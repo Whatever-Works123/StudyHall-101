@@ -3,126 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall 101: Chemistry Notes</title> 
+    <title>StudyHall 101: Chemistry</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header class="site-header">
-        <h1>StudyHall 101</h1>
+    <nav class="sidebar">
+        <div class="logo">🧪 StudyHall 101</div>
         
-        <div class="tab-bar">
-            <button class="tab-button active" onclick="openTab('home')">Home</button>
-            <button class="tab-button" onclick="openTab('games')">Resources</button> <button class="tab-button" onclick="openTab('browser')">Research</button> </div>
-
-        <button class="tiny-btn" onclick="toggleTheme()">🌗</button>
-    </header>
-
-    <div class="content-window">
+        <button class="nav-btn active" onclick="showSection('home')">
+            <span>🏠</span> Home
+        </button>
         
-        <div id="home" class="tab-content" style="display:block">
-            <h2>Chemistry 101: Periodic Table</h2>
-            <p>The periodic table is a tabular display of the chemical elements.</p>
-            <p><strong>Note:</strong> Hydrogen is the first element.</p>
-            <hr>
-            <h3>Study Checklist:</h3>
-            <ul>
-                <li>Review atomic weights</li>
-                <li>Memorize noble gases</li>
-            </ul>
+        <button class="nav-btn" onclick="showSection('games')">
+            <span>📚</span> Resources
+        </button>
+        
+        <button class="nav-btn" onclick="showSection('browser')">
+            <span>🔍</span> Research
+        </button>
+        
+        <button class="nav-btn" onclick="showSection('socials')">
+            <span>👥</span> Group Study
+        </button>
+    </nav>
+
+    <main class="main-content">
+
+        <div id="home" class="section active">
+            <h2>Welcome Back, Student</h2>
+            <p style="margin-bottom: 30px;">Select a module to begin your session.</p>
+
+            <div class="dashboard-grid">
+                <div class="card" onclick="showSection('games')">
+                    <span class="card-icon">🎮</span>
+                    <h3>Game Library</h3>
+                    <p>Access unblocked resources</p>
+                </div>
+
+                <div class="card" onclick="showSection('browser')">
+                    <span class="card-icon">🌐</span>
+                    <h3>Web Browser</h3>
+                    <p>Surf the web freely</p>
+                </div>
+
+                <div class="card" onclick="showSection('socials')">
+                    <span class="card-icon">💬</span>
+                    <h3>Social Hub</h3>
+                    <p>Connect to your other site</p>
+                </div>
+
+                <div class="card" onclick="alert('Reviewing Periodic Table...')">
+                    <span class="card-icon">⚗️</span>
+                    <h3>Chemistry Notes</h3>
+                    <p>Actually study (Just in case)</p>
+                </div>
+            </div>
         </div>
 
-        <div id="games" class="tab-content">
-            <h2>Available "Resources"</h2>
-            <div class="game-grid">
-                <div class="game-btn" onclick="playGame('https://bing.com/fun')">
-                    Bing Games
-                </div>
+        <div id="games" class="section">
+            <h2>Learning Resources</h2>
+            <div class="dashboard-grid">
                 
-                <div class="game-btn" onclick="playGame('https://scratch.mit.edu/projects/embed/324867008/?autostart=false')">
-                    Minecraft (Scratch)
+                <div class="card" onclick="launchGame('https://bing.com/fun')">
+                    <span class="card-icon">🕹️</span>
+                    <h3>Bing Games</h3>
                 </div>
 
-                <div class="game-btn" onclick="playGame('https://geometry.monster/embed')">
-                    Geometry Dash
+                <div class="card" onclick="launchGame('https://geometry.monster/embed')">
+                    <span class="card-icon">🔺</span>
+                    <h3>Geometry Dash</h3>
                 </div>
 
-                <div class="game-btn" onclick="playGame('https://slope-game.github.io/slope/')">
-                    Slope
+                <div class="card" onclick="launchGame('https://slope-game.github.io/slope/')">
+                    <span class="card-icon">⛷️</span>
+                    <h3>Slope</h3>
                 </div>
+
+            </div>
+            
+            <div id="game-player" style="display:none; height:100%; margin-top:20px;">
+                <button onclick="closeGame()" style="margin-bottom:10px; cursor:pointer;">❌ Close Game</button>
+                <iframe id="game-frame" class="full-frame" src=""></iframe>
             </div>
         </div>
 
-        <div id="browser" class="tab-content">
-            <div class="browser-controls">
-                <input type="text" id="urlInput" placeholder="https://..." onkeypress="handleEnter(event)">
-                <button class="tiny-btn" onclick="loadUrl()">Go</button>
+        <div id="browser" class="section">
+            <div class="browser-bar">
+                <input type="text" id="urlInput" class="browser-input" placeholder="Enter website URL (e.g. wikipedia.org)..." onkeypress="handleEnter(event)">
+                <button onclick="loadUrl()">Go</button>
             </div>
-            <iframe id="web-frame" src=""></iframe>
+            <iframe id="web-frame" class="full-frame" src=""></iframe>
         </div>
 
-        <div id="game-view" class="tab-content" style="padding:0;">
-            <div style="background:#333; color:#fff; padding:5px; text-align:center;">
-                <button onclick="closeGame()">❌ Close Game (Return to Menu)</button>
-            </div>
-            <iframe id="game-frame" src="" style="width:100%; height:95%; border:none;"></iframe>
+        <div id="socials" class="section">
+            <h2 style="margin-bottom:10px;">Group Study Hub</h2>
+            <iframe class="full-frame" src="https://YOUR-SOCIAL-WEBSITE.com"></iframe>
         </div>
 
-    </div>
+    </main>
 
     <script>
-        // --- TAB LOGIC ---
-        function openTab(tabName) {
-            // Hide all tabs
-            const tabs = document.getElementsByClassName("tab-content");
-            for (let i = 0; i < tabs.length; i++) {
-                tabs[i].style.display = "none";
-            }
-            
-            // Remove active class from buttons
-            const buttons = document.getElementsByClassName("tab-button");
-            for (let i = 0; i < buttons.length; i++) {
-                buttons[i].classList.remove("active");
-            }
+        function showSection(sectionId) {
+            // 1. Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(sec => sec.classList.remove('active'));
 
-            // Show selected tab
-            document.getElementById(tabName).style.display = "block";
+            // 2. Show the target section
+            document.getElementById(sectionId).classList.add('active');
+
+            // 3. Update Sidebar Buttons
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
             
-            // Note: We are manually managing the active button look
-            // based on the click for simplicity
+            // Find the button that calls this function and make it active
+            // (Simple loop to match by onclick text or just manual index)
+            // For simplicity, we just clear active states visually or you can map them.
         }
 
-        // --- BROWSER LOGIC ---
+        /* --- BROWSER LOGIC --- */
         function loadUrl() {
             let url = document.getElementById("urlInput").value;
-            // Add https:// if missing
-            if (!url.startsWith("http")) {
-                url = "https://" + url;
-            }
+            if (!url.startsWith("http")) url = "https://" + url;
             document.getElementById("web-frame").src = url;
         }
-
         function handleEnter(e) {
             if (e.key === "Enter") loadUrl();
         }
 
-        // --- GAME LOGIC ---
-        function playGame(url) {
-            // Hide everything and show the game view
-            openTab('game-view');
-            document.getElementById("game-frame").src = url;
+        /* --- GAME LOGIC --- */
+        function launchGame(url) {
+            // Hide the grid, show the player
+            document.querySelector('#games .dashboard-grid').style.display = 'none';
+            document.getElementById('game-player').style.display = 'block';
+            document.getElementById('game-frame').src = url;
         }
 
         function closeGame() {
-            // Stop the game (unload it) so sound stops
-            document.getElementById("game-frame").src = "";
-            // Go back to the games list
-            openTab('games');
-        }
-
-        // --- THEME ---
-        function toggleTheme() {
-            document.body.classList.toggle("dark-mode");
+            // Stop the game
+            document.getElementById('game-frame').src = "";
+            // Show the grid, hide the player
+            document.querySelector('#games .dashboard-grid').style.display = 'grid';
+            document.getElementById('game-player').style.display = 'none';
         }
     </script>
 
