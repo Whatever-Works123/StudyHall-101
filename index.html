@@ -3,134 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall 101</title> 
+    <title>StudyHall 101: Chemistry Notes</title> 
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="main-container">
+    <header class="site-header">
+        <h1>StudyHall 101</h1>
         
-        <header class="site-header">
-            <h1>StudyHall 101</h1>
-            
-            <div class="controls">
-                <input type="text" id="searchInput" placeholder="Search projects or notes..." onkeyup="handleSearch()">
-                
-                <button class="theme-btn" onclick="toggleTheme()">🌗 Mode</button>
-            </div>
-        </header>
-
         <div class="tab-bar">
-            <button class="tab-button active" onclick="openTab(event, 'home')">Home</button>
-            <button class="tab-button" onclick="openTab(event, 'projects')">Projects</button>
-            <button class="tab-button" onclick="openTab(event, 'notes')">Notes</button>
-            <button class="tab-button" onclick="goToContact()">Contact</button>
+            <button class="tab-button active" onclick="openTab('home')">Home</button>
+            <button class="tab-button" onclick="openTab('games')">Resources</button> <button class="tab-button" onclick="openTab('browser')">Research</button> </div>
+
+        <button class="tiny-btn" onclick="toggleTheme()">🌗</button>
+    </header>
+
+    <div class="content-window">
+        
+        <div id="home" class="tab-content" style="display:block">
+            <h2>Chemistry 101: Periodic Table</h2>
+            <p>The periodic table is a tabular display of the chemical elements.</p>
+            <p><strong>Note:</strong> Hydrogen is the first element.</p>
+            <hr>
+            <h3>Study Checklist:</h3>
+            <ul>
+                <li>Review atomic weights</li>
+                <li>Memorize noble gases</li>
+            </ul>
         </div>
 
-        <div class="content-window">
-            
-            <div id="home" class="tab-content">
-                <h2>Welcome to Class</h2>
-                <p>Welcome to <strong>StudyHall 101</strong>.</p>
-                <p>Use the search bar above to filter my projects and notes instantly.</p>
+        <div id="games" class="tab-content">
+            <h2>Available "Resources"</h2>
+            <div class="game-grid">
+                <div class="game-btn" onclick="playGame('https://bing.com/fun')">
+                    Bing Games
+                </div>
+                
+                <div class="game-btn" onclick="playGame('https://scratch.mit.edu/projects/embed/324867008/?autostart=false')">
+                    Minecraft (Scratch)
+                </div>
+
+                <div class="game-btn" onclick="playGame('https://geometry.monster/embed')">
+                    Geometry Dash
+                </div>
+
+                <div class="game-btn" onclick="playGame('https://slope-game.github.io/slope/')">
+                    Slope
+                </div>
             </div>
-
-            <div id="projects" class="tab-content" style="display:none">
-                <h2>My Projects</h2>
-                <div id="project-list"></div> </div>
-
-            <div id="notes" class="tab-content" style="display:none">
-                <h2>Study Notes</h2>
-                <div id="note-list"></div> </div>
-
         </div>
+
+        <div id="browser" class="tab-content">
+            <div class="browser-controls">
+                <input type="text" id="urlInput" placeholder="https://..." onkeypress="handleEnter(event)">
+                <button class="tiny-btn" onclick="loadUrl()">Go</button>
+            </div>
+            <iframe id="web-frame" src=""></iframe>
+        </div>
+
+        <div id="game-view" class="tab-content" style="padding:0;">
+            <div style="background:#333; color:#fff; padding:5px; text-align:center;">
+                <button onclick="closeGame()">❌ Close Game (Return to Menu)</button>
+            </div>
+            <iframe id="game-frame" src="" style="width:100%; height:95%; border:none;"></iframe>
+        </div>
+
     </div>
 
     <script>
-        // --- 1. CONFIGURATION (EDIT THIS DATA!) ---
-        
-        // PASTE YOUR CONTACT WEBSITE URL HERE:
-        const contactURL = "https://google.com"; 
-
-        const myProjects = [
-            { title: "StudyHall Website", desc: "This website itself! Built with JS.", link: "#" },
-            { title: "Calculator App", desc: "A React calculator.", link: "#" },
-            { title: "Python Scraper", desc: "Data collection script.", link: "#" }
-        ];
-
-        const myNotes = [
-            { title: "HTML Basics", desc: "HTML stands for HyperText Markup Language." },
-            { title: "CSS Flexbox", desc: "Flexbox makes centering divs easy." },
-            { title: "JavaScript Arrays", desc: "Arrays hold lists of data like this one." }
-        ];
-
-        // --- 2. SEARCH & RENDER LOGIC ---
-
-        // This runs when the page loads
-        window.onload = function() {
-            renderData(myProjects, "project-list");
-            renderData(myNotes, "note-list");
-        };
-
-        // This creates the HTML cards from your data
-        function renderData(dataArray, containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = ""; // Clear current list
-
-            if (dataArray.length === 0) {
-                container.innerHTML = "<p>No matches found.</p>";
-                return;
+        // --- TAB LOGIC ---
+        function openTab(tabName) {
+            // Hide all tabs
+            const tabs = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].style.display = "none";
             }
-
-            dataArray.forEach(item => {
-                const card = document.createElement("div");
-                card.className = "card";
-                // Create the HTML inside the card
-                let linkHTML = item.link ? `<br><a href="${item.link}">View Code &rarr;</a>` : "";
-                card.innerHTML = `<h3>${item.title}</h3><p>${item.desc}</p>${linkHTML}`;
-                container.appendChild(card);
-            });
-        }
-
-        // Handles the Search Bar
-        function handleSearch() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
             
-            // Filter Projects
-            const filteredProjects = myProjects.filter(item => 
-                item.title.toLowerCase().includes(query) || 
-                item.desc.toLowerCase().includes(query)
-            );
-            renderData(filteredProjects, "project-list");
-
-            // Filter Notes
-            const filteredNotes = myNotes.filter(item => 
-                item.title.toLowerCase().includes(query) || 
-                item.desc.toLowerCase().includes(query)
-            );
-            renderData(filteredNotes, "note-list");
-        }
-
-        // --- 3. TAB LOGIC ---
-        function openTab(evt, tabName) {
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
+            // Remove active class from buttons
+            const buttons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove("active");
             }
-            tablinks = document.getElementsByClassName("tab-button");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].classList.remove("active");
-            }
+
+            // Show selected tab
             document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.classList.add("active");
+            
+            // Note: We are manually managing the active button look
+            // based on the click for simplicity
         }
 
-        // --- 4. CONTACT & THEME ---
-        function goToContact() {
-            window.location.href = contactURL;
+        // --- BROWSER LOGIC ---
+        function loadUrl() {
+            let url = document.getElementById("urlInput").value;
+            // Add https:// if missing
+            if (!url.startsWith("http")) {
+                url = "https://" + url;
+            }
+            document.getElementById("web-frame").src = url;
         }
 
+        function handleEnter(e) {
+            if (e.key === "Enter") loadUrl();
+        }
+
+        // --- GAME LOGIC ---
+        function playGame(url) {
+            // Hide everything and show the game view
+            openTab('game-view');
+            document.getElementById("game-frame").src = url;
+        }
+
+        function closeGame() {
+            // Stop the game (unload it) so sound stops
+            document.getElementById("game-frame").src = "";
+            // Go back to the games list
+            openTab('games');
+        }
+
+        // --- THEME ---
         function toggleTheme() {
             document.body.classList.toggle("dark-mode");
         }
