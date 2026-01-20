@@ -1,9 +1,32 @@
-/* Page Background */
+/* --- 1. COLOR VARIABLES --- */
+:root {
+    /* LIGHT MODE (Default) */
+    --bg-color: #f3f4f6;
+    --window-bg: #ffffff;
+    --text-color: #2c3e50;
+    --accent-color: #3498db; /* Blue */
+    --border-color: #ccc;
+    --card-bg: #f9f9f9;
+}
+
+/* DARK MODE OVERRIDES */
+body.dark-mode {
+    --bg-color: #1a1a1a;
+    --window-bg: #2d2d2d;
+    --text-color: #e0e0e0;
+    --accent-color: #bb86fc; /* Purple for dark mode */
+    --border-color: #444;
+    --card-bg: #333;
+}
+
+/* --- 2. LAYOUT --- */
 body {
-    font-family: 'Verdana', sans-serif; /* Clean, readable font */
+    font-family: 'Verdana', sans-serif;
     margin: 0;
-    padding: 40px 20px;
-    background-color: #f3f4f6; /* Light grey/blue academic background */
+    padding: 20px;
+    background-color: var(--bg-color); /* Uses variable */
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s; /* Smooth fade */
     display: flex;
     justify-content: center;
 }
@@ -13,31 +36,47 @@ body {
     max-width: 700px;
 }
 
-/* --- BRANDING --- */
+/* --- 3. HEADER & CONTROLS --- */
 .site-header {
     text-align: center;
     margin-bottom: 20px;
+    position: relative;
 }
 
-.site-header h1 {
-    margin: 0;
-    font-size: 2.5rem;
-    color: #2c3e50; /* Dark Blue-Grey */
-    letter-spacing: 2px;
+.controls {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
-.subtitle {
-    color: #7f8c8d;
-    margin-top: 5px;
-    font-size: 1.1rem;
+/* Search Bar Styling */
+#searchInput {
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background-color: var(--window-bg);
+    color: var(--text-color);
+    width: 60%;
+    outline: none;
 }
 
-/* --- TABS --- */
+/* Dark Mode Button Styling */
+.theme-btn {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background-color: var(--window-bg);
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+/* --- 4. TABS --- */
 .tab-bar {
     display: flex;
-    justify-content: center; /* Center the buttons */
-    gap: 10px;
-    margin-bottom: -1px; /* Overlap slightly with content */
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: -1px;
     position: relative;
     z-index: 10;
 }
@@ -45,52 +84,41 @@ body {
 .tab-button {
     padding: 12px 25px;
     cursor: pointer;
-    background-color: #e0e0e0;
-    border: 1px solid #ccc;
+    background-color: var(--border-color);
+    border: 1px solid var(--border-color);
     border-bottom: none;
     border-radius: 8px 8px 0 0;
-    font-size: 16px;
+    color: var(--text-color);
     font-weight: bold;
-    color: #555;
-    transition: 0.3s;
-}
-
-.tab-button:hover {
-    background-color: #dcdcdc;
+    opacity: 0.7;
 }
 
 .tab-button.active {
-    background-color: white;
-    color: #2c3e50;
-    border-top: 3px solid #3498db; /* Blue accent line on top */
-    padding-bottom: 13px; /* Extends down to cover the border */
+    background-color: var(--window-bg);
+    opacity: 1;
+    border-top: 3px solid var(--accent-color);
+    padding-bottom: 13px;
 }
 
-/* --- CONTENT WINDOW --- */
+/* --- 5. CONTENT WINDOW --- */
 .content-window {
-    background-color: white;
-    padding: 40px;
-    border: 1px solid #ccc;
+    background-color: var(--window-bg);
+    padding: 30px;
+    border: 1px solid var(--border-color);
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     min-height: 300px;
-    position: relative;
     z-index: 5;
 }
 
-/* --- CARDS --- */
+/* --- 6. CARDS (Projects/Notes) --- */
 .card {
-    background-color: #fff;
-    border-left: 5px solid #3498db; /* Blue bookmark accent */
-    border-top: 1px solid #eee;
-    border-right: 1px solid #eee;
-    border-bottom: 1px solid #eee;
+    background-color: var(--card-bg);
+    border-left: 5px solid var(--accent-color);
     padding: 15px;
     margin-bottom: 15px;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+    border-radius: 4px;
 }
 
-h2 {
-    margin-top: 0;
-    color: #2c3e50;
-}
+.card h3 { margin-top: 0; }
+.card a { color: var(--accent-color); }
