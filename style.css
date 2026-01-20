@@ -1,107 +1,97 @@
-/* General Page Background */
+/* --- 1. EASY EDIT ZONE --- */
+:root {
+    /* Change these colors to whatever you want! */
+    --main-bg-color: #f4f4f4;      /* Background of the whole page */
+    --card-bg-color: #ffffff;      /* Background of the project cards */
+    --primary-color: #007bff;      /* Main Button/Link color (Blue) */
+    --text-color: #333333;         /* Dark grey text */
+    --header-bg: #222222;          /* Top navigation bar color */
+    --header-text: #ffffff;        /* Text color in the nav bar */
+}
+
+/* --- 2. GLOBAL STYLES --- */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif; /* Change font here if you want */
     margin: 0;
     padding: 0;
-    /* Light background to make the white window pop */
-    background-color: #e0e5ec; 
-    color: #333;
+    background-color: var(--main-bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* --- 3. NAVIGATION --- */
+.navbar {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    padding: 1rem 2rem;
     display: flex;
-    justify-content: center;
-    padding-top: 50px; /* Space from top of screen */
-    padding-bottom: 50px;
-}
-
-/* Centers the browser window */
-.main-wrapper {
-    width: 90%;
-    max-width: 800px; /* Maximum width of your 'browser' */
-}
-
-/* --- THE BROWSER WINDOW STYLES --- */
-
-.browser-window {
-    background-color: #fff;
-    border-radius: 10px; /* Rounded corners */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2); /* The shadow effect */
-    overflow: hidden; /* Ensures content fits in the corners */
-    border: 1px solid #d1d1d1;
-}
-
-/* The Top Bar */
-.browser-header {
-    background-color: #f1f1f1;
-    padding: 10px 15px;
-    display: flex; /* Aligns dots and address bar */
+    justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #ccc;
 }
 
-/* Traffic Light Dots Container */
-.dots {
+.nav-links {
+    list-style: none;
     display: flex;
-    gap: 8px; /* Space between dots */
-    width: 60px;
+    gap: 20px;
 }
 
-/* The Dots themselves */
-.dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%; /* Makes them circles */
-    display: inline-block;
-}
-
-.red { background-color: #ff5f56; }
-.yellow { background-color: #ffbd2e; }
-.green { background-color: #27c93f; }
-
-/* The Fake Address Bar */
-.address-bar {
-    background-color: #fff;
-    color: #666;
-    padding: 5px 15px;
-    border-radius: 5px;
-    font-size: 0.85rem;
-    flex-grow: 1; /* Takes up remaining space */
-    text-align: center;
-    margin-left: 15px;
-    border: 1px solid #ddd;
-    font-family: monospace; /* Looks like code/url */
-}
-
-/* --- CONTENT STYLES (Previously Created) --- */
-
-.browser-content header {
-    background: #24292e;
-    color: #fff;
-    padding: 30px 0;
-    text-align: center;
-    border-bottom: #0779e4 3px solid;
-}
-
-.container {
-    padding: 20px;
-}
-
-section {
-    padding: 20px;
-    border-bottom: 1px solid #eee;
-}
-
-a {
-    color: #0779e4;
+.nav-links a {
+    color: var(--header-text);
     text-decoration: none;
     font-weight: bold;
 }
 
-a:hover {
-    text-decoration: underline;
+/* --- 4. HERO SECTION --- */
+.hero-section {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: #ddd; /* Light grey box for intro */
 }
 
+.btn {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+/* --- 5. MAIN CONTENT BLOCKS --- */
+.content-block {
+    padding: 40px 20px;
+    max-width: 800px;
+    margin: 0 auto; /* Centers the content */
+}
+
+/* --- 6. PROJECT GRID --- */
+.project-grid {
+    display: grid;
+    /* This makes columns automatically fit the screen size */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    gap: 20px;
+}
+
+.card {
+    background-color: var(--card-bg-color);
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.card a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* --- 7. FOOTER --- */
 footer {
-    background: #f4f4f4;
     text-align: center;
-    padding: 15px;
-    font-size: 0.8rem;
+    padding: 20px;
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    margin-top: 40px;
 }
