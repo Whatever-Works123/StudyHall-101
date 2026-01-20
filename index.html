@@ -3,71 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Personal Website</title>
+    <title>StudyHall 101</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="logo">MyPortfolio</div>
-        <ul class="nav-links">
-            <li><a href="#about">About</a></li>
-            <li><a href="#projects">Projects</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
-    </nav>
-
-    <header class="hero-section">
-        <h1>Hi, I'm [Your Name]</h1>
-        <p>This is my customized GitHub website.</p>
-        <a href="#projects" class="btn">View My Work</a>
-    </header>
-
-    <main>
+    <div class="main-container">
         
-        <section id="about" class="content-block">
-            <h2>About Me</h2>
-            <p>
-                I am a developer based in [City]. I love building things for the web.
-                You can easily edit this text in the index.html file.
-            </p>
-        </section>
+        <div class="tab-bar">
+            <button class="tab-button active" onclick="openTab('home')">Home</button>
+            <button class="tab-button" onclick="openTab('projects')">Projects</button>
+            <button class="tab-button" onclick="openTab('about')">About Me</button>
+        </div>
 
-        <section id="projects" class="content-block">
-            <h2>My Projects</h2>
-            <div class="project-grid">
-                
-                <div class="card">
-                    <h3>Project Title 1</h3>
-                    <p>Description of what this project does.</p>
-                    <a href="#">Link to Code &rarr;</a>
-                </div>
-
-                <div class="card">
-                    <h3>Project Title 2</h3>
-                    <p>Description of what this project does.</p>
-                    <a href="#">Link to Code &rarr;</a>
-                </div>
-
-                <div class="card">
-                    <h3>Project Title 3</h3>
-                    <p>Description of what this project does.</p>
-                    <a href="#">Link to Code &rarr;</a>
-                </div>
-
+        <div class="content-window">
+            
+            <div id="home" class="tab-content">
+                <h1>Welcome!</h1>
+                <p>Click the tabs above to switch content instantly.</p>
+                <p>This is the <strong>Home</strong> section.</p>
             </div>
-        </section>
 
-        <section id="contact" class="content-block">
-            <h2>Get in Touch</h2>
-            <p>You can find me on <a href="https://github.com">GitHub</a> or email me at example@email.com.</p>
-        </section>
+            <div id="projects" class="tab-content" style="display:none">
+                <h1>My Projects</h1>
+                <div class="project-list">
+                    <div class="card">
+                        <h3>Project A</h3>
+                        <p>Description of project A.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Project B</h3>
+                        <p>Description of project B.</p>
+                    </div>
+                </div>
+            </div>
 
-    </main>
+            <div id="about" class="tab-content" style="display:none">
+                <h1>About Me</h1>
+                <p>This is the <strong>About</strong> section.</p>
+                <p>You can add your bio, skills, and contact info here.</p>
+            </div>
 
-    <footer>
-        <p>&copy; 2024 My Name. Built with HTML & CSS.</p>
-    </footer>
+        </div>
+    </div>
+
+    <script>
+        function openTab(tabName) {
+            // 1. Hide all elements with class="tab-content"
+            var x = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+
+            // 2. Remove the "active" class from all buttons (makes them look dull)
+            var buttons = document.getElementsByClassName("tab-button");
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove("active");
+            }
+
+            // 3. Show the specific tab we clicked
+            document.getElementById(tabName).style.display = "block";
+            
+            // 4. Highlight the button we just clicked (optional, requires passing 'event' or finding button)
+            // For simplicity, we just show the content for now.
+        }
+    </script>
 
 </body>
 </html>
