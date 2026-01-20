@@ -3,69 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall 101</title>
+    <title>StudyHall 101</title> 
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="main-container">
         
+        <header class="site-header">
+            <h1>StudyHall 101</h1>
+            <p class="subtitle">My Coding Journey & Projects</p>
+        </header>
+
         <div class="tab-bar">
-            <button class="tab-button active" onclick="openTab('home')">Home</button>
-            <button class="tab-button" onclick="openTab('projects')">Projects</button>
-            <button class="tab-button" onclick="openTab('about')">About Me</button>
+            <button class="tab-button active" onclick="openTab(event, 'home')">Home</button>
+            <button class="tab-button" onclick="openTab(event, 'projects')">Projects</button>
+            <button class="tab-button" onclick="openTab(event, 'notes')">Notes</button>
         </div>
 
         <div class="content-window">
             
             <div id="home" class="tab-content">
-                <h1>Welcome!</h1>
-                <p>Click the tabs above to switch content instantly.</p>
-                <p>This is the <strong>Home</strong> section.</p>
+                <h2>Welcome to Class</h2>
+                <p>Welcome to <strong>StudyHall 101</strong>. This is where I document everything I am learning about code.</p>
+                <p>Click the <strong>Projects</strong> tab to see what I've built, or <strong>Notes</strong> to see what I'm studying.</p>
             </div>
 
             <div id="projects" class="tab-content" style="display:none">
-                <h1>My Projects</h1>
-                <div class="project-list">
-                    <div class="card">
-                        <h3>Project A</h3>
-                        <p>Description of project A.</p>
-                    </div>
-                    <div class="card">
-                        <h3>Project B</h3>
-                        <p>Description of project B.</p>
-                    </div>
+                <h2>Assignments & Projects</h2>
+                
+                <div class="card">
+                    <h3>Project 1: The Website</h3>
+                    <p>You are looking at it! Built with HTML, CSS, and JS.</p>
+                </div>
+
+                <div class="card">
+                    <h3>Project 2: Calculator</h3>
+                    <p>A simple calculator app I am working on.</p>
                 </div>
             </div>
 
-            <div id="about" class="tab-content" style="display:none">
-                <h1>About Me</h1>
-                <p>This is the <strong>About</strong> section.</p>
-                <p>You can add your bio, skills, and contact info here.</p>
+            <div id="notes" class="tab-content" style="display:none">
+                <h2>Study Notes</h2>
+                <ul>
+                    <li><strong>HTML:</strong> Used for structure.</li>
+                    <li><strong>CSS:</strong> Used for style.</li>
+                    <li><strong>JavaScript:</strong> Used for logic (like these tabs!).</li>
+                </ul>
             </div>
 
         </div>
     </div>
 
     <script>
-        function openTab(tabName) {
-            // 1. Hide all elements with class="tab-content"
-            var x = document.getElementsByClassName("tab-content");
-            for (var i = 0; i < x.length; i++) {
-                x[i].style.display = "none";
+        function openTab(evt, tabName) {
+            // 1. Hide all tab content
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
             }
 
-            // 2. Remove the "active" class from all buttons (makes them look dull)
-            var buttons = document.getElementsByClassName("tab-button");
-            for (var i = 0; i < buttons.length; i++) {
-                buttons[i].classList.remove("active");
+            // 2. Remove "active" class from all buttons
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
 
-            // 3. Show the specific tab we clicked
+            // 3. Show the current tab and add "active" class to the button clicked
             document.getElementById(tabName).style.display = "block";
-            
-            // 4. Highlight the button we just clicked (optional, requires passing 'event' or finding button)
-            // For simplicity, we just show the content for now.
+            evt.currentTarget.className += " active";
         }
     </script>
 
