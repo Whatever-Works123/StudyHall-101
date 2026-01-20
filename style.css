@@ -1,55 +1,107 @@
-/* General settings */
+/* General Page Background */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    line-height: 1.6;
+    /* Light background to make the white window pop */
+    background-color: #e0e5ec; 
     color: #333;
+    display: flex;
+    justify-content: center;
+    padding-top: 50px; /* Space from top of screen */
+    padding-bottom: 50px;
 }
 
-/* Layout helper */
-.container {
-    width: 80%;
-    margin: auto;
-    overflow: hidden;
-    padding: 20px;
+/* Centers the browser window */
+.main-wrapper {
+    width: 90%;
+    max-width: 800px; /* Maximum width of your 'browser' */
 }
 
-/* Header styling */
-header {
-    background: #24292e; /* GitHub Dark Color */
-    color: #fff;
-    padding-top: 30px;
-    min-height: 70px;
-    border-bottom: #0779e4 3px solid;
-    text-align: center;
+/* --- THE BROWSER WINDOW STYLES --- */
+
+.browser-window {
+    background-color: #fff;
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); /* The shadow effect */
+    overflow: hidden; /* Ensures content fits in the corners */
+    border: 1px solid #d1d1d1;
 }
 
-header h1 {
-    margin: 0;
-    padding-bottom: 10px;
-}
-
-/* Section styling */
-section {
-    padding: 20px;
+/* The Top Bar */
+.browser-header {
+    background-color: #f1f1f1;
+    padding: 10px 15px;
+    display: flex; /* Aligns dots and address bar */
+    align-items: center;
     border-bottom: 1px solid #ccc;
 }
 
-/* Link styling */
+/* Traffic Light Dots Container */
+.dots {
+    display: flex;
+    gap: 8px; /* Space between dots */
+    width: 60px;
+}
+
+/* The Dots themselves */
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%; /* Makes them circles */
+    display: inline-block;
+}
+
+.red { background-color: #ff5f56; }
+.yellow { background-color: #ffbd2e; }
+.green { background-color: #27c93f; }
+
+/* The Fake Address Bar */
+.address-bar {
+    background-color: #fff;
+    color: #666;
+    padding: 5px 15px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    flex-grow: 1; /* Takes up remaining space */
+    text-align: center;
+    margin-left: 15px;
+    border: 1px solid #ddd;
+    font-family: monospace; /* Looks like code/url */
+}
+
+/* --- CONTENT STYLES (Previously Created) --- */
+
+.browser-content header {
+    background: #24292e;
+    color: #fff;
+    padding: 30px 0;
+    text-align: center;
+    border-bottom: #0779e4 3px solid;
+}
+
+.container {
+    padding: 20px;
+}
+
+section {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
 a {
     color: #0779e4;
     text-decoration: none;
+    font-weight: bold;
 }
 
 a:hover {
     text-decoration: underline;
 }
 
-/* Footer styling */
 footer {
     background: #f4f4f4;
     text-align: center;
-    padding: 20px;
-    margin-top: 20px;
+    padding: 15px;
+    font-size: 0.8rem;
 }
