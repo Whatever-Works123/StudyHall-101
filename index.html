@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudyHall Dashboard</title>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
     <style>
         /* --- CSS VARIABLES & THEMES --- */
         :root {
-            /* Light Theme (Default) */
+            /* Light Theme (School Mode) */
             --bg-color: #f4f4f9;
             --sidebar-bg: #ffffff;
             --text-primary: #333333;
@@ -17,12 +22,12 @@
         }
 
         [data-theme="dark"] {
-            /* Dark Theme */
+            /* Dark Theme (Hacker/Gamer Mode) */
             --bg-color: #121212;
             --sidebar-bg: #1e1e1e;
             --text-primary: #e0e0e0;
             --card-bg: #2c2c2c;
-            --accent: #bb86fc; /* Fun Purple */
+            --accent: #bb86fc; /* Purple */
             --border: #444;
         }
 
@@ -30,18 +35,38 @@
 
         body { display: flex; height: 100vh; background-color: var(--bg-color); color: var(--text-primary); transition: background 0.3s; }
 
+        /* --- LOGIN MODAL --- */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 10px; text-align: center; width: 350px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .login-box h2 { color: #333; margin-bottom: 20px; }
+        .login-box input {
+            width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;
+        }
+        .login-box button {
+            width: 100%; padding: 12px; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;
+        }
+        .login-box button:hover { background: #357abd; }
+        .login-box p { color: red; margin-top: 10px; font-size: 0.9rem; }
+
         /* --- SIDEBAR --- */
         .sidebar {
             width: 250px;
             background-color: var(--sidebar-bg);
             border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
+            display: flex; flex-direction: column; padding: 20px;
             transition: background 0.3s;
         }
 
         .logo { font-size: 1.5rem; font-weight: bold; margin-bottom: 30px; color: var(--accent); }
+        .user-info { font-size: 0.8rem; margin-bottom: 20px; color: grey; word-break: break-all; }
 
         .nav-btn {
             background: none; border: none;
@@ -50,16 +75,14 @@
             cursor: pointer; border-radius: 8px;
             margin-bottom: 5px; font-size: 1rem;
             opacity: 0.7; transition: 0.2s;
+            width: 100%; display: flex; align-items: center; gap: 10px;
         }
         .nav-btn:hover { opacity: 1; background-color: rgba(0,0,0,0.05); }
         .nav-btn.active { opacity: 1; background-color: var(--accent); color: white; }
 
-        /* Mode Specific Visibility */
+        /* Mode Visibility */
         .school-only, .fun-only { display: none; }
-        
-        /* If body has class 'mode-school', show school items */
         body.mode-school .school-only { display: block; }
-        /* If body has class 'mode-fun', show fun items */
         body.mode-fun .fun-only { display: block; }
 
         .settings-area { margin-top: auto; border-top: 1px solid var(--border); padding-top: 20px; }
@@ -72,18 +95,17 @@
 
         h2 { margin-bottom: 20px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; display: inline-block; }
 
-        /* --- TOOLS: TODO LIST --- */
+        /* --- TOOLS --- */
         .todo-input-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        .todo-input-group input { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 5px; }
+        .todo-input-group input { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 5px; background: var(--card-bg); color: var(--text-primary); }
         .todo-list { list-style: none; }
         .todo-item { 
             background: var(--card-bg); padding: 10px; margin-bottom: 5px; 
             border: 1px solid var(--border); border-radius: 5px;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .delete-btn { color: red; cursor: pointer; font-weight: bold; padding: 0 10px; }
+        .delete-btn { color: #ff4444; cursor: pointer; font-weight: bold; padding: 0 10px; }
 
-        /* --- TOOLS: CALCULATOR --- */
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 300px; }
         .calc-btn { 
             padding: 20px; font-size: 1.2rem; cursor: pointer; 
@@ -96,33 +118,39 @@
             color: var(--text-primary);
         }
 
-        /* --- TOOLS: NOTES --- */
         textarea.notes-area {
-            width: 100%; height: 200px; padding: 15px;
+            width: 100%; height: 300px; padding: 15px;
             background: var(--card-bg); color: var(--text-primary);
-            border: 1px solid var(--border); border-radius: 10px; resize: vertical;
+            border: 1px solid var(--border); border-radius: 10px; resize: vertical; font-family: monospace;
         }
 
-        /* --- TOOLS: PERIODIC TABLE (Simple) --- */
-        .pt-container { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 5px; 
-        }
+        /* --- PERIODIC TABLE --- */
+        .pt-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 5px; }
         .element { 
             border: 1px solid var(--border); padding: 5px; text-align: center; 
             background: var(--card-bg); border-radius: 5px; cursor: pointer;
         }
         .element strong { display: block; font-size: 1.2rem; color: var(--accent); }
-        .element small { font-size: 0.7rem; }
 
-        /* --- IFRAMES --- */
-        iframe { width: 100%; height: 500px; border: none; border-radius: 10px; background: white; }
-
+        iframe { width: 100%; height: 600px; border: none; border-radius: 10px; background: white; }
     </style>
 </head>
 <body class="mode-school" data-theme="light">
 
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2>📚 StudyHall Login</h2>
+            <p style="color:#666; margin-bottom:15px;">Use your ChatterBox Account</p>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="loginUser()">Login</button>
+            <p id="login-error"></p>
+        </div>
+    </div>
+
     <nav class="sidebar">
         <div class="logo">📚 StudyHall</div>
+        <div class="user-info" id="user-display">Waiting for login...</div>
         
         <button class="nav-btn school-only active" onclick="showSection('school-home')">🏠 Home</button>
         <button class="nav-btn school-only" onclick="showSection('todo')">✅ To-Do List</button>
@@ -138,21 +166,21 @@
 
         <div class="settings-area">
             <button class="nav-btn" onclick="showSection('settings')">⚙️ Settings</button>
+            <button class="nav-btn" onclick="logoutUser()" style="color:#ff6b6b; margin-top:10px;">🚪 Logout</button>
         </div>
     </nav>
 
     <main class="main-content">
-
         <div id="school-home" class="section active">
-            <h2>Welcome, Student.</h2>
-            <p>Select a subject to begin your study session.</p>
+            <h2>Welcome Back.</h2>
+            <p>Select a subject to retrieve your cloud notes.</p>
         </div>
 
         <div id="todo" class="section">
             <h2>Assignment Tracker</h2>
             <div class="todo-input-group">
                 <input type="text" id="newTodo" placeholder="Add assignment...">
-                <button onclick="addTodo()" style="padding:0 20px;">Add</button>
+                <button onclick="addTodo()" style="padding:0 20px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer;">Add</button>
             </div>
             <ul id="todoList" class="todo-list"></ul>
         </div>
@@ -162,7 +190,8 @@
             <div style="display:flex; gap: 20px; flex-wrap:wrap;">
                 <div style="flex:1;">
                     <h3>Notes</h3>
-                    <textarea class="notes-area" placeholder="Type math formulas here..."></textarea>
+                    <textarea id="note-math" class="notes-area" oninput="saveData('math')" placeholder="Type math formulas here..."></textarea>
+                    <p style="font-size:0.8rem; color:grey; margin-top:5px;">Autosaving...</p>
                 </div>
                 <div>
                     <h3>Calculator</h3>
@@ -183,8 +212,8 @@
                         <button class="calc-btn" onclick="calc('0')">0</button>
                         <button class="calc-btn" onclick="calc('.')">.</button>
                         <button class="calc-btn" onclick="calc('=')">=</button>
-                        <button class="calc-btn" onclick="calc('+')">+</button>
                         <button class="calc-btn" onclick="calc('C')" style="background:#ffcccc; color:black;">C</button>
+                        <button class="calc-btn" onclick="calc('+')">+</button>
                     </div>
                 </div>
             </div>
@@ -193,7 +222,8 @@
         <div id="science" class="section">
             <h2>Science</h2>
             <h3>Lab Notes</h3>
-            <textarea class="notes-area" placeholder="Type hypothesis here..." style="margin-bottom:20px;"></textarea>
+            <textarea id="note-science" class="notes-area" oninput="saveData('science')" placeholder="Type hypothesis here..."></textarea>
+            <br><br>
             <h3>Reference Table</h3>
             <div class="pt-container">
                 <div class="element"><strong>H</strong><small>1</small></div>
@@ -205,94 +235,228 @@
                 <div class="element"><strong>N</strong><small>7</small></div>
                 <div class="element"><strong>O</strong><small>8</small></div>
             </div>
-            <p style="margin-top:10px; color:grey;">(Simplified table for quick reference)</p>
         </div>
 
         <div id="ela" class="section">
             <h2>English Language Arts</h2>
-            <textarea class="notes-area" placeholder="Essay draft..."></textarea>
+            <textarea id="note-ela" class="notes-area" oninput="saveData('ela')" placeholder="Essay draft..."></textarea>
         </div>
 
         <div id="history" class="section">
             <h2>History</h2>
-            <textarea class="notes-area" placeholder="Timeline notes..."></textarea>
+            <textarea id="note-history" class="notes-area" oninput="saveData('history')" placeholder="Timeline notes..."></textarea>
         </div>
 
         <div id="fun-home" class="section">
-            <h2>Break Time!</h2>
-            <p>Welcome to the secret lounge.</p>
+            <h2>Secret Lounge</h2>
+            <p>Welcome to the unlocked section.</p>
         </div>
 
         <div id="games" class="section">
             <h2>Games Library</h2>
-            <p>Select a game to embed (Placeholder)</p>
             <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:20px; margin-top:20px;">
                 <div style="background:var(--card-bg); padding:20px; border-radius:10px; border:1px solid var(--border);">
                     <h3>Bing Games</h3>
-                    <button onclick="alert('Load game url here')">Play</button>
+                    <button onclick="document.getElementById('game-frame').src='https://www.bing.com/fun'" style="margin-top:10px; padding:5px 15px;">Load</button>
                 </div>
                 <div style="background:var(--card-bg); padding:20px; border-radius:10px; border:1px solid var(--border);">
-                    <h3>Slope</h3>
-                    <button onclick="alert('Load game url here')">Play</button>
+                    <h3>Custom Game</h3>
+                    <button onclick="document.getElementById('game-frame').src='https://slope-game.github.io/'" style="margin-top:10px; padding:5px 15px;">Load</button>
                 </div>
             </div>
+            <br>
+            <iframe id="game-frame" src=""></iframe>
         </div>
 
         <div id="chatterbox" class="section">
-            <h2 style="margin-bottom:10px;">ChatterBox</h2>
             <iframe src="https://whatever-works123.github.io/Chatter-Box/"></iframe>
         </div>
 
         <div id="socials" class="section">
             <h2>Social Feed</h2>
-            <p>Connect your account below.</p>
             <iframe src="https://bing.com"></iframe>
         </div>
 
         <div id="settings" class="section">
             <h2>Settings</h2>
-            
             <div style="background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 20px;">
                 <h3>🔒 Stealth Mode</h3>
                 <p style="margin-bottom:10px;">Toggle between School and Fun mode.</p>
-                <button onclick="toggleMode()" style="padding:10px 20px; cursor:pointer;">Switch Mode</button>
+                <button onclick="toggleMode()" style="padding:10px 20px; cursor:pointer; background:var(--accent); color:white; border:none; border-radius:5px;">Switch Mode</button>
             </div>
-
             <div style="background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid var(--border);">
                 <h3>🎨 Appearance</h3>
-                <p style="margin-bottom:10px;">Switch between Light and Dark themes.</p>
-                <button onclick="toggleTheme()" style="padding:10px 20px; cursor:pointer;">Toggle Theme</button>
+                <p style="margin-bottom:10px;">Switch color theme.</p>
+                <button onclick="toggleTheme()" style="padding:10px 20px; cursor:pointer; background:var(--text-primary); color:var(--bg-color); border:none; border-radius:5px;">Toggle Theme</button>
             </div>
         </div>
-
     </main>
 
     <script>
-        // --- NAVIGATION LOGIC ---
+        // ==========================================
+        // FIREBASE CONFIGURATION (Inserted)
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA",
+            authDomain: "chatterbox3000-fb3e2.firebaseapp.com",
+            databaseURL: "https://chatterbox3000-fb3e2-default-rtdb.firebaseio.com",
+            projectId: "chatterbox3000-fb3e2",
+            storageBucket: "chatterbox3000-fb3e2.firebasestorage.app",
+            messagingSenderId: "298622361038",
+            appId: "1:298622361038:web:c1e46432470dbce92a5f9f"
+        };
+        
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        let currentUser = null;
+        let todoArray = [];
+
+        // ==========================================
+        // AUTH LOGIC
+        // ==========================================
+        
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                currentUser = user;
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('user-display').innerText = user.email;
+                loadUserData(); 
+            } else {
+                // No user is signed in
+                document.getElementById('login-overlay').style.display = 'flex';
+                currentUser = null;
+            }
+        });
+
+        function loginUser() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            const errorMsg = document.getElementById('login-error');
+            
+            errorMsg.innerText = "Logging in...";
+            
+            auth.signInWithEmailAndPassword(email, pass)
+                .catch((error) => {
+                    errorMsg.innerText = "Error: " + error.message;
+                });
+        }
+
+        function logoutUser() {
+            auth.signOut();
+            location.reload();
+        }
+
+        // ==========================================
+        // DATABASE LOGIC (Cloud Save)
+        // ==========================================
+
+        function loadUserData() {
+            if(!currentUser) return;
+
+            // Using Firestore to store 'users' collection
+            const userDoc = db.collection('users').doc(currentUser.uid);
+
+            userDoc.get().then((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    
+                    // Populate Notes
+                    if(data.math) document.getElementById('note-math').value = data.math;
+                    if(data.science) document.getElementById('note-science').value = data.science;
+                    if(data.ela) document.getElementById('note-ela').value = data.ela;
+                    if(data.history) document.getElementById('note-history').value = data.history;
+                    
+                    // Populate Todos
+                    if(data.todos) {
+                        todoArray = data.todos;
+                        renderTodos();
+                    }
+                } else {
+                    console.log("No data found for this user yet.");
+                }
+            }).catch((error) => {
+                console.error("Error getting document:", error);
+            });
+        }
+
+        // Autosave Notes on input
+        function saveData(subject) {
+            if(!currentUser) return;
+            const noteContent = document.getElementById('note-' + subject).value;
+            
+            let updateObj = {};
+            updateObj[subject] = noteContent;
+
+            db.collection('users').doc(currentUser.uid).set(updateObj, { merge: true });
+        }
+
+        // ==========================================
+        // TODO LIST LOGIC
+        // ==========================================
+        function addTodo() {
+            const input = document.getElementById('newTodo');
+            const text = input.value;
+            if (!text) return;
+
+            todoArray.push(text);
+            updateTodoDB();
+            renderTodos();
+            input.value = '';
+        }
+
+        function removeTodo(index) {
+            todoArray.splice(index, 1);
+            updateTodoDB();
+            renderTodos();
+        }
+
+        function updateTodoDB() {
+            if(!currentUser) return;
+            db.collection('users').doc(currentUser.uid).set({
+                todos: todoArray
+            }, { merge: true });
+        }
+
+        function renderTodos() {
+            const list = document.getElementById('todoList');
+            list.innerHTML = '';
+            todoArray.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = 'todo-item';
+                li.innerHTML = `<span>${task}</span> <span class="delete-btn" onclick="removeTodo(${index})">×</span>`;
+                list.appendChild(li);
+            });
+        }
+
+        // ==========================================
+        // UI / TABS / CALCULATOR
+        // ==========================================
+        
         function showSection(id) {
-            // Hide all sections
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            // Show target
             document.getElementById(id).classList.add('active');
             
-            // Highlight button
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            // Find button with matching onclick
             const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
             if(btn) btn.classList.add('active');
         }
 
-        // --- SETTINGS LOGIC ---
         function toggleMode() {
             const body = document.body;
             if (body.classList.contains('mode-school')) {
                 body.classList.remove('mode-school');
                 body.classList.add('mode-fun');
-                showSection('fun-home'); // Auto switch to fun home
+                showSection('fun-home');
             } else {
                 body.classList.remove('mode-fun');
                 body.classList.add('mode-school');
-                showSection('school-home'); // Auto switch to school home
+                showSection('school-home');
             }
         }
 
@@ -302,34 +466,13 @@
             body.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
         }
 
-        // --- TODO LOGIC ---
-        function addTodo() {
-            const input = document.getElementById('newTodo');
-            const text = input.value;
-            if (!text) return;
-
-            const li = document.createElement('li');
-            li.className = 'todo-item';
-            li.innerHTML = `<span>${text}</span> <span class="delete-btn" onclick="this.parentElement.remove()">×</span>`;
-            
-            document.getElementById('todoList').appendChild(li);
-            input.value = '';
-        }
-
-        // --- CALCULATOR LOGIC ---
         function calc(val) {
             const display = document.getElementById('calcDisplay');
-            if (val === 'C') {
-                display.value = '';
-            } else if (val === '=') {
-                try {
-                    display.value = eval(display.value);
-                } catch {
-                    display.value = 'Error';
-                }
-            } else {
-                display.value += val;
-            }
+            if (val === 'C') { display.value = ''; }
+            else if (val === '=') { 
+                try { display.value = eval(display.value); } catch { display.value = 'Error'; }
+            } 
+            else { display.value += val; }
         }
     </script>
 </body>
