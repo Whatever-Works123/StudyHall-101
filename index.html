@@ -7,12 +7,11 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
     <style>
         /* --- CSS VARIABLES & THEMES --- */
         :root {
-            /* Light Theme (School Mode) */
             --bg-color: #f4f4f9;
             --sidebar-bg: #ffffff;
             --text-primary: #333333;
@@ -22,7 +21,6 @@
         }
 
         [data-theme="dark"] {
-            /* Dark Theme (Hacker/Gamer Mode) */
             --bg-color: #121212;
             --sidebar-bg: #1e1e1e;
             --text-primary: #e0e0e0;
@@ -53,7 +51,6 @@
         .login-box button {
             width: 100%; padding: 12px; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;
         }
-        .login-box button:hover { background: #357abd; }
         .login-box p { color: red; margin-top: 10px; font-size: 0.9rem; }
 
         /* --- SIDEBAR --- */
@@ -136,29 +133,21 @@
 
         /* --- FULLSCREEN CHATTERBOX --- */
         .fullscreen-active {
-            position: fixed !important;
-            top: 0; left: 0;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 2000;
-            background: var(--bg-color);
-            padding: 0 !important;
-            display: flex;
-            flex-direction: column;
+            position: fixed !important; top: 0; left: 0;
+            width: 100vw !important; height: 100vh !important;
+            z-index: 2000; background: var(--bg-color);
+            padding: 0 !important; display: flex; flex-direction: column;
         }
-        .fullscreen-active iframe {
-            flex: 1;
-            border-radius: 0;
-            height: 100%;
-        }
-        .fullscreen-active h2, .fullscreen-active p {
-            display: none; /* Hide header text in fullscreen */
-        }
+        .fullscreen-active iframe { flex: 1; border-radius: 0; height: 100%; }
+        .fullscreen-active h2, .fullscreen-active p { display: none; }
         .fs-btn {
             background: var(--accent); color: white; border: none; 
             padding: 5px 15px; border-radius: 5px; cursor: pointer; 
             margin-left: 10px; font-size: 0.9rem;
         }
+        
+        /* Save Status Indicator */
+        #save-status { position: fixed; bottom: 20px; right: 20px; background: rgba(0,0,0,0.7); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
     </style>
 </head>
 <body class="mode-school" data-theme="light">
@@ -173,6 +162,8 @@
             <p id="login-error"></p>
         </div>
     </div>
+
+    <div id="save-status">All changes saved</div>
 
     <nav class="sidebar">
         <div class="logo">📚 StudyHall</div>
@@ -217,7 +208,6 @@
                 <div style="flex:1;">
                     <h3>Notes</h3>
                     <textarea id="note-math" class="notes-area" oninput="saveData('math')" placeholder="Type math formulas here..."></textarea>
-                    <p style="font-size:0.8rem; color:grey; margin-top:5px;">Autosaving...</p>
                 </div>
                 <div>
                     <h3>Calculator</h3>
@@ -325,7 +315,7 @@
 
     <script>
         // ==========================================
-        // FIREBASE CONFIGURATION (Inserted)
+        // FIREBASE CONFIGURATION
         // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA",
@@ -342,7 +332,7 @@
             firebase.initializeApp(firebaseConfig);
         }
         const auth = firebase.auth();
-        const db = firebase.firestore();
+        const db = firebase.database(); // Using Realtime Database
         
         let currentUser = null;
         let todoArray = [];
@@ -382,18 +372,25 @@
         }
 
         // ==========================================
-        // DATABASE LOGIC (Cloud Save)
+        // DATABASE LOGIC (Realtime Database)
         // ==========================================
+
+        function showSaveStatus() {
+            const status = document.getElementById('save-status');
+            status.style.opacity = '1';
+            setTimeout(() => { status.style.opacity = '0'; }, 2000);
+        }
 
         function loadUserData() {
             if(!currentUser) return;
 
-            const userDoc = db.collection('users').doc(currentUser.uid);
+            // Define User Reference
+            const userRef = db.ref('users/' + currentUser.uid);
 
-            userDoc.get().then((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    
+            // Load Once
+            userRef.once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data) {
                     if(data.math) document.getElementById('note-math').value = data.math;
                     if(data.science) document.getElementById('note-science').value = data.science;
                     if(data.ela) document.getElementById('note-ela').value = data.ela;
@@ -411,10 +408,9 @@
             if(!currentUser) return;
             const noteContent = document.getElementById('note-' + subject).value;
             
-            let updateObj = {};
-            updateObj[subject] = noteContent;
-
-            db.collection('users').doc(currentUser.uid).set(updateObj, { merge: true });
+            // Save to /users/UID/subject
+            db.ref('users/' + currentUser.uid + '/' + subject).set(noteContent)
+                .then(() => showSaveStatus());
         }
 
         // ==========================================
@@ -439,9 +435,8 @@
 
         function updateTodoDB() {
             if(!currentUser) return;
-            db.collection('users').doc(currentUser.uid).set({
-                todos: todoArray
-            }, { merge: true });
+            db.ref('users/' + currentUser.uid + '/todos').set(todoArray)
+                .then(() => showSaveStatus());
         }
 
         function renderTodos() {
@@ -502,25 +497,17 @@
             else { display.value += val; }
         }
 
-        // ==========================================
-        // NEW FEATURES: FULLSCREEN & PANIC BUTTON
-        // ==========================================
-
         function toggleFullscreenChat() {
             const chatDiv = document.getElementById('chatterbox');
             chatDiv.classList.toggle('fullscreen-active');
         }
 
-        // PANIC BUTTON: LISTENER FOR 'ESCAPE' KEY
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape") {
-                // 1. Exit fullscreen if active
                 const chatDiv = document.getElementById('chatterbox');
                 if(chatDiv.classList.contains('fullscreen-active')) {
                     chatDiv.classList.remove('fullscreen-active');
                 }
-
-                // 2. Force School Mode
                 const body = document.body;
                 if (body.classList.contains('mode-fun')) {
                     body.classList.remove('mode-fun');
