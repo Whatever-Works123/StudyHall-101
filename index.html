@@ -329,7 +329,7 @@
                 #stage { position: relative; width: 100vw; height: 100vh; }
                 .monster {
                     position: absolute;
-                    border-radius: 50%; /* Make them circles */
+                    border-radius: 50%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
@@ -337,17 +337,24 @@
                     color: rgba(0,0,0,0.5);
                     box-shadow: 0 0 10px rgba(255,255,255,0.5);
                     user-select: none;
+                    cursor: pointer;
                 }
             </style>
         </head>
         <body>
             <div id="stage"></div>
             <script>
-                console.log('ready');
+                console.log('Game Starting...');
 
                 var refreshRate = 50;
                 var windowWidth = window.innerWidth;
                 var windowHeight = window.innerHeight;
+
+                // Handle resize
+                window.onresize = function() {
+                    windowWidth = window.innerWidth;
+                    windowHeight = window.innerHeight;
+                };
 
                 var pxToNumber = function(str) {
                     return Number(str.replace('px', ''));
@@ -361,71 +368,62 @@
                     this.startY = 0;
                     this.size = 100;
                     this.color = 'ff00ff';
-                    this.isMoving = false;
                     this.domId = false;
                     this.domElement = false;
-                    this.name = false;
                     this.cycle = 0;
                     
                     this.init = function() {
-                        var monsterHtml = '<div class="monster" id="' + this.domId + '">(o_o)</div>';     
-                        document.getElementById('stage').innerHTML += monsterHtml;
+                        // FIXED: Use createElement instead of innerHTML to prevent overwriting other monsters
+                        var el = document.createElement('div');
+                        el.className = 'monster';
+                        el.id = this.domId;
+                        el.innerText = '(o_o)';
                         
-                        this.domElement = document.getElementById(this.domId);
+                        // Set initial styles
+                        el.style.left = this.startX + 'px';
+                        el.style.top = this.startY + 'px';
+                        el.style.backgroundColor = '#' + this.color;
+                        el.style.width = this.size + 'px';
+                        el.style.height = this.size + 'px';
+                        el.style.fontSize = (this.size / 3) + 'px';
+
+                        document.getElementById('stage').appendChild(el);
                         
-                        // Modified: Removed external image, using color and css
-                        // this.domElement.style.backgroundImage = 'url(img/monster/monster_a.png)';
-                        
-                        this.domElement.style.left = this.startX + 'px';
-                        this.domElement.style.top = this.startY + 'px';
-                        
-                        this.setColor();
-                        this.setSize();
+                        this.domElement = el;
                         
                         this.interval = setInterval(function() {
                             self.draw();
                         }, refreshRate);
                     };
                     
-                    this.setColor = function() {
-                        this.domElement.style.backgroundColor = '#' + this.color;
-                    };
-                    
-                    this.setSize = function() {
-                        this.domElement.style.width = this.size + 'px';
-                        this.domElement.style.height = this.size + 'px';
-                        this.domElement.style.fontSize = (this.size / 3) + 'px'; // Scale face
-                    };
-                    
                     this.move = function() {
                         var currentX = pxToNumber(this.domElement.style.left);
                         var newX = currentX + this.speedX;
-                        
                         var currentY = pxToNumber(this.domElement.style.top);
                         var newY = currentY + this.speedY;
                         
+                        // Bounce off floor/ceiling
                         if(newY + this.size >= windowHeight && this.speedY > 0) {
                             this.speedY = this.speedY * -1;
-                        };
+                        }
                         if(newY <= 0 && this.speedY < 0) {
                             this.speedY = this.speedY * -1;
-                        };
+                        }
                         
+                        // Wrap around sides
                         if(newX >= windowWidth && this.speedX > 0) {
-                            newX =  - this.size;
-                        };
+                            newX = -this.size;
+                        }
                         if(newX + this.size < 0 && this.speedX < 0) {
                             newX = windowWidth;
-                        };
+                        }
                         
                         this.domElement.style.left = newX + 'px';
                         this.domElement.style.top = newY + 'px';
                     };
                     
                     this.setImage = function() {
-                        // Modified: Rotate face instead of sprite sheet
-                        var direction;
-                        if(this.speedX >= 0) {
+                        if(this.speedX > 0) {
                             this.domElement.style.transform = 'scaleX(1)';
                         }
                         if(this.speedX < 0) {
@@ -434,71 +432,52 @@
                     };
                     
                     this.draw = function() {
-                        this.domElement = document.getElementById(this.domId);
+                        // Re-fetch element just in case, but rely on variable
+                        if(!this.domElement) this.domElement = document.getElementById(this.domId);
                         
                         this.domElement.onclick = function(event){
-                            // Flash color on click to show selection
-                            this.style.border = "2px solid white";
+                            this.style.border = "3px solid white";
                             currentMonster = self;
                             console.log("Selected monster " + self.domId);
                         };
                         
-                        // this.setColor(); // Optimization: Don't set color every frame
-                        this.setSize();
                         this.move();
                         this.setImage();
-                        
-                        this.cycle += 1;
-                        if(this.cycle > 1) {
-                            this.cycle = 0;
-                        }
                     };
                 };
 
-                var monsters = new Array;
-                // Reduced count slightly for better performance in iframe
-                for (var i=0; i<40; i++) {
-                    monsters[i] = new Monster;
+                var monsters = [];
+                for (var i=0; i<30; i++) {
+                    monsters[i] = new Monster();
                     monsters[i].domId = 'monster_' + i;
-                    monsters[i].speedX = Math.floor(Math.random() * 10 -5);
-                    monsters[i].speedY = Math.floor(Math.random() * 10 -5);
-                    monsters[i].startX = Math.floor(Math.random() * (windowWidth - 50));
-                    monsters[i].startY = Math.floor(Math.random() * (windowHeight - 50));
-                    monsters[i].size = Math.floor(Math.random() * 50 + 20);
-                    // Random bright colors
+                    monsters[i].speedX = Math.floor(Math.random() * 10 - 5);
+                    monsters[i].speedY = Math.floor(Math.random() * 10 - 5);
+                    monsters[i].startX = Math.floor(Math.random() * (windowWidth - 100));
+                    monsters[i].startY = Math.floor(Math.random() * (windowHeight - 100));
+                    monsters[i].size = Math.floor(Math.random() * 50 + 30);
                     monsters[i].color = Math.floor(Math.random()*16777215).toString(16);
                     monsters[i].init();
-                };
+                }
 
                 var currentMonster = monsters[0];
 
                 window.addEventListener('keydown', function(event){
                     if(!currentMonster) return;
-                    console.log(event.keyCode);
+                    // Prevent page scrolling with arrow keys
+                    if([32, 37, 38, 39, 40].indexOf(event.keyCode) > -1) {
+                        event.preventDefault();
+                    }
+                    
                     switch (event.keyCode) {
-                        // right
-                        case 39: {
-                            currentMonster.speedX += 1;
-                            break;
-                        };
-                        case 37: {
-                            currentMonster.speedX -= 1;
-                            break;
-                        };
-                        case 40: {
-                            currentMonster.speedY += 1;
-                            break;
-                        };
-                        case 38: {
-                            currentMonster.speedY -= 1;
-                            break;
-                        };
-                        case 32: {
+                        case 39: currentMonster.speedX += 1; break; // Right
+                        case 37: currentMonster.speedX -= 1; break; // Left
+                        case 40: currentMonster.speedY += 1; break; // Down
+                        case 38: currentMonster.speedY -= 1; break; // Up
+                        case 32: // Spacebar
                             currentMonster.speedX = 0;
                             currentMonster.speedY = 0;
                             break;
-                        };
-                    };
+                    }
                 });
             </script>
         </body>
@@ -519,12 +498,11 @@
             appId: "1:298622361038:web:c1e46432470dbce92a5f9f"
         };
         
-        // Initialize Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
         const auth = firebase.auth();
-        const db = firebase.database(); // Using Realtime Database
+        const db = firebase.database();
         
         let currentUser = null;
         let todoArray = [];
@@ -549,13 +527,9 @@
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
             const errorMsg = document.getElementById('login-error');
-            
             errorMsg.innerText = "Logging in...";
-            
             auth.signInWithEmailAndPassword(email, pass)
-                .catch((error) => {
-                    errorMsg.innerText = "Error: " + error.message;
-                });
+                .catch((error) => { errorMsg.innerText = "Error: " + error.message; });
         }
 
         function logoutUser() {
@@ -564,7 +538,7 @@
         }
 
         // ==========================================
-        // DATABASE LOGIC (Realtime Database)
+        // DATABASE LOGIC
         // ==========================================
 
         function showSaveStatus() {
@@ -575,11 +549,7 @@
 
         function loadUserData() {
             if(!currentUser) return;
-
-            // Define User Reference
             const userRef = db.ref('users/' + currentUser.uid);
-
-            // Load Once
             userRef.once('value').then((snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -587,11 +557,7 @@
                     if(data.science) document.getElementById('note-science').value = data.science;
                     if(data.ela) document.getElementById('note-ela').value = data.ela;
                     if(data.history) document.getElementById('note-history').value = data.history;
-                    
-                    if(data.todos) {
-                        todoArray = data.todos;
-                        renderTodos();
-                    }
+                    if(data.todos) { todoArray = data.todos; renderTodos(); }
                 }
             });
         }
@@ -599,20 +565,17 @@
         function saveData(subject) {
             if(!currentUser) return;
             const noteContent = document.getElementById('note-' + subject).value;
-            
-            // Save to /users/UID/subject
             db.ref('users/' + currentUser.uid + '/' + subject).set(noteContent)
                 .then(() => showSaveStatus());
         }
 
         // ==========================================
-        // TODO LIST LOGIC
+        // TODO LIST
         // ==========================================
         function addTodo() {
             const input = document.getElementById('newTodo');
             const text = input.value;
             if (!text) return;
-
             todoArray.push(text);
             updateTodoDB();
             renderTodos();
@@ -647,7 +610,6 @@
         // ==========================================
         
         function showSection(id) {
-            // Disable fullscreen if it's on when switching tabs
             const chatterDiv = document.getElementById('chatterbox');
             if(chatterDiv.classList.contains('fullscreen-active')) {
                 toggleFullscreenChat();
@@ -694,13 +656,11 @@
             chatDiv.classList.toggle('fullscreen-active');
         }
 
-        // NEW: Load the monster game from the script template
         function loadMonsterGame() {
             const iframe = document.getElementById('game-frame');
             const gameCode = document.getElementById('monster-game-template').textContent;
             iframe.srcdoc = gameCode;
             iframe.onload = function() {
-                // Focus the iframe so keys work immediately
                 iframe.contentWindow.focus();
             };
         }
@@ -719,7 +679,6 @@
                 }
             }
         });
-
     </script>
 </body>
 </html>
