@@ -280,12 +280,12 @@
                     <button onclick="document.getElementById('game-frame').src='https://slope-game.github.io/'" style="margin-top:10px; padding:5px 15px;">Load</button>
                 </div>
                 <div style="background:var(--card-bg); padding:20px; border-radius:10px; border:1px solid var(--border);">
-                    <h3>Monster Chase</h3>
-                    <button onclick="loadMonsterGame()" style="margin-top:10px; padding:5px 15px; background-color: #ff9800; color: white; border: none; cursor: pointer;">Play Now</button>
+                    <h3>Drive Mad</h3>
+                    <button onclick="loadDriveMad()" style="margin-top:10px; padding:5px 15px; background-color: #ff9800; color: white; border: none; cursor: pointer;">Play Now</button>
                 </div>
             </div>
             <br>
-            <p style="font-size: 0.9rem; color: grey;">Click inside the game to play. Use Arrow Keys to move.</p>
+            <p style="font-size: 0.9rem; color: grey;">Click inside the game to play. Controls: Click/Touch sides of screen or Arrows.</p>
             <iframe id="game-frame" src=""></iframe>
         </div>
 
@@ -318,171 +318,87 @@
         </div>
     </main>
 
-    <script id="monster-game-template" type="text/plain">
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>Monster Object</title>
-            <style type="text/css">
-                body { overflow: hidden; margin: 0; background: #222; font-family: sans-serif; }
-                #stage { position: relative; width: 100vw; height: 100vh; }
-                .monster {
-                    position: absolute;
-                    border-radius: 50%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    font-weight: bold;
-                    color: rgba(0,0,0,0.5);
-                    box-shadow: 0 0 10px rgba(255,255,255,0.5);
-                    user-select: none;
-                    cursor: pointer;
-                }
-            </style>
-        </head>
-        <body>
-            <div id="stage"></div>
-            <script>
-                console.log('Game Starting...');
+    <textarea id="drive-mad-code" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<script src="https://cdn.jsdelivr.net/npm/p5@1.11.5/lib/p5.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@1.11.5/lib/addons/p5.sound.min.js"></script>
+	<script src="mySketch.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css">
+<head>
+  <base href="https://cdn.jsdelivr.net/gh/genizy/dmad-poki@49b5ab6b987f5f3be58f9dae59c92e8fc1aab9b0/">
+  <script>
+  window.assgdd = {
+    "ancestorOrigins": {
+        "0": "https://games.poki.com",
+        "1": "https://poki.com"
+    },
+    "href": "https://f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com/cc1bc57a-e355-4696-97c2-097bf6188606/index.html?country=US&url_referrer=https%3A%2F%2Fpoki.com%2F&site_id=3&iso_lang=en&poki_url=https%3A%2F%2Fpoki.com%2Fen%2Fg%2Fdrive-mad&hoist=yes&nonPersonalized=n&cloudsavegames=n&familyFriendly=n&categories=78%2C93%2C96%2C103%2C377%2C390%2C400%2C893%2C929%2C1126%2C1139%2C1140%2C1141%2C1143%2C1147%2C1163%2C1185%2C1190%2C1193%2C1197&special_condition=landing&game_id=f9564e4e-ef25-4e4b-ba67-cb11a1576bbd&game_version_id=cc1bc57a-e355-4696-97c2-097bf6188606&inspector=0",
+    "origin": "https://f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com",
+    "protocol": "https:",
+    "host": "f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com",
+    "hostname": "f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com",
+    "port": "",
+    "pathname": "/cc1bc57a-e355-4696-97c2-097bf6188606/index.html",
+    "search": "?country=US&url_referrer=https%3A%2F%2Fpoki.com%2F&site_id=3&iso_lang=en&poki_url=https%3A%2F%2Fpoki.com%2Fen%2Fg%2Fdrive-mad&hoist=yes&nonPersonalized=n&cloudsavegames=n&familyFriendly=n&categories=78%2C93%2C96%2C103%2C377%2C390%2C400%2C893%2C929%2C1126%2C1139%2C1140%2C1141%2C1143%2C1147%2C1163%2C1185%2C1190%2C1193%2C1197&special_condition=landing&game_id=f9564e4e-ef25-4e4b-ba67-cb11a1576bbd&game_version_id=cc1bc57a-e355-4696-97c2-097bf6188606&inspector=0",
+    "hash": ""
+}
+  </script>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-                var refreshRate = 50;
-                var windowWidth = window.innerWidth;
-                var windowHeight = window.innerHeight;
+  <title>Drive Mad</title>
+  <meta name="description" content="">
+  <meta name="google" content="notranslate">
 
-                // Handle resize
-                window.onresize = function() {
-                    windowWidth = window.innerWidth;
-                    windowHeight = window.innerHeight;
-                };
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <link rel="stylesheet" href="webapp/fancade.css">
+  <link rel="icon" href="webapp/favicon.ico">
 
-                var pxToNumber = function(str) {
-                    return Number(str.replace('px', ''));
-                }
+  <script src="poki-sdk.js" ></script>
+</head>
 
-                var Monster = function() {
-                    var self = this;
-                    this.speedX = 0;
-                    this.speedY = 0;
-                    this.startX = 0;
-                    this.startY = 0;
-                    this.size = 100;
-                    this.color = 'ff00ff';
-                    this.domId = false;
-                    this.domElement = false;
-                    this.cycle = 0;
-                    
-                    this.init = function() {
-                        // FIXED: Use createElement instead of innerHTML to prevent overwriting other monsters
-                        var el = document.createElement('div');
-                        el.className = 'monster';
-                        el.id = this.domId;
-                        el.innerText = '(o_o)';
-                        
-                        // Set initial styles
-                        el.style.left = this.startX + 'px';
-                        el.style.top = this.startY + 'px';
-                        el.style.backgroundColor = '#' + this.color;
-                        el.style.width = this.size + 'px';
-                        el.style.height = this.size + 'px';
-                        el.style.fontSize = (this.size / 3) + 'px';
+<body id="body">
 
-                        document.getElementById('stage').appendChild(el);
-                        
-                        this.domElement = el;
-                        
-                        this.interval = setInterval(function() {
-                            self.draw();
-                        }, refreshRate);
-                    };
-                    
-                    this.move = function() {
-                        var currentX = pxToNumber(this.domElement.style.left);
-                        var newX = currentX + this.speedX;
-                        var currentY = pxToNumber(this.domElement.style.top);
-                        var newY = currentY + this.speedY;
-                        
-                        // Bounce off floor/ceiling
-                        if(newY + this.size >= windowHeight && this.speedY > 0) {
-                            this.speedY = this.speedY * -1;
-                        }
-                        if(newY <= 0 && this.speedY < 0) {
-                            this.speedY = this.speedY * -1;
-                        }
-                        
-                        // Wrap around sides
-                        if(newX >= windowWidth && this.speedX > 0) {
-                            newX = -this.size;
-                        }
-                        if(newX + this.size < 0 && this.speedX < 0) {
-                            newX = windowWidth;
-                        }
-                        
-                        this.domElement.style.left = newX + 'px';
-                        this.domElement.style.top = newY + 'px';
-                    };
-                    
-                    this.setImage = function() {
-                        if(this.speedX > 0) {
-                            this.domElement.style.transform = 'scaleX(1)';
-                        }
-                        if(this.speedX < 0) {
-                            this.domElement.style.transform = 'scaleX(-1)';
-                        }
-                    };
-                    
-                    this.draw = function() {
-                        // Re-fetch element just in case, but rely on variable
-                        if(!this.domElement) this.domElement = document.getElementById(this.domId);
-                        
-                        this.domElement.onclick = function(event){
-                            this.style.border = "3px solid white";
-                            currentMonster = self;
-                            console.log("Selected monster " + self.domId);
-                        };
-                        
-                        this.move();
-                        this.setImage();
-                    };
-                };
+  <div id="modal_parent">
+    <div id="modal_content">
+      <span id="modal_close_button">&times;</span>
+      <div id="store_link_modal_content" class="modal_inner"></div>
+      <div id="share_file_modal_content" class="modal_inner"></div>
+    </div>
+  </div>
 
-                var monsters = [];
-                for (var i=0; i<30; i++) {
-                    monsters[i] = new Monster();
-                    monsters[i].domId = 'monster_' + i;
-                    monsters[i].speedX = Math.floor(Math.random() * 10 - 5);
-                    monsters[i].speedY = Math.floor(Math.random() * 10 - 5);
-                    monsters[i].startX = Math.floor(Math.random() * (windowWidth - 100));
-                    monsters[i].startY = Math.floor(Math.random() * (windowHeight - 100));
-                    monsters[i].size = Math.floor(Math.random() * 50 + 30);
-                    monsters[i].color = Math.floor(Math.random()*16777215).toString(16);
-                    monsters[i].init();
-                }
+  <div id="canvas_border" class="emscripten_border">
+    <div id="play_content" class="middle center">
+      <div class="edge">
+        <div class="box">
+          <div class="black">
+            <img src="webapp/cover.jpg" class="cover">
+            <p class="title">Drive Mad</p>
+            <p class="author">Fancade</p>
+          </div>
+        </div>
+      </div>
+      <div id="progress_or_play">
+        <progress id="progress" class="loading" value="0" max="100"></progress>
+      </div>
+      <p class="description"></p>
+    </div>
+    <canvas class="emscripten" id="canvas" tabindex=-1>
+    </canvas>
+    <div id="gradient"></div>
+    <div id="webview_content"></div>
+  </div>
 
-                var currentMonster = monsters[0];
+  <script type="text/javascript" src="webapp/source_min.js"></script>
 
-                window.addEventListener('keydown', function(event){
-                    if(!currentMonster) return;
-                    // Prevent page scrolling with arrow keys
-                    if([32, 37, 38, 39, 40].indexOf(event.keyCode) > -1) {
-                        event.preventDefault();
-                    }
-                    
-                    switch (event.keyCode) {
-                        case 39: currentMonster.speedX += 1; break; // Right
-                        case 37: currentMonster.speedX -= 1; break; // Left
-                        case 40: currentMonster.speedY += 1; break; // Down
-                        case 38: currentMonster.speedY -= 1; break; // Up
-                        case 32: // Spacebar
-                            currentMonster.speedX = 0;
-                            currentMonster.speedY = 0;
-                            break;
-                    }
-                });
-            </script>
-        </body>
-        </html>
-    </script>
+  <script type="text/javascript" src="webapp/index.js"></script>
+</body>
+
+</html>
+    </textarea>
 
     <script>
         // ==========================================
@@ -656,9 +572,11 @@
             chatDiv.classList.toggle('fullscreen-active');
         }
 
-        function loadMonsterGame() {
+        // Updated function to load the Drive Mad game from the textarea
+        function loadDriveMad() {
             const iframe = document.getElementById('game-frame');
-            const gameCode = document.getElementById('monster-game-template').textContent;
+            // We use a textarea to safely store the HTML code without breaking the main script tags
+            const gameCode = document.getElementById('drive-mad-code').value;
             iframe.srcdoc = gameCode;
             iframe.onload = function() {
                 iframe.contentWindow.focus();
