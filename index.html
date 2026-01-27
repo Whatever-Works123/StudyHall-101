@@ -3,755 +3,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall OS 2.0</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-
+    <title>Complete Periodic Table</title>
     <style>
-        /* --- CSS VARIABLES & THEMES --- */
         :root {
-            --bg-color: #f0f2f5;
-            --sidebar-bg: #ffffff;
-            --card-bg: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --accent: #3b82f6; /* Modern Blue */
-            --accent-hover: #2563eb;
-            --border: #e2e8f0;
-            --success: #10b981;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --radius: 16px;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --panel-bg: #1e1e1e;
+            --border-color: #333;
+            --hover-bg: #333;
+            
+            /* Modern Neon-ish Palette */
+            --c-alkali: #ff6b6b;
+            --c-alkaline: #ff9f43;
+            --c-transition: #feca57;
+            --c-post-trans: #48dbfb;
+            --c-metalloid: #1dd1a1;
+            --c-reactive-nonmetal: #00d2d3;
+            --c-noble: #5f27cd;
+            --c-lanthanide: #ff9ff3;
+            --c-actinide: #f368e0;
+            --c-unknown: #8395a7;
         }
 
-        [data-theme="dark"] {
-            --bg-color: #0f172a;
-            --sidebar-bg: #1e293b;
-            --card-bg: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --accent: #6366f1; /* Indigo */
-            --accent-hover: #4f46e5;
-            --border: #334155;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        h1 { margin-top: 0; font-weight: 300; letter-spacing: 2px; }
 
-        body { display: flex; height: 100vh; background-color: var(--bg-color); color: var(--text-primary); transition: background 0.3s; overflow: hidden; }
-
-        /* --- UI COMPONENTS --- */
-        .btn {
-            padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;
-            font-weight: 600; transition: 0.2s; font-size: 0.9rem;
-        }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
-        .btn-danger { background: #ef4444; color: white; }
-        
-        input, textarea, select {
-            background: var(--bg-color); border: 1px solid var(--border);
-            color: var(--text-primary); padding: 12px; border-radius: 8px;
-            outline: none; transition: 0.2s; width: 100%;
-        }
-        input:focus, textarea:focus { border-color: var(--accent); }
-
-        /* --- LOGIN OVERLAY --- */
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 3000;
-            display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(8px);
-        }
-        .login-box {
-            background: var(--card-bg); padding: 40px; border-radius: 24px; 
-            text-align: center; width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            border: 1px solid var(--border);
+        /* --- INFO PANEL --- */
+        #display-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 900px; /* Width of the table */
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            min-height: 120px;
         }
 
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 260px; background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 24px;
-            transition: 0.3s; z-index: 100;
-        }
-        .logo { 
-            font-size: 1.5rem; font-weight: 800; margin-bottom: 40px; 
-            color: var(--accent); display: flex; align-items: center; gap: 10px;
-        }
-        .nav-btn {
-            background: none; border: none; color: var(--text-secondary);
-            padding: 12px 16px; text-align: left; cursor: pointer; border-radius: 12px;
-            margin-bottom: 4px; font-size: 0.95rem; font-weight: 500;
-            display: flex; align-items: center; gap: 12px; transition: 0.2s;
-        }
-        .nav-btn:hover { background: var(--bg-color); color: var(--text-primary); }
-        .nav-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-
-        /* --- MAIN CONTENT --- */
-        .main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
-        .section { display: none; animation: fadeIn 0.4s ease-out; max-width: 1200px; margin: 0 auto; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        h2 { font-size: 2rem; margin-bottom: 20px; font-weight: 700; color: var(--text-primary); }
-        
-        .card {
-            background: var(--card-bg); border-radius: var(--radius);
-            padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
-            border: 1px solid var(--border);
+        .panel-big-sym {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: var(--c-transition); /* Dynamic color via JS */
         }
 
-        /* --- DASHBOARD WIDGETS --- */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        
-        /* Pomodoro Timer */
-        .timer-circle {
-            width: 150px; height: 150px; border-radius: 50%;
-            border: 6px solid var(--accent); display: flex;
-            align-items: center; justify-content: center;
-            font-size: 2.5rem; font-weight: bold; margin: 0 auto 20px auto;
-            background: var(--bg-color);
+        .panel-info {
+            padding: 0 20px;
+            border-left: 1px solid #333;
+            border-right: 1px solid #333;
         }
 
-        /* --- STUDY TOOLS --- */
-        /* To-Do */
-        .todo-item {
-            background: var(--bg-color); padding: 15px; margin-bottom: 8px;
-            border-radius: 8px; display: flex; justify-content: space-between; align-items: center;
-            border-left: 4px solid var(--accent); transition: 0.2s;
-        }
-        .todo-item.done { opacity: 0.6; text-decoration: line-through; border-left-color: var(--success); }
-        
-        /* Calculator */
-        .calc-wrapper { display: flex; gap: 20px; flex-wrap: wrap; }
-        .calc-body { width: 300px; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .calc-btn {
-            padding: 15px; border-radius: 8px; font-size: 1.1rem;
-            background: var(--bg-color); border: 1px solid var(--border);
-            cursor: pointer; color: var(--text-primary);
-        }
-        .calc-btn:hover { background: var(--border); }
-        .calc-btn.op { background: var(--accent); color: white; border: none; }
-        
-        /* Note Editor */
-        .editor-container { position: relative; }
-        textarea.notes-area {
-            height: 500px; line-height: 1.6; font-size: 1.1rem;
-            background: var(--card-bg); border: 1px solid var(--border);
-            padding: 40px; resize: vertical;
-            background-image: linear-gradient(var(--border) 1px, transparent 1px);
-            background-size: 100% 2rem; /* Lined paper effect */
-            background-attachment: local;
-        }
-        .word-count { position: absolute; bottom: 15px; right: 20px; font-size: 0.8rem; color: var(--text-secondary); }
+        .panel-info h2 { margin: 0 0 5px 0; font-size: 1.5rem; }
+        .panel-desc { color: #888; margin: 2px 0; font-size: 0.9rem; }
 
-        /* Periodic Table */
-        .pt-grid { display: grid; grid-template-columns: repeat(18, 1fr); gap: 4px; font-size: 0.7rem; }
-        .pt-el {
-            aspect-ratio: 1; border: 1px solid var(--border); border-radius: 4px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; background: var(--bg-color); transition: 0.2s; position: relative;
-        }
-        .pt-el:hover { transform: scale(1.5); z-index: 10; background: var(--card-bg); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .pt-el strong { font-size: 0.9rem; color: var(--accent); }
-        
-        /* Modes */
-        .school-only, .fun-only { display: none; }
-        body.mode-school .school-only { display: block; }
-        body.mode-fun .fun-only { display: block; }
+        .panel-stats { text-align: right; font-family: monospace; color: #aaa; }
 
-        /* Fullscreen */
-        .fullscreen-active {
-            position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 5000; padding: 0; background: black;
+        /* --- THE TABLE GRID --- */
+        .periodic-table {
+            display: grid;
+            /* 18 columns */
+            grid-template-columns: repeat(18, 1fr);
+            gap: 4px;
+            width: 100%;
+            max-width: 1200px;
+            padding-bottom: 50px;
         }
-        iframe { width: 100%; height: 600px; border: none; border-radius: 12px; background: white; }
 
-        /* Notification */
-        #toast {
-            position: fixed; bottom: 30px; right: 30px;
-            background: var(--text-primary); color: var(--bg-color);
-            padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s;
-            font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.2); pointer-events: none;
+        .element {
+            position: relative;
+            background: #252525;
+            border: 1px solid #333;
+            aspect-ratio: 5/6;
+            padding: 4px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.1s, z-index 0s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .element:hover {
+            transform: scale(1.3);
+            z-index: 100; /* Pop on top */
+            background: var(--hover-bg);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            border-color: #fff;
+        }
+
+        .at-num { font-size: 0.6rem; opacity: 0.7; }
+        .symbol { font-size: 1.1rem; font-weight: 700; text-align: center; }
+        .name { 
+            font-size: 0.5rem; 
+            text-align: center; 
+            overflow: hidden; 
+            white-space: nowrap; 
+            text-overflow: ellipsis; 
+            opacity: 0.9; 
+        }
+
+        /* --- CATEGORY BORDERS --- */
+        .cat-alkali { border-bottom: 3px solid var(--c-alkali); color: var(--c-alkali); }
+        .cat-alkaline { border-bottom: 3px solid var(--c-alkaline); color: var(--c-alkaline); }
+        .cat-transition { border-bottom: 3px solid var(--c-transition); color: var(--c-transition); }
+        .cat-post-transition { border-bottom: 3px solid var(--c-post-trans); color: var(--c-post-trans); }
+        .cat-metalloid { border-bottom: 3px solid var(--c-metalloid); color: var(--c-metalloid); }
+        .cat-reactive-nonmetal { border-bottom: 3px solid var(--c-reactive-nonmetal); color: var(--c-reactive-nonmetal); }
+        .cat-noble-gas { border-bottom: 3px solid var(--c-noble); color: var(--c-noble); }
+        .cat-lanthanide { border-bottom: 3px solid var(--c-lanthanide); color: var(--c-lanthanide); }
+        .cat-actinide { border-bottom: 3px solid var(--c-actinide); color: var(--c-actinide); }
+        .cat-unknown { border-bottom: 3px solid var(--c-unknown); color: var(--c-unknown); }
+
+        /* Row labels for Lanthanides/Actinides gap management */
+        .empty-gap { grid-column: 1 / -1; height: 20px; } 
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .periodic-table { display: flex; flex-wrap: wrap; justify-content: center; }
+            .element { width: 50px; height: 60px; margin: 2px; }
+            #display-panel { grid-template-columns: 1fr; text-align: center; gap: 10px; }
+            .panel-info { border: none; }
+            .panel-stats { text-align: center; }
         }
     </style>
 </head>
-<body class="mode-school" data-theme="light">
-
-    <div id="login-overlay">
-        <div class="login-box">
-            <h1 style="color: var(--accent); margin-bottom:10px;">StudyHall OS</h1>
-            <p style="color: var(--text-secondary); margin-bottom:20px;">Access your workspace</p>
-            <input type="email" id="email" placeholder="Email" style="margin-bottom:10px;">
-            <input type="password" id="password" placeholder="Password" style="margin-bottom:20px;">
-            <button class="btn btn-primary" onclick="loginUser()" style="width:100%;">Enter Dashboard</button>
-            <p id="login-error" style="margin-top:15px; color:#ef4444; font-size:0.9rem;"></p>
-        </div>
-    </div>
-
-    <div id="toast">Saved automatically</div>
-
-    <nav class="sidebar">
-        <div class="logo">📘 StudyHall</div>
-        <div style="margin-bottom: 20px;">
-            <div id="user-display" style="font-weight:bold; font-size:0.9rem;">Guest</div>
-            <div style="font-size:0.8rem; color:var(--text-secondary);">Student Mode</div>
-        </div>
-        
-        <button class="nav-btn school-only active" onclick="showSection('school-home')">🏠 Dashboard</button>
-        <button class="nav-btn school-only" onclick="showSection('todo')">✅ Tasks</button>
-        <button class="nav-btn school-only" onclick="showSection('math')">📐 Math Lab</button>
-        <button class="nav-btn school-only" onclick="showSection('science')">🧬 Science Lab</button>
-        <button class="nav-btn school-only" onclick="showSection('ela')">✍️ ELA Writer</button>
-        <button class="nav-btn school-only" onclick="showSection('history')">📜 History</button>
-
-        <button class="nav-btn fun-only" onclick="showSection('fun-home')">🎮 Secret Lounge</button>
-        <button class="nav-btn fun-only" onclick="showSection('games')">🕹️ Arcade</button>
-        <button class="nav-btn fun-only" onclick="showSection('chatterbox')">💬 ChatterBox</button>
-        <button class="nav-btn fun-only" onclick="showSection('socials')">🌐 Web Browser</button>
-
-        <div style="margin-top:auto;">
-            <button class="nav-btn" onclick="showSection('settings')">⚙️ System</button>
-            <button class="nav-btn" onclick="logoutUser()" style="color:#ef4444;">🚪 Logout</button>
-        </div>
-    </nav>
-
-    <main class="main-content">
-        
-        <div id="school-home" class="section active">
-            <header style="margin-bottom:30px;">
-                <h1 id="greeting">Good Morning.</h1>
-                <p style="color:var(--text-secondary);">Here is your study overview.</p>
-            </header>
-
-            <div class="dashboard-grid">
-                <div class="card" style="text-align:center;">
-                    <h3>Focus Timer</h3>
-                    <p style="color:var(--text-secondary); margin-bottom:20px;">25 min work • 5 min break</p>
-                    <div class="timer-circle" id="timer-display">25:00</div>
-                    <button class="btn btn-primary" onclick="toggleTimer()">Start / Pause</button>
-                    <button class="btn" onclick="resetTimer()">Reset</button>
-                </div>
-                
-                <div class="card">
-                    <h3>At a Glance</h3>
-                    <ul id="mini-todo-list" style="list-style:none; margin-top:15px; padding-left:0;">
-                        <li style="color:var(--text-secondary);">No pending tasks.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="todo" class="section">
-            <div class="card">
-                <h2>Assignment Tracker</h2>
-                <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <input type="text" id="newTodo" placeholder="What needs to be done?">
-                    <button class="btn btn-primary" onclick="addTodo()">Add Task</button>
-                </div>
-                <div id="todoList"></div>
-            </div>
-        </div>
-
-        <div id="math" class="section">
-            <h2>Mathematics Laboratory</h2>
-            <div class="calc-wrapper">
-                <div class="card calc-body">
-                    <h3>Scientific Calc</h3>
-                    <input type="text" id="calcDisplay" readonly style="margin-bottom:15px; text-align:right; font-size:1.5rem; font-family:monospace;">
-                    <div class="calc-grid">
-                        <button class="calc-btn" onclick="calc('sin(')">sin</button>
-                        <button class="calc-btn" onclick="calc('cos(')">cos</button>
-                        <button class="calc-btn" onclick="calc('tan(')">tan</button>
-                        <button class="calc-btn" onclick="calc('C')" style="background:#fee2e2; color:#ef4444;">AC</button>
-                        
-                        <button class="calc-btn" onclick="calc('sqrt(')">√</button>
-                        <button class="calc-btn" onclick="calc('pow(')">^</button>
-                        <button class="calc-btn" onclick="calc('(')">(</button>
-                        <button class="calc-btn" onclick="calc(')')">)</button>
-
-                        <button class="calc-btn" onclick="calc('7')">7</button>
-                        <button class="calc-btn" onclick="calc('8')">8</button>
-                        <button class="calc-btn" onclick="calc('9')">9</button>
-                        <button class="calc-btn op" onclick="calc('/')">÷</button>
-
-                        <button class="calc-btn" onclick="calc('4')">4</button>
-                        <button class="calc-btn" onclick="calc('5')">5</button>
-                        <button class="calc-btn" onclick="calc('6')">6</button>
-                        <button class="calc-btn op" onclick="calc('*')">×</button>
-
-                        <button class="calc-btn" onclick="calc('1')">1</button>
-                        <button class="calc-btn" onclick="calc('2')">2</button>
-                        <button class="calc-btn" onclick="calc('3')">3</button>
-                        <button class="calc-btn op" onclick="calc('-')">-</button>
-
-                        <button class="calc-btn" onclick="calc('0')">0</button>
-                        <button class="calc-btn" onclick="calc('.')">.</button>
-                        <button class="calc-btn" onclick="calc('PI')">π</button>
-                        <button class="calc-btn op" onclick="calc('=')">=</button>
-                    </div>
-                </div>
-
-                <div class="card" style="flex:1;">
-                    <h3>Math Notes & Formulas</h3>
-                    <div style="margin-bottom:10px; font-size:0.9rem; color:var(--text-secondary);">
-                        Tip: Write your theorems here. Area of Circle = πr²
-                    </div>
-                    <div class="editor-container">
-                        <textarea id="note-math" class="notes-area" oninput="saveData('math')" placeholder="Enter formulas..."></textarea>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="science" class="section">
-            <h2>Science Laboratory</h2>
-            
-            <div class="card">
-                <h3>Unit Converter</h3>
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <input type="number" id="conv-input" placeholder="Value">
-                    <select id="conv-type">
-                        <option value="c-f">Celsius to Fahrenheit</option>
-                        <option value="f-c">Fahrenheit to Celsius</option>
-                        <option value="kg-lbs">Kg to Lbs</option>
-                        <option value="m-ft">Meters to Feet</option>
-                    </select>
-                    <button class="btn btn-primary" onclick="convertUnit()">Convert</button>
-                    <div id="conv-result" style="font-weight:bold; margin-left:10px;"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>Quick Periodic Table</h3>
-                <div class="pt-grid">
-                    <div class="pt-el" title="Hydrogen"><strong>H</strong>1</div>
-                    <div style="grid-column: span 16;"></div>
-                    <div class="pt-el" title="Helium"><strong>He</strong>2</div>
-                    <div class="pt-el" title="Lithium"><strong>Li</strong>3</div>
-                    <div class="pt-el" title="Beryllium"><strong>Be</strong>4</div>
-                    <div style="grid-column: span 10;"></div>
-                    <div class="pt-el"><strong>B</strong>5</div>
-                    <div class="pt-el"><strong>C</strong>6</div>
-                    <div class="pt-el"><strong>N</strong>7</div>
-                    <div class="pt-el"><strong>O</strong>8</div>
-                    <div class="pt-el"><strong>F</strong>9</div>
-                    <div class="pt-el"><strong>Ne</strong>10</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>Lab Report Notes</h3>
-                <div class="editor-container">
-                    <textarea id="note-science" class="notes-area" oninput="saveData('science')" placeholder="Hypothesis..."></textarea>
-                </div>
-            </div>
-        </div>
-
-        <div id="ela" class="section">
-            <h2>Writing Studio</h2>
-            <div class="card">
-                <div class="editor-container">
-                    <textarea id="note-ela" class="notes-area" oninput="saveData('ela'); countWords('note-ela', 'ela-count')" placeholder="Start your essay..."></textarea>
-                    <div class="word-count" id="ela-count">0 words</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="history" class="section">
-            <h2>History Archives</h2>
-            <div class="card">
-                <div class="editor-container">
-                    <textarea id="note-history" class="notes-area" oninput="saveData('history'); countWords('note-history', 'hist-count')" placeholder="Timeline of events..."></textarea>
-                    <div class="word-count" id="hist-count">0 words</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="fun-home" class="section">
-            <h2>Secret Lounge</h2>
-            <p>Welcome to the unlocked section. Keep it quiet.</p>
-        </div>
-
-        <div id="games" class="section">
-            <h2>Arcade</h2>
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h3>Geometry Dash</h3>
-                    <p style="color:var(--text-secondary);">Rhythm-based platformer.</p>
-                    <button class="btn btn-primary" onclick="loadGeoDash()">Play Now</button>
-                </div>
-                <div class="card">
-                    <h3>Drive Mad</h3>
-                    <p style="color:var(--text-secondary);">Physics driving game.</p>
-                    <button class="btn btn-primary" onclick="loadDriveMad()">Play Now</button>
-                </div>
-                <div class="card">
-                    <h3>Snake</h3>
-                    <p style="color:var(--text-secondary);">Classic retro fun.</p>
-                    <button class="btn btn-primary" onclick="loadSnakeGame()">Play Now</button>
-                </div>
-                <div class="card">
-                    <h3>Slope</h3>
-                    <button class="btn" onclick="document.getElementById('game-frame').src='https://slope-game.github.io/'">Load</button>
-                </div>
-            </div>
-            <br>
-            <div class="card" style="padding:0; overflow:hidden;">
-                <iframe id="game-frame" src=""></iframe>
-            </div>
-        </div>
-
-        <div id="chatterbox" class="section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h2>ChatterBox</h2>
-                <button class="btn" onclick="toggleFullscreenChat()">⛶ Fullscreen</button>
-            </div>
-            <iframe src="https://whatever-works123.github.io/Chatter-Box/"></iframe>
-        </div>
-
-        <div id="socials" class="section">
-            <h2>Web Browser</h2>
-            <iframe src="https://bing.com"></iframe>
-        </div>
-
-        <div id="settings" class="section">
-            <h2>System Settings</h2>
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h3>🔒 Stealth Mode</h3>
-                    <p>Toggle between School and Fun mode instantly.</p>
-                    <button class="btn btn-primary" onclick="toggleMode()">Switch Mode</button>
-                    <p style="font-size:0.8rem; margin-top:10px; color:var(--text-secondary);">Shortcut: Press <strong>ESC</strong> key.</p>
-                </div>
-                <div class="card">
-                    <h3>🎨 Appearance</h3>
-                    <p>Switch between Light and Dark themes.</p>
-                    <button class="btn" onclick="toggleTheme()">Toggle Theme</button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <textarea id="drive-mad-code" style="display:none;">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="utf-8" />
-	<script src="https://cdn.jsdelivr.net/npm/p5@1.11.5/lib/p5.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/p5@1.11.5/lib/addons/p5.sound.min.js"></script>
-	<script src="mySketch.js"></script>
-	<link rel="stylesheet" type="text/css" href="style.css">
-<head>
-  <base href="https://cdn.jsdelivr.net/gh/genizy/dmad-poki@49b5ab6b987f5f3be58f9dae59c92e8fc1aab9b0/">
-  <script>
-  window.assgdd = {
-    "ancestorOrigins": { "0": "https://games.poki.com", "1": "https://poki.com" },
-    "href": "https://f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com/cc1bc57a-e355-4696-97c2-097bf6188606/index.html?cloudsavegames=y"
-  }
-  </script>
-  <meta charset="utf-8"><title>Drive Mad</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <link rel="stylesheet" href="webapp/fancade.css">
-  <script src="poki-sdk.js" ></script>
-</head>
-<body id="body">
-  <div id="canvas_border" class="emscripten_border">
-    <div id="play_content" class="middle center">
-      <div class="edge"><div class="box"><div class="black"><img src="webapp/cover.jpg" class="cover"><p class="title">Drive Mad</p></div></div></div>
-      <div id="progress_or_play"><progress id="progress" class="loading" value="0" max="100"></progress></div>
-    </div>
-    <canvas class="emscripten" id="canvas" tabindex=-1></canvas>
-  </div>
-  <script type="text/javascript" src="webapp/source_min.js"></script>
-  <script type="text/javascript" src="webapp/index.js"></script>
-</body>
-</html>
-    </textarea>
-
-    <textarea id="snake-code" style="display:none;">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"><title>Snake</title>
-    <style>body{display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#333;color:white;font-family:monospace;}canvas{background:#000;border:2px solid #fff;}.score-board{margin-bottom:10px;font-size:1.5em;}</style>
-</head>
 <body>
-    <div class="score-board">Score: <span id="score">0</span></div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-    <script>
-        const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d'),scoreElement=document.getElementById('score');
-        const gridSize=20;let snake=[{x:200,y:200}],food={},dx=gridSize,dy=0,score=0;
-        function main(){setTimeout(()=>{clear();drawFood();move();drawSnake();if(checkOver()){alert("Game Over: "+score);location.reload()}else main()},100)}
-        function clear(){ctx.fillStyle='#000';ctx.fillRect(0,0,400,400)}
-        function drawSnake(){snake.forEach(p=>{ctx.fillStyle='#4CAF50';ctx.fillRect(p.x,p.y,gridSize,gridSize);ctx.strokeRect(p.x,p.y,gridSize,gridSize)})}
-        function move(){const head={x:snake[0].x+dx,y:snake[0].y+dy};snake.unshift(head);if(head.x===food.x&&head.y===food.y){score+=10;scoreElement.innerText=score;placeFood()}else snake.pop()}
-        function placeFood(){food.x=Math.floor(Math.random()*20)*20;food.y=Math.floor(Math.random()*20)*20}
-        function checkOver(){return snake[0].x<0||snake[0].x>=400||snake[0].y<0||snake[0].y>=400||snake.slice(1).some(p=>p.x===snake[0].x&&p.y===snake[0].y)}
-        document.addEventListener('keydown',e=>{
-            if(e.which===37&&dx===0){dx=-20;dy=0}if(e.which===38&&dy===0){dx=0;dy=-20}
-            if(e.which===39&&dx===0){dx=20;dy=0}if(e.which===40&&dy===0){dx=0;dy=20}
-        });
-        placeFood();main();
-    </script>
-</body>
-</html>
-    </textarea>
 
-    <textarea id="geo-dash-code" style="display:none;">
-<!DOCTYPE html>
-<html lang="en-US">
-<head>
-    <base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/">
-    <title>Geometry Dash</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1">
-</head>
-<body style="margin:0;overflow:hidden;background:#000;">
-    <div id="gameContainer" style="width:100vw;height:100vh;"></div>
-    <script src="Build/UnityLoader.js"></script>
-    <script>
-        var gameInstance = UnityLoader.instantiate("gameContainer", "Build/GeometryDashLite.json");
-    </script>
-</body>
-</html>
-    </textarea>
+    <h1>Interactive Periodic Table</h1>
 
-    <script>
-        // --- CONFIG & AUTH ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA",
-            authDomain: "chatterbox3000-fb3e2.firebaseapp.com",
-            databaseURL: "https://chatterbox3000-fb3e2-default-rtdb.firebaseio.com",
-            projectId: "chatterbox3000-fb3e2",
-            storageBucket: "chatterbox3000-fb3e2.firebasestorage.app",
-            messagingSenderId: "298622361038",
-            appId: "1:298622361038:web:c1e46432470dbce92a5f9f"
-        };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
-        let currentUser = null;
-        let todoArray = [];
+    <div id="display-panel">
+        <div class="panel-big-sym" id="disp-sym">H</div>
+        <div class="panel-info">
+            <h2 id="disp-name">Hydrogen</h2>
+            <div class="panel-desc" id="disp-cat">Reactive Nonmetal</div>
+            <div class="panel-desc" id="disp-config">Group 1, Period 1</div>
+        </div>
+        <div class="panel-stats">
+            <div id="disp-num">Atomic #: 1</div>
+            <div id="disp-mass">Mass: 1.008</div>
+        </div>
+    </div>
 
-        // Greeting
-        const hour = new Date().getHours();
-        document.getElementById('greeting').innerText = hour < 12 ? 'Good Morning.' : hour < 18 ? 'Good Afternoon.' : 'Good Evening.';
+    <div class="periodic-table" id="table">
+        </div>
 
-        // Auth Listener
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('user-display').innerText = user.email.split('@')[0];
-                loadUserData(); 
-            } else {
-                document.getElementById('login-overlay').style.display = 'flex';
-                currentUser = null;
-            }
-        });
+<script>
+    /* Format: AtomicNumber|Symbol|Name|Mass|Category|GridColumn|GridRow
+       Note: 
+       - Standard Elements occupy rows 1-7.
+       - Lanthanides (57-71) are moved to Row 9.
+       - Actinides (89-103) are moved to Row 10.
+    */
+    const rawData = `
+1|H|Hydrogen|1.008|reactive-nonmetal|1|1
+2|He|Helium|4.0026|noble-gas|18|1
+3|Li|Lithium|6.94|alkali|1|2
+4|Be|Beryllium|9.0122|alkaline|2|2
+5|B|Boron|10.81|metalloid|13|2
+6|C|Carbon|12.011|reactive-nonmetal|14|2
+7|N|Nitrogen|14.007|reactive-nonmetal|15|2
+8|O|Oxygen|15.999|reactive-nonmetal|16|2
+9|F|Fluorine|18.998|reactive-nonmetal|17|2
+10|Ne|Neon|20.180|noble-gas|18|2
+11|Na|Sodium|22.990|alkali|1|3
+12|Mg|Magnesium|24.305|alkaline|2|3
+13|Al|Aluminum|26.982|post-transition|13|3
+14|Si|Silicon|28.085|metalloid|14|3
+15|P|Phosphorus|30.974|reactive-nonmetal|15|3
+16|S|Sulfur|32.06|reactive-nonmetal|16|3
+17|Cl|Chlorine|35.45|reactive-nonmetal|17|3
+18|Ar|Argon|39.948|noble-gas|18|3
+19|K|Potassium|39.098|alkali|1|4
+20|Ca|Calcium|40.078|alkaline|2|4
+21|Sc|Scandium|44.956|transition|3|4
+22|Ti|Titanium|47.867|transition|4|4
+23|V|Vanadium|50.942|transition|5|4
+24|Cr|Chromium|51.996|transition|6|4
+25|Mn|Manganese|54.938|transition|7|4
+26|Fe|Iron|55.845|transition|8|4
+27|Co|Cobalt|58.933|transition|9|4
+28|Ni|Nickel|58.693|transition|10|4
+29|Cu|Copper|63.546|transition|11|4
+30|Zn|Zinc|65.38|transition|12|4
+31|Ga|Gallium|69.723|post-transition|13|4
+32|Ge|Germanium|72.630|metalloid|14|4
+33|As|Arsenic|74.922|metalloid|15|4
+34|Se|Selenium|78.971|reactive-nonmetal|16|4
+35|Br|Bromine|79.904|reactive-nonmetal|17|4
+36|Kr|Krypton|83.798|noble-gas|18|4
+37|Rb|Rubidium|85.468|alkali|1|5
+38|Sr|Strontium|87.62|alkaline|2|5
+39|Y|Yttrium|88.906|transition|3|5
+40|Zr|Zirconium|91.224|transition|4|5
+41|Nb|Niobium|92.906|transition|5|5
+42|Mo|Molybdenum|95.95|transition|6|5
+43|Tc|Technetium|98|transition|7|5
+44|Ru|Ruthenium|101.07|transition|8|5
+45|Rh|Rhodium|102.91|transition|9|5
+46|Pd|Palladium|106.42|transition|10|5
+47|Ag|Silver|107.87|transition|11|5
+48|Cd|Cadmium|112.41|transition|12|5
+49|In|Indium|114.82|post-transition|13|5
+50|Sn|Tin|118.71|post-transition|14|5
+51|Sb|Antimony|121.76|metalloid|15|5
+52|Te|Tellurium|127.60|metalloid|16|5
+53|I|Iodine|126.90|reactive-nonmetal|17|5
+54|Xe|Xenon|131.29|noble-gas|18|5
+55|Cs|Cesium|132.91|alkali|1|6
+56|Ba|Barium|137.33|alkaline|2|6
+57|La|Lanthanum|138.91|lanthanide|4|9
+58|Ce|Cerium|140.12|lanthanide|5|9
+59|Pr|Praseodymium|140.91|lanthanide|6|9
+60|Nd|Neodymium|144.24|lanthanide|7|9
+61|Pm|Promethium|145|lanthanide|8|9
+62|Sm|Samarium|150.36|lanthanide|9|9
+63|Eu|Europium|151.96|lanthanide|10|9
+64|Gd|Gadolinium|157.25|lanthanide|11|9
+65|Tb|Terbium|158.93|lanthanide|12|9
+66|Dy|Dysprosium|162.50|lanthanide|13|9
+67|Ho|Holmium|164.93|lanthanide|14|9
+68|Er|Erbium|167.26|lanthanide|15|9
+69|Tm|Thulium|168.93|lanthanide|16|9
+70|Yb|Ytterbium|173.05|lanthanide|17|9
+71|Lu|Lutetium|174.97|lanthanide|18|9
+72|Hf|Hafnium|178.49|transition|4|6
+73|Ta|Tantalum|180.95|transition|5|6
+74|W|Tungsten|183.84|transition|6|6
+75|Re|Rhenium|186.21|transition|7|6
+76|Os|Osmium|190.23|transition|8|6
+77|Ir|Iridium|192.22|transition|9|6
+78|Pt|Platinum|195.08|transition|10|6
+79|Au|Gold|196.97|transition|11|6
+80|Hg|Mercury|200.59|transition|12|6
+81|Tl|Thallium|204.38|post-transition|13|6
+82|Pb|Lead|207.2|post-transition|14|6
+83|Bi|Bismuth|208.98|post-transition|15|6
+84|Po|Polonium|209|post-transition|16|6
+85|At|Astatine|210|metalloid|17|6
+86|Rn|Radon|222|noble-gas|18|6
+87|Fr|Francium|223|alkali|1|7
+88|Ra|Radium|226|alkaline|2|7
+89|Ac|Actinium|227|actinide|4|10
+90|Th|Thorium|232.04|actinide|5|10
+91|Pa|Protactinium|231.04|actinide|6|10
+92|U|Uranium|238.03|actinide|7|10
+93|Np|Neptunium|237|actinide|8|10
+94|Pu|Plutonium|244|actinide|9|10
+95|Am|Americium|243|actinide|10|10
+96|Cm|Curium|247|actinide|11|10
+97|Bk|Berkelium|247|actinide|12|10
+98|Cf|Californium|251|actinide|13|10
+99|Es|Einsteinium|252|actinide|14|10
+100|Fm|Fermium|257|actinide|15|10
+101|Md|Mendelevium|258|actinide|16|10
+102|No|Nobelium|259|actinide|17|10
+103|Lr|Lawrencium|266|actinide|18|10
+104|Rf|Rutherfordium|267|transition|4|7
+105|Db|Dubnium|268|transition|5|7
+106|Sg|Seaborgium|269|transition|6|7
+107|Bh|Bohrium|270|transition|7|7
+108|Hs|Hassium|277|transition|8|7
+109|Mt|Meitnerium|278|unknown|9|7
+110|Ds|Darmstadtium|281|unknown|10|7
+111|Rg|Roentgenium|282|unknown|11|7
+112|Cn|Copernicium|285|transition|12|7
+113|Nh|Nihonium|286|unknown|13|7
+114|Fl|Flerovium|289|unknown|14|7
+115|Mc|Moscovium|290|unknown|15|7
+116|Lv|Livermorium|293|unknown|16|7
+117|Ts|Tennessine|294|unknown|17|7
+118|Og|Oganesson|294|unknown|18|7
+`;
 
-        function loginUser() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            const err = document.getElementById('login-error');
-            err.innerText = "Authenticating...";
-            auth.signInWithEmailAndPassword(email, pass).catch(e => err.innerText = e.message);
-        }
-        function logoutUser() { auth.signOut(); location.reload(); }
+    // --- LOGIC ---
 
-        // --- DATABASE ---
-        function toast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg || "Saved automatically";
-            t.style.opacity = '1';
-            setTimeout(() => t.style.opacity = '0', 2000);
-        }
+    const table = document.getElementById('table');
+    const dispSym = document.getElementById('disp-sym');
+    const dispName = document.getElementById('disp-name');
+    const dispCat = document.getElementById('disp-cat');
+    const dispNum = document.getElementById('disp-num');
+    const dispMass = document.getElementById('disp-mass');
+    const dispConfig = document.getElementById('disp-config');
 
-        function loadUserData() {
-            if(!currentUser) return;
-            db.ref('users/' + currentUser.uid).once('value').then(snap => {
-                const data = snap.val();
-                if (data) {
-                    ['math', 'science', 'ela', 'history'].forEach(sub => {
-                        if(data[sub]) {
-                            document.getElementById('note-' + sub).value = data[sub];
-                            if(sub === 'ela' || sub === 'history') countWords('note-'+sub, sub==='ela'?'ela-count':'hist-count');
-                        }
-                    });
-                    if(data.todos) { todoArray = data.todos; renderTodos(); }
-                }
-            });
-        }
+    // Parse Data
+    const elements = rawData.trim().split('\n').map(line => {
+        const [num, sym, name, mass, cat, col, row] = line.split('|');
+        return { num, sym, name, mass, cat, col, row };
+    });
 
-        function saveData(subject) {
-            if(!currentUser) return;
-            db.ref('users/' + currentUser.uid + '/' + subject).set(document.getElementById('note-' + subject).value)
-                .then(() => toast());
-        }
+    // Populate Grid
+    elements.forEach(el => {
+        const div = document.createElement('div');
+        div.className = `element cat-${el.cat}`;
+        
+        // CSS Grid Position
+        div.style.gridColumn = el.col;
+        div.style.gridRow = el.row;
 
-        // --- STUDY TOOLS ---
-        // To-Do
-        function addTodo() {
-            const txt = document.getElementById('newTodo').value;
-            if(!txt) return;
-            todoArray.push({text: txt, done: false});
-            updateTodoDB();
-            document.getElementById('newTodo').value = '';
-        }
-        function toggleTodo(idx) {
-            todoArray[idx].done = !todoArray[idx].done;
-            updateTodoDB();
-        }
-        function removeTodo(idx) {
-            todoArray.splice(idx, 1);
-            updateTodoDB();
-        }
-        function updateTodoDB() {
-            if(currentUser) db.ref('users/' + currentUser.uid + '/todos').set(todoArray).then(() => toast("Task updated"));
-            renderTodos();
-        }
-        function renderTodos() {
-            const list = document.getElementById('todoList');
-            const mini = document.getElementById('mini-todo-list');
-            list.innerHTML = '';
-            mini.innerHTML = '';
-            
-            let pendingCount = 0;
+        div.innerHTML = `
+            <span class="at-num">${el.num}</span>
+            <span class="symbol">${el.sym}</span>
+            <span class="name">${el.name}</span>
+        `;
 
-            todoArray.forEach((task, i) => {
-                // Main List
-                list.innerHTML += `
-                    <div class="todo-item ${task.done ? 'done' : ''}">
-                        <span onclick="toggleTodo(${i})" style="cursor:pointer; flex:1;">${task.text}</span>
-                        <button class="btn btn-danger" onclick="removeTodo(${i})" style="padding:5px 10px;">×</button>
-                    </div>`;
-                
-                // Dashboard Mini List (only show first 3 pending)
-                if(!task.done) {
-                    pendingCount++;
-                    if(pendingCount <= 3) {
-                        mini.innerHTML += `<li style="margin-bottom:5px;">• ${task.text}</li>`;
-                    }
-                }
-            });
+        // Click Event
+        div.addEventListener('click', () => updateDisplay(el));
+        
+        table.appendChild(div);
+    });
 
-            if(pendingCount === 0) mini.innerHTML = '<li style="color:var(--text-secondary);">No pending tasks.</li>';
-        }
+    // Function to format category string for display
+    function formatCat(str) {
+        return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
 
-        // Calculator
-        function calc(val) {
-            const disp = document.getElementById('calcDisplay');
-            if(val === 'C') disp.value = '';
-            else if(val === '=') {
-                try {
-                    let expr = disp.value
-                        .replace(/sin/g, 'Math.sin')
-                        .replace(/cos/g, 'Math.cos')
-                        .replace(/tan/g, 'Math.tan')
-                        .replace(/sqrt/g, 'Math.sqrt')
-                        .replace(/pow/g, 'Math.pow')
-                        .replace(/PI/g, 'Math.PI');
-                    disp.value = eval(expr);
-                } catch { disp.value = 'Error'; }
-            } else { disp.value += val; }
-        }
+    // Function to update the top panel
+    function updateDisplay(el) {
+        // Update Text
+        dispSym.innerText = el.sym;
+        dispName.innerText = el.name;
+        dispCat.innerText = formatCat(el.cat);
+        dispNum.innerText = `Atomic Number: ${el.num}`;
+        dispMass.innerText = `Atomic Mass: ${el.mass}`;
+        
+        // Determine Period/Group logic for display
+        // Standard Periods are just the row, but Lanthanides/Actinides are special
+        let period = el.row;
+        if(el.cat === 'lanthanide') period = 6;
+        if(el.cat === 'actinide') period = 7;
+        
+        let group = el.col;
+        // Lanthanides/Actinides technically don't have standard group numbers 1-18 in the same way
+        if(el.cat === 'lanthanide' || el.cat === 'actinide') group = '-';
 
-        // Science Converter
-        function convertUnit() {
-            const val = parseFloat(document.getElementById('conv-input').value);
-            const type = document.getElementById('conv-type').value;
-            let res = 0;
-            if(isNaN(val)) return;
+        dispConfig.innerText = `Period ${period}, Group ${group}`;
 
-            if(type === 'c-f') res = (val * 9/5) + 32 + ' °F';
-            else if(type === 'f-c') res = (val - 32) * 5/9 + ' °C';
-            else if(type === 'kg-lbs') res = val * 2.20462 + ' lbs';
-            else if(type === 'm-ft') res = val * 3.28084 + ' ft';
-            
-            document.getElementById('conv-result').innerText = res;
-        }
+        // Update Color of the Big Symbol to match category
+        // We get the computed color from the element class
+        const computedColor = getComputedStyle(document.querySelector(`.cat-${el.cat}`)).color;
+        dispSym.style.color = computedColor;
+        dispCat.style.color = computedColor;
+    }
 
-        // Pomodoro Timer
-        let timerInt = null;
-        let timeLeft = 25 * 60;
-        function toggleTimer() {
-            if(timerInt) { clearInterval(timerInt); timerInt = null; }
-            else {
-                timerInt = setInterval(() => {
-                    if(timeLeft > 0) {
-                        timeLeft--;
-                        let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-                        let s = (timeLeft % 60).toString().padStart(2, '0');
-                        document.getElementById('timer-display').innerText = `${m}:${s}`;
-                    } else {
-                        clearInterval(timerInt);
-                        alert("Time's up! Take a break.");
-                    }
-                }, 1000);
-            }
-        }
-        function resetTimer() {
-            clearInterval(timerInt); timerInt = null;
-            timeLeft = 25 * 60;
-            document.getElementById('timer-display').innerText = "25:00";
-        }
+</script>
 
-        // Word Count
-        function countWords(areaId, displayId) {
-            const txt = document.getElementById(areaId).value.trim();
-            const count = txt ? txt.split(/\s+/).length : 0;
-            document.getElementById(displayId).innerText = count + " words";
-        }
-
-        // --- NAVIGATION ---
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
-            if(btn) btn.classList.add('active');
-        }
-
-        function toggleMode() {
-            document.body.classList.toggle('mode-school');
-            document.body.classList.toggle('mode-fun');
-            showSection(document.body.classList.contains('mode-school') ? 'school-home' : 'fun-home');
-        }
-
-        function toggleTheme() {
-            const b = document.body;
-            b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
-        }
-
-        // Games Loading
-        function loadGame(codeId) {
-            const iframe = document.getElementById('game-frame');
-            iframe.srcdoc = document.getElementById(codeId).value;
-            iframe.onload = () => iframe.contentWindow.focus();
-        }
-        function loadDriveMad() { loadGame('drive-mad-code'); }
-        function loadSnakeGame() { loadGame('snake-code'); }
-        function loadGeoDash() { loadGame('geo-dash-code'); }
-
-        function toggleFullscreenChat() {
-            document.getElementById('chatterbox').classList.toggle('fullscreen-active');
-        }
-
-        document.addEventListener('keydown', e => {
-            if(e.key === "Escape") {
-                const c = document.getElementById('chatterbox');
-                if(c.classList.contains('fullscreen-active')) c.classList.remove('fullscreen-active');
-                if(document.body.classList.contains('mode-fun')) toggleMode();
-            }
-        });
-    </script>
 </body>
 </html>
