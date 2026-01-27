@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall OS 3.3</title>
+    <title>StudyHall OS 3.4</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
     <style>
-        /* --- CSS VARIABLES & THEMES --- */
+        /* --- CSS VARIABLES --- */
         :root {
             --bg-color: #f1f5f9;
             --sidebar-bg: rgba(255, 255, 255, 0.95);
@@ -26,7 +26,7 @@
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             --radius: 16px;
 
-            /* Periodic Table Categories */
+            /* Periodic Table Colors */
             --cat-1: #ef4444; --cat-2: #f97316; --cat-3: #eab308; 
             --cat-4: #22c55e; --cat-5: #06b6d4; --cat-6: #3b82f6; 
             --cat-7: #8b5cf6; --cat-8: #d946ef; --cat-9: #f43f5e; --cat-0: #94a3b8;
@@ -180,16 +180,24 @@
         #pt-panel { background: var(--bg-color); border: 1px solid var(--border); padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: none; align-items: center; justify-content: space-between; }
         #pt-panel.active { display: flex; animation: fadeIn 0.2s; }
 
-        /* --- FULLSCREEN LOGIC --- */
-        /* Universal Fullscreen Class */
-        .fullscreen-active {
-            position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 5000; padding: 0 !important; margin: 0 !important; background: black;
+        /* --- FULLSCREEN FIX --- */
+        /* This class will now safely cover everything and handle z-indexes */
+        .fullscreen-mode {
+            position: fixed !important;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: black;
+            z-index: 99999;
+            padding: 0; margin: 0;
+            display: flex; flex-direction: column;
         }
-        .fullscreen-active iframe { height: 100vh !important; border-radius: 0 !important; }
-        .fullscreen-active h2, .fullscreen-active button { display: none !important; } /* Hide header in fullscreen */
-
-        /* To allow exiting fullscreen with ESC, we use the JS listener */
+        .fullscreen-mode iframe {
+            width: 100%; height: 100%;
+            border: none;
+        }
+        .fullscreen-mode .fs-controls {
+            position: absolute; top: 10px; right: 10px; z-index: 100000;
+        }
 
         iframe { width: 100%; height: 600px; border: none; border-radius: 12px; background: white; }
 
@@ -222,7 +230,6 @@
         </div>
         
         <button class="nav-btn school-only active" onclick="showSection('school-home')">🏠 Dashboard</button>
-        <button class="nav-btn school-only" onclick="showSection('portal')">🏫 School Portal</button>
         <button class="nav-btn school-only" onclick="showSection('todo')">✅ Tasks</button>
         <button class="nav-btn school-only" onclick="showSection('math')">📐 Math Lab</button>
         <button class="nav-btn school-only" onclick="showSection('science')">🧬 Science Lab</button>
@@ -231,6 +238,7 @@
 
         <button class="nav-btn fun-only" onclick="showSection('fun-home')">🎮 Secret Lounge</button>
         <button class="nav-btn fun-only" onclick="showSection('games')">🕹️ Arcade</button>
+        <button class="nav-btn fun-only" onclick="showSection('media')">📺 Stealth Tube</button>
         <button class="nav-btn fun-only" onclick="showSection('chatterbox')">💬 ChatterBox</button>
 
         <div style="margin-top:auto;">
@@ -264,28 +272,6 @@
                         <li style="color:var(--text-secondary);">No pending tasks.</li>
                     </ul>
                 </div>
-                
-                <div class="card" style="border-left: 5px solid #22c55e;">
-                    <h3>Quick Access</h3>
-                    <p style="color:var(--text-secondary); margin-bottom:15px;">Jump to School Portal.</p>
-                    <button class="btn btn-primary" style="width:100%; background:#22c55e;" onclick="showSection('portal')">Launch ClassLink</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="portal" class="section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h2>ClassLink Access</h2>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn" onclick="window.open('https://myapps.classlink.com/home', '_blank')">🔗 Open in New Tab</button>
-                    <button class="btn btn-primary" onclick="toggleFullscreenPortal()">⛶ Fullscreen</button>
-                </div>
-            </div>
-            <div class="card" style="padding:0; overflow:hidden;">
-                <p style="text-align:center; padding:10px; font-size:0.8rem; color:#aaa;">
-                    If the screen below is white, your school blocks embedding. Click "Open in New Tab".
-                </p>
-                <iframe src="https://myapps.classlink.com/home"></iframe>
             </div>
         </div>
 
@@ -341,22 +327,6 @@
 
         <div id="science" class="section">
             <h2>Science Laboratory</h2>
-            
-            <div class="card">
-                <h3>Unit Converter</h3>
-                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                    <input type="number" id="conv-input" placeholder="Value" style="width:120px;">
-                    <select id="conv-type" style="width:180px;">
-                        <option value="c-f">Celsius to Fahrenheit</option>
-                        <option value="f-c">Fahrenheit to Celsius</option>
-                        <option value="kg-lbs">Kg to Lbs</option>
-                        <option value="m-ft">Meters to Feet</option>
-                    </select>
-                    <button class="btn btn-primary" onclick="convertUnit()">Convert</button>
-                    <div id="conv-result" style="font-weight:bold; margin-left:10px; color:var(--accent);"></div>
-                </div>
-            </div>
-
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3>Periodic Table</h3>
@@ -374,7 +344,6 @@
                 </div>
                 <div class="periodic-table" id="table"></div>
             </div>
-
             <div class="card">
                 <h3>Lab Report</h3>
                 <textarea id="note-science" class="notes-area" oninput="saveData('science')" placeholder="Draft your lab report here..."></textarea>
@@ -402,6 +371,20 @@
             <p style="color:var(--text-secondary);">Welcome to the unlocked zone.</p>
         </div>
 
+        <div id="media" class="section">
+            <h2>Stealth Tube</h2>
+            <div class="card">
+                <p style="margin-bottom:10px; font-size:0.9rem; color:var(--text-secondary);">Paste a Video ID or Link (e.g., dQw4w9WgXcQ)</p>
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <input type="text" id="yt-input" placeholder="Video ID or URL">
+                    <button class="btn btn-primary" onclick="loadYouTube()">Watch</button>
+                </div>
+                <div id="yt-container" style="position:relative; width:100%; padding-bottom:56.25%; background:black; border-radius:12px; overflow:hidden;">
+                    <iframe id="yt-frame" style="position:absolute; top:0; left:0; width:100%; height:100%;" src="https://www.youtube.com/embed/5qap5aO4i9A" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+
         <div id="games" class="section">
             <h2>Arcade</h2>
             <div class="dashboard-grid">
@@ -418,7 +401,8 @@
                     <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadSnakeGame()">Play</button>
                 </div>
             </div>
-            <div class="card" style="padding:0; overflow:hidden; margin-top:20px;">
+            <div id="game-container" class="card" style="padding:0; overflow:hidden; margin-top:20px;">
+                <button class="btn btn-danger" style="position:absolute; top:10px; right:10px; z-index:100; display:none;" id="exit-game-fs" onclick="exitFullGame()">Exit Fullscreen</button>
                 <iframe id="game-frame" src=""></iframe>
             </div>
         </div>
@@ -426,9 +410,9 @@
         <div id="chatterbox" class="section">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <h2>ChatterBox</h2>
-                <button class="btn" onclick="toggleFullscreenChat()">⛶ Fullscreen</button>
+                <button class="btn" onclick="toggleFullscreenEl('chatterbox')">⛶ Fullscreen</button>
             </div>
-            <iframe src="https://whatever-works123.github.io/Chatter-Box/"></iframe>
+            <iframe src="https://whatever-works123.github.io/Chatter-Box/" style="height:500px;"></iframe>
         </div>
 
         <div id="settings" class="section">
@@ -552,18 +536,6 @@
                     disp.value = eval(expr);
                 } catch { disp.value = 'Error'; }
             } else { disp.value += val; }
-        }
-
-        function convertUnit() {
-            const val = parseFloat(document.getElementById('conv-input').value);
-            const type = document.getElementById('conv-type').value;
-            let res = 0;
-            if(isNaN(val)) return;
-            if(type === 'c-f') res = (val * 9/5) + 32 + ' °F';
-            else if(type === 'f-c') res = (val - 32) * 5/9 + ' °C';
-            else if(type === 'kg-lbs') res = val * 2.20462 + ' lbs';
-            else if(type === 'm-ft') res = val * 3.28084 + ' ft';
-            document.getElementById('conv-result').innerText = res;
         }
 
         let timerInt = null;
@@ -774,22 +746,57 @@
         function loadGame(codeId) {
             const iframe = document.getElementById('game-frame');
             iframe.srcdoc = document.getElementById(codeId).value;
-            iframe.onload = () => iframe.contentWindow.focus();
+            iframe.onload = () => {
+                iframe.contentWindow.focus();
+                // Show exit button if using fullscreen hack
+                const container = document.getElementById('game-container');
+                if(container.classList.contains('fullscreen-mode')) document.getElementById('exit-game-fs').style.display = 'block';
+            };
         }
         function loadDriveMad() { loadGame('drive-mad-code'); }
         function loadSnakeGame() { loadGame('snake-code'); }
         function loadGeoDash() { loadGame('geo-dash-code'); }
 
-        function toggleFullscreenChat() { document.getElementById('chatterbox').classList.toggle('fullscreen-active'); }
-        function toggleFullscreenPortal() { document.getElementById('portal').classList.toggle('fullscreen-active'); }
+        // Robust Fullscreen Logic
+        function toggleFullscreenEl(id) {
+            const el = document.getElementById(id);
+            if(el.classList.contains('fullscreen-mode')) {
+                el.classList.remove('fullscreen-mode');
+            } else {
+                // Remove fullscreen from any other element first
+                document.querySelectorAll('.fullscreen-mode').forEach(e => e.classList.remove('fullscreen-mode'));
+                el.classList.add('fullscreen-mode');
+            }
+        }
+        // Specific wrapper for Game Fullscreen to handle the button
+        function exitFullGame() {
+            document.getElementById('game-container').classList.remove('fullscreen-mode');
+            document.getElementById('exit-game-fs').style.display = 'none';
+        }
+
+        // YouTube Logic
+        function loadYouTube() {
+            const input = document.getElementById('yt-input').value;
+            let videoId = '';
+            if(input.includes('v=')) videoId = input.split('v=')[1].split('&')[0];
+            else if(input.includes('youtu.be/')) videoId = input.split('youtu.be/')[1];
+            else videoId = input; // assume ID
+            
+            document.getElementById('yt-frame').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+        }
 
         document.addEventListener('keydown', e => {
             if(e.key === "Escape") {
-                const c = document.getElementById('chatterbox');
-                const p = document.getElementById('portal');
-                if(c.classList.contains('fullscreen-active')) c.classList.remove('fullscreen-active');
-                else if(p.classList.contains('fullscreen-active')) p.classList.remove('fullscreen-active');
-                else toggleMode();
+                // Exit any fullscreen element
+                document.querySelectorAll('.fullscreen-mode').forEach(el => {
+                    el.classList.remove('fullscreen-mode');
+                    if(el.id === 'game-container') document.getElementById('exit-game-fs').style.display = 'none';
+                });
+                
+                // If not fullscreen, and in fun mode, toggle back to school
+                if(!document.querySelector('.fullscreen-mode') && document.body.classList.contains('mode-fun')) {
+                    toggleMode();
+                }
             }
         });
     </script>
