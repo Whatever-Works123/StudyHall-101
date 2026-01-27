@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall OS 3.0</title>
+    <title>StudyHall OS 3.1</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -19,12 +19,12 @@
             --card-bg: #ffffff;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --accent: #3b82f6; /* Modern Blue */
+            --accent: #3b82f6;
             --accent-hover: #2563eb;
             --border: #e2e8f0;
             --success: #10b981;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --radius: 16px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
 
             /* Periodic Table Colors */
             --alkali: #ff6b6b;
@@ -39,28 +39,32 @@
             --unk: #8395a7;
         }
 
+        /* Dark Theme (Settings Toggle) */
         [data-theme="dark"] {
             --bg-color: #0f172a;
             --sidebar-bg: #1e293b;
             --card-bg: #1e293b;
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
-            --accent: #6366f1; /* Indigo */
+            --accent: #6366f1;
             --accent-hover: #4f46e5;
             --border: #334155;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
         }
 
-        /* --- MODE LOGIC (Restored) --- */
+        /* --- MODE LOGIC --- */
         body.mode-school .fun-only { display: none !important; }
         body.mode-fun .school-only { display: none !important; }
         
+        /* New "Fun Mode" (Midnight Theme - No longer Green/Black) */
         body.mode-fun {
-            --bg-color: #050505;
-            --sidebar-bg: #0a0a0a;
-            --card-bg: #111;
-            --text-primary: #00ff00; /* Hacker Green */
-            --accent: #00ff00;
+            --bg-color: #111827;       /* Very dark blue/gray */
+            --sidebar-bg: #1f2937;     /* Dark gray sidebar */
+            --card-bg: #374151;        /* Lighter gray cards */
+            --text-primary: #f3f4f6;   /* White text */
+            --text-secondary: #9ca3af; /* Light gray text */
+            --accent: #8b5cf6;         /* Purple accent */
+            --border: #4b5563;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -68,17 +72,14 @@
         body { display: flex; height: 100vh; background-color: var(--bg-color); color: var(--text-primary); transition: background 0.3s; overflow: hidden; }
 
         /* --- UI COMPONENTS --- */
-        .btn {
-            padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;
-            font-weight: 600; transition: 0.2s; font-size: 0.9rem;
-        }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 0.9rem; }
         .btn-primary { background: var(--accent); color: white; }
-        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-danger { background: #ef4444; color: white; }
         
         input, textarea, select {
             background: var(--bg-color); border: 1px solid var(--border);
-            color: var(--text-primary); padding: 12px; border-radius: 8px;
+            color: var(--text-primary); padding: 10px; border-radius: 6px;
             outline: none; transition: 0.2s; width: 100%;
         }
         input:focus, textarea:focus { border-color: var(--accent); }
@@ -88,144 +89,143 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 3000;
             display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(5px);
         }
         .login-box {
-            background: var(--card-bg); padding: 40px; border-radius: 24px; 
-            text-align: center; width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            background: var(--card-bg); padding: 40px; border-radius: 20px; 
+            text-align: center; width: 350px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
             border: 1px solid var(--border);
         }
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: 260px; background-color: var(--sidebar-bg);
+            width: 240px; background-color: var(--sidebar-bg);
             border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 24px;
+            display: flex; flex-direction: column; padding: 20px;
             transition: 0.3s; z-index: 100;
         }
         .logo { 
-            font-size: 1.5rem; font-weight: 800; margin-bottom: 40px; 
-            color: var(--accent); display: flex; align-items: center; gap: 10px;
+            font-size: 1.4rem; font-weight: 800; margin-bottom: 30px; 
+            color: var(--accent); display: flex; align-items: center; gap: 8px;
         }
         .nav-btn {
             background: none; border: none; color: var(--text-secondary);
-            padding: 12px 16px; text-align: left; cursor: pointer; border-radius: 12px;
-            margin-bottom: 4px; font-size: 0.95rem; font-weight: 500;
-            display: flex; align-items: center; gap: 12px; transition: 0.2s;
+            padding: 10px 14px; text-align: left; cursor: pointer; border-radius: 8px;
+            margin-bottom: 2px; font-size: 0.9rem; font-weight: 500;
+            display: flex; align-items: center; gap: 10px; transition: 0.2s;
         }
         .nav-btn:hover { background: var(--bg-color); color: var(--text-primary); }
-        .nav-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .nav-btn.active { background: var(--accent); color: white; }
 
         /* --- MAIN CONTENT --- */
-        .main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
-        .section { display: none; animation: fadeIn 0.4s ease-out; max-width: 1200px; margin: 0 auto; }
+        .main-content { flex: 1; padding: 25px; overflow-y: auto; position: relative; }
+        .section { display: none; animation: fadeIn 0.3s ease-out; max-width: 1000px; margin: 0 auto; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        h2 { font-size: 2rem; margin-bottom: 20px; font-weight: 700; color: var(--text-primary); }
+        h2 { font-size: 1.8rem; margin-bottom: 15px; font-weight: 700; color: var(--text-primary); }
         
         .card {
             background: var(--card-bg); border-radius: var(--radius);
-            padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
+            padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
 
-        /* --- DASHBOARD WIDGETS --- */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        
+        /* --- WIDGETS --- */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
         .timer-circle {
-            width: 150px; height: 150px; border-radius: 50%;
-            border: 6px solid var(--accent); display: flex;
+            width: 120px; height: 120px; border-radius: 50%;
+            border: 5px solid var(--accent); display: flex;
             align-items: center; justify-content: center;
-            font-size: 2.5rem; font-weight: bold; margin: 0 auto 20px auto;
+            font-size: 2rem; font-weight: bold; margin: 0 auto 15px auto;
             background: var(--bg-color);
         }
-
-        /* --- STUDY TOOLS --- */
         .todo-item {
-            background: var(--bg-color); padding: 15px; margin-bottom: 8px;
-            border-radius: 8px; display: flex; justify-content: space-between; align-items: center;
-            border-left: 4px solid var(--accent); transition: 0.2s;
+            background: var(--bg-color); padding: 12px; margin-bottom: 6px;
+            border-radius: 6px; display: flex; justify-content: space-between; align-items: center;
+            border-left: 3px solid var(--accent); transition: 0.2s;
         }
-        .todo-item.done { opacity: 0.6; text-decoration: line-through; border-left-color: var(--success); }
-        
-        .calc-wrapper { display: flex; gap: 20px; flex-wrap: wrap; }
-        .calc-body { width: 300px; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .todo-item.done { opacity: 0.5; text-decoration: line-through; border-left-color: var(--success); }
+
+        /* Calculator */
+        .calc-wrapper { display: flex; gap: 15px; flex-wrap: wrap; }
+        .calc-body { width: 260px; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
         .calc-btn {
-            padding: 15px; border-radius: 8px; font-size: 1.1rem;
+            padding: 12px; border-radius: 6px; font-size: 1rem;
             background: var(--bg-color); border: 1px solid var(--border);
             cursor: pointer; color: var(--text-primary);
         }
         .calc-btn:hover { background: var(--border); }
         .calc-btn.op { background: var(--accent); color: white; border: none; }
-        
+
         .editor-container { position: relative; }
         textarea.notes-area {
-            height: 500px; line-height: 1.6; font-size: 1.1rem;
+            height: 400px; line-height: 1.6; font-size: 1rem;
             background: var(--card-bg); border: 1px solid var(--border);
-            padding: 40px; resize: vertical;
-            background-image: linear-gradient(var(--border) 1px, transparent 1px);
-            background-size: 100% 2rem;
-            background-attachment: local;
+            padding: 20px; resize: vertical;
         }
-        .word-count { position: absolute; bottom: 15px; right: 20px; font-size: 0.8rem; color: var(--text-secondary); }
 
-        /* --- PERIODIC TABLE --- */
+        /* --- COMPACT PERIODIC TABLE --- */
         .periodic-table {
             display: grid;
             grid-template-columns: repeat(18, 1fr);
-            gap: 4px;
+            gap: 2px; /* Smaller Gap */
             width: 100%;
-            margin-top: 20px;
+            max-width: 800px; /* Constrain width to make it smaller */
+            margin: 0 auto;
         }
 
         .element {
             background: #252525;
             border: 1px solid #333;
-            padding: 4px;
-            aspect-ratio: 4/5;
+            padding: 2px; /* Less padding */
+            aspect-ratio: 1/1.1; /* Tighter aspect ratio */
             position: relative;
             cursor: pointer;
             transition: 0.1s;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center; /* Center content */
+            align-items: center;
             color: #fff;
+            min-height: 35px; /* Force minimum height */
         }
 
         .element:hover {
-            transform: scale(1.5);
-            z-index: 10;
+            transform: scale(1.8);
+            z-index: 50;
             background: #333;
             border-color: #fff;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
-        .num { font-size: 0.6em; opacity: 0.7; }
-        .sym { font-size: 1em; font-weight: bold; text-align: center; }
-        .name { font-size: 0.5em; text-align: center; overflow: hidden; white-space: nowrap; }
+        /* Smaller Fonts for Elements */
+        .num { font-size: 7px; position: absolute; top: 2px; left: 2px; opacity: 0.7; }
+        .sym { font-size: 12px; font-weight: bold; }
+        .name { display: none; } /* Hide name on grid to save space, show on hover/panel */
 
-        /* Periodic Table Category Colors */
-        .cat-alkali { border-bottom: 3px solid var(--alkali); color: var(--alkali); }
-        .cat-alkaline { border-bottom: 3px solid var(--alkaline); color: var(--alkaline); }
-        .cat-transition { border-bottom: 3px solid var(--transition); color: var(--transition); }
-        .cat-post-transition { border-bottom: 3px solid var(--post); color: var(--post); }
-        .cat-metalloid { border-bottom: 3px solid var(--meta); color: var(--meta); }
-        .cat-reactive-nonmetal { border-bottom: 3px solid var(--non); color: var(--non); }
-        .cat-noble-gas { border-bottom: 3px solid var(--noble); color: var(--noble); }
-        .cat-lanthanide { border-bottom: 3px solid var(--lanth); color: var(--lanth); }
-        .cat-actinide { border-bottom: 3px solid var(--act); color: var(--act); }
-        .cat-unknown { border-bottom: 3px solid var(--unk); color: var(--unk); }
+        /* Category Colors */
+        .cat-alkali { border-bottom: 2px solid var(--alkali); color: var(--alkali); }
+        .cat-alkaline { border-bottom: 2px solid var(--alkaline); color: var(--alkaline); }
+        .cat-transition { border-bottom: 2px solid var(--transition); color: var(--transition); }
+        .cat-post-transition { border-bottom: 2px solid var(--post); color: var(--post); }
+        .cat-metalloid { border-bottom: 2px solid var(--meta); color: var(--meta); }
+        .cat-reactive-nonmetal { border-bottom: 2px solid var(--non); color: var(--non); }
+        .cat-noble-gas { border-bottom: 2px solid var(--noble); color: var(--noble); }
+        .cat-lanthanide { border-bottom: 2px solid var(--lanth); color: var(--lanth); }
+        .cat-actinide { border-bottom: 2px solid var(--act); color: var(--act); }
+        .cat-unknown { border-bottom: 2px solid var(--unk); color: var(--unk); }
 
         #pt-panel {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
             display: none; /* Hidden by default */
+            align-items: center; 
+            justify-content: space-between;
         }
         #pt-panel.active { display: flex; }
 
@@ -237,9 +237,9 @@
         iframe { width: 100%; height: 600px; border: none; border-radius: 12px; background: white; }
 
         #toast {
-            position: fixed; bottom: 30px; right: 30px;
+            position: fixed; bottom: 20px; right: 20px;
             background: var(--text-primary); color: var(--bg-color);
-            padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s;
+            padding: 10px 20px; border-radius: 50px; opacity: 0; transition: 0.3s;
             font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.2); pointer-events: none;
             z-index: 9999;
         }
@@ -296,7 +296,6 @@
             <div class="dashboard-grid">
                 <div class="card" style="text-align:center;">
                     <h3>Focus Timer</h3>
-                    <p style="color:var(--text-secondary); margin-bottom:20px;">25 min work • 5 min break</p>
                     <div class="timer-circle" id="timer-display">25:00</div>
                     <button class="btn btn-primary" onclick="toggleTimer()">Start / Pause</button>
                     <button class="btn" onclick="resetTimer()">Reset</button>
@@ -326,46 +325,36 @@
             <h2>Mathematics Laboratory</h2>
             <div class="calc-wrapper">
                 <div class="card calc-body">
-                    <h3>Scientific Calc</h3>
                     <input type="text" id="calcDisplay" readonly style="margin-bottom:15px; text-align:right; font-size:1.5rem; font-family:monospace;">
                     <div class="calc-grid">
                         <button class="calc-btn" onclick="calc('sin(')">sin</button>
                         <button class="calc-btn" onclick="calc('cos(')">cos</button>
                         <button class="calc-btn" onclick="calc('tan(')">tan</button>
                         <button class="calc-btn" onclick="calc('C')" style="background:#fee2e2; color:#ef4444;">AC</button>
-                        
                         <button class="calc-btn" onclick="calc('sqrt(')">√</button>
                         <button class="calc-btn" onclick="calc('pow(')">^</button>
                         <button class="calc-btn" onclick="calc('(')">(</button>
                         <button class="calc-btn" onclick="calc(')')">)</button>
-
                         <button class="calc-btn" onclick="calc('7')">7</button>
                         <button class="calc-btn" onclick="calc('8')">8</button>
                         <button class="calc-btn" onclick="calc('9')">9</button>
                         <button class="calc-btn op" onclick="calc('/')">÷</button>
-
                         <button class="calc-btn" onclick="calc('4')">4</button>
                         <button class="calc-btn" onclick="calc('5')">5</button>
                         <button class="calc-btn" onclick="calc('6')">6</button>
                         <button class="calc-btn op" onclick="calc('*')">×</button>
-
                         <button class="calc-btn" onclick="calc('1')">1</button>
                         <button class="calc-btn" onclick="calc('2')">2</button>
                         <button class="calc-btn" onclick="calc('3')">3</button>
                         <button class="calc-btn op" onclick="calc('-')">-</button>
-
                         <button class="calc-btn" onclick="calc('0')">0</button>
                         <button class="calc-btn" onclick="calc('.')">.</button>
                         <button class="calc-btn" onclick="calc('PI')">π</button>
                         <button class="calc-btn op" onclick="calc('=')">=</button>
                     </div>
                 </div>
-
                 <div class="card" style="flex:1;">
-                    <h3>Math Notes & Formulas</h3>
-                    <div style="margin-bottom:10px; font-size:0.9rem; color:var(--text-secondary);">
-                        Tip: Write your theorems here. Area of Circle = πr²
-                    </div>
+                    <h3>Notes</h3>
                     <div class="editor-container">
                         <textarea id="note-math" class="notes-area" oninput="saveData('math')" placeholder="Enter formulas..."></textarea>
                     </div>
@@ -381,26 +370,26 @@
                 <div style="display:flex; gap:10px; align-items:center;">
                     <input type="number" id="conv-input" placeholder="Value">
                     <select id="conv-type">
-                        <option value="c-f">Celsius to Fahrenheit</option>
-                        <option value="f-c">Fahrenheit to Celsius</option>
+                        <option value="c-f">C to F</option>
+                        <option value="f-c">F to C</option>
                         <option value="kg-lbs">Kg to Lbs</option>
                         <option value="m-ft">Meters to Feet</option>
                     </select>
-                    <button class="btn btn-primary" onclick="convertUnit()">Convert</button>
+                    <button class="btn btn-primary" onclick="convertUnit()">Go</button>
                     <div id="conv-result" style="font-weight:bold; margin-left:10px;"></div>
                 </div>
             </div>
 
             <div class="card">
-                <h3>Interactive Periodic Table</h3>
+                <h3 style="margin-bottom:5px;">Periodic Table</h3>
                 <div id="pt-panel">
                     <div>
-                        <h2 id="p-sym" style="font-size:2.5rem; margin:0;">H</h2>
-                        <span id="p-cat">Unknown</span>
+                        <h2 id="p-sym" style="font-size:2rem; margin:0;">H</h2>
+                        <span id="p-cat" style="font-size:0.8rem; text-transform:uppercase;">Unknown</span>
                     </div>
                     <div style="text-align:right;">
                         <h3 id="p-name" style="margin:0;">Hydrogen</h3>
-                        <p id="p-data" style="margin:0; color:var(--text-secondary);">Atomic #: 1 | Mass: 1.008</p>
+                        <p id="p-data" style="margin:0; font-size:0.9rem; color:var(--text-secondary);">#1 | 1.008</p>
                     </div>
                 </div>
                 <div class="periodic-table" id="table"></div>
@@ -419,7 +408,7 @@
             <div class="card">
                 <div class="editor-container">
                     <textarea id="note-ela" class="notes-area" oninput="saveData('ela'); countWords('note-ela', 'ela-count')" placeholder="Start your essay..."></textarea>
-                    <div class="word-count" id="ela-count">0 words</div>
+                    <div style="text-align:right; margin-top:5px; font-size:0.8rem; color:var(--text-secondary);" id="ela-count">0 words</div>
                 </div>
             </div>
         </div>
@@ -429,14 +418,14 @@
             <div class="card">
                 <div class="editor-container">
                     <textarea id="note-history" class="notes-area" oninput="saveData('history'); countWords('note-history', 'hist-count')" placeholder="Timeline of events..."></textarea>
-                    <div class="word-count" id="hist-count">0 words</div>
+                    <div style="text-align:right; margin-top:5px; font-size:0.8rem; color:var(--text-secondary);" id="hist-count">0 words</div>
                 </div>
             </div>
         </div>
 
         <div id="fun-home" class="section">
             <h2>Secret Lounge</h2>
-            <p>Welcome to the unlocked section. Keep it quiet.</p>
+            <p>Welcome to the relaxed zone.</p>
         </div>
 
         <div id="games" class="section">
@@ -444,17 +433,14 @@
             <div class="dashboard-grid">
                 <div class="card">
                     <h3>Geometry Dash</h3>
-                    <p style="color:var(--text-secondary);">Rhythm-based platformer.</p>
                     <button class="btn btn-primary" onclick="loadGeoDash()">Play Now</button>
                 </div>
                 <div class="card">
                     <h3>Drive Mad</h3>
-                    <p style="color:var(--text-secondary);">Physics driving game.</p>
                     <button class="btn btn-primary" onclick="loadDriveMad()">Play Now</button>
                 </div>
                 <div class="card">
                     <h3>Snake</h3>
-                    <p style="color:var(--text-secondary);">Classic Snake game.</p>
                     <button class="btn btn-primary" onclick="loadSnakeGame()">Play Now</button>
                 </div>
             </div>
@@ -481,7 +467,7 @@
             <div class="dashboard-grid">
                 <div class="card">
                     <h3>🔒 Stealth Mode</h3>
-                    <p>Toggle between School and Fun mode instantly.</p>
+                    <p>Toggle between School and Lounge mode.</p>
                     <button class="btn btn-primary" onclick="toggleMode()">Switch Mode</button>
                     <p style="font-size:0.8rem; margin-top:10px; color:var(--text-secondary);">Shortcut: Press <strong>ESC</strong> key.</p>
                 </div>
@@ -646,7 +632,6 @@
         }
 
         // --- STUDY TOOLS ---
-        // To-Do
         function addTodo() {
             const txt = document.getElementById('newTodo').value;
             if(!txt) return;
@@ -673,22 +658,17 @@
             mini.innerHTML = '';
             
             let pendingCount = 0;
-
             todoArray.forEach((task, i) => {
                 list.innerHTML += `
                     <div class="todo-item ${task.done ? 'done' : ''}">
                         <span onclick="toggleTodo(${i})" style="cursor:pointer; flex:1;">${task.text}</span>
-                        <button class="btn btn-danger" onclick="removeTodo(${i})" style="padding:5px 10px;">×</button>
+                        <button class="btn btn-danger" onclick="removeTodo(${i})" style="padding:4px 8px; font-size:0.8rem;">×</button>
                     </div>`;
-                
                 if(!task.done) {
                     pendingCount++;
-                    if(pendingCount <= 3) {
-                        mini.innerHTML += `<li style="margin-bottom:5px;">• ${task.text}</li>`;
-                    }
+                    if(pendingCount <= 3) mini.innerHTML += `<li style="margin-bottom:5px;">• ${task.text}</li>`;
                 }
             });
-
             if(pendingCount === 0) mini.innerHTML = '<li style="color:var(--text-secondary);">No pending tasks.</li>';
         }
 
@@ -698,34 +678,26 @@
             if(val === 'C') disp.value = '';
             else if(val === '=') {
                 try {
-                    let expr = disp.value
-                        .replace(/sin/g, 'Math.sin')
-                        .replace(/cos/g, 'Math.cos')
-                        .replace(/tan/g, 'Math.tan')
-                        .replace(/sqrt/g, 'Math.sqrt')
-                        .replace(/pow/g, 'Math.pow')
-                        .replace(/PI/g, 'Math.PI');
+                    let expr = disp.value.replace(/sin/g, 'Math.sin').replace(/cos/g, 'Math.cos').replace(/tan/g, 'Math.tan').replace(/sqrt/g, 'Math.sqrt').replace(/pow/g, 'Math.pow').replace(/PI/g, 'Math.PI');
                     disp.value = eval(expr);
                 } catch { disp.value = 'Error'; }
             } else { disp.value += val; }
         }
 
-        // Science Converter
+        // Converter
         function convertUnit() {
             const val = parseFloat(document.getElementById('conv-input').value);
             const type = document.getElementById('conv-type').value;
             let res = 0;
             if(isNaN(val)) return;
-
             if(type === 'c-f') res = (val * 9/5) + 32 + ' °F';
             else if(type === 'f-c') res = (val - 32) * 5/9 + ' °C';
             else if(type === 'kg-lbs') res = val * 2.20462 + ' lbs';
             else if(type === 'm-ft') res = val * 3.28084 + ' ft';
-            
             document.getElementById('conv-result').innerText = res;
         }
 
-        // Pomodoro Timer
+        // Timer
         let timerInt = null;
         let timeLeft = 25 * 60;
         function toggleTimer() {
@@ -750,14 +722,13 @@
             document.getElementById('timer-display').innerText = "25:00";
         }
 
-        // Word Count
         function countWords(areaId, displayId) {
             const txt = document.getElementById(areaId).value.trim();
             const count = txt ? txt.split(/\s+/).length : 0;
             document.getElementById(displayId).innerText = count + " words";
         }
 
-        // --- PERIODIC TABLE LOGIC ---
+        // --- PERIODIC TABLE DATA ---
         const ptElements = [
             { num: 1, sym: "H", name: "Hydrogen", mass: "1.008", cat: "reactive-nonmetal", col: 1, row: 1 },
             { num: 2, sym: "He", name: "Helium", mass: "4.0026", cat: "noble-gas", col: 18, row: 1 },
@@ -815,7 +786,6 @@
             { num: 54, sym: "Xe", name: "Xenon", mass: "131.29", cat: "noble-gas", col: 18, row: 5 },
             { num: 55, sym: "Cs", name: "Cesium", mass: "132.91", cat: "alkali", col: 1, row: 6 },
             { num: 56, sym: "Ba", name: "Barium", mass: "137.33", cat: "alkaline", col: 2, row: 6 },
-            // Lanthanides (Row 9)
             { num: 57, sym: "La", name: "Lanthanum", mass: "138.91", cat: "lanthanide", col: 4, row: 9 },
             { num: 58, sym: "Ce", name: "Cerium", mass: "140.12", cat: "lanthanide", col: 5, row: 9 },
             { num: 59, sym: "Pr", name: "Praseodymium", mass: "140.91", cat: "lanthanide", col: 6, row: 9 },
@@ -831,7 +801,6 @@
             { num: 69, sym: "Tm", name: "Thulium", mass: "168.93", cat: "lanthanide", col: 16, row: 9 },
             { num: 70, sym: "Yb", name: "Ytterbium", mass: "173.05", cat: "lanthanide", col: 17, row: 9 },
             { num: 71, sym: "Lu", name: "Lutetium", mass: "174.97", cat: "lanthanide", col: 18, row: 9 },
-            // Back to Main Table Row 6
             { num: 72, sym: "Hf", name: "Hafnium", mass: "178.49", cat: "transition", col: 4, row: 6 },
             { num: 73, sym: "Ta", name: "Tantalum", mass: "180.95", cat: "transition", col: 5, row: 6 },
             { num: 74, sym: "W", name: "Tungsten", mass: "183.84", cat: "transition", col: 6, row: 6 },
@@ -849,7 +818,6 @@
             { num: 86, sym: "Rn", name: "Radon", mass: "222", cat: "noble-gas", col: 18, row: 6 },
             { num: 87, sym: "Fr", name: "Francium", mass: "223", cat: "alkali", col: 1, row: 7 },
             { num: 88, sym: "Ra", name: "Radium", mass: "226", cat: "alkaline", col: 2, row: 7 },
-            // Actinides (Row 10)
             { num: 89, sym: "Ac", name: "Actinium", mass: "227", cat: "actinide", col: 4, row: 10 },
             { num: 90, sym: "Th", name: "Thorium", mass: "232.04", cat: "actinide", col: 5, row: 10 },
             { num: 91, sym: "Pa", name: "Protactinium", mass: "231.04", cat: "actinide", col: 6, row: 10 },
@@ -865,7 +833,6 @@
             { num: 101, sym: "Md", name: "Mendelevium", mass: "258", cat: "actinide", col: 16, row: 10 },
             { num: 102, sym: "No", name: "Nobelium", mass: "259", cat: "actinide", col: 17, row: 10 },
             { num: 103, sym: "Lr", name: "Lawrencium", mass: "266", cat: "actinide", col: 18, row: 10 },
-            // Back to Main Table Row 7
             { num: 104, sym: "Rf", name: "Rutherfordium", mass: "267", cat: "transition", col: 4, row: 7 },
             { num: 105, sym: "Db", name: "Dubnium", mass: "268", cat: "transition", col: 5, row: 7 },
             { num: 106, sym: "Sg", name: "Seaborgium", mass: "269", cat: "transition", col: 6, row: 7 },
@@ -883,46 +850,32 @@
             { num: 118, sym: "Og", name: "Oganesson", mass: "294", cat: "unknown", col: 18, row: 7 }
         ];
 
-        // Render Periodic Table
         function renderPT() {
             const table = document.getElementById('table');
             const panel = document.getElementById('pt-panel');
-            
             ptElements.forEach(el => {
                 const div = document.createElement('div');
                 div.className = `element cat-${el.cat}`;
                 div.style.gridColumn = el.col;
                 div.style.gridRow = el.row;
-
-                div.innerHTML = `
-                    <div class="num">${el.num}</div>
-                    <div class="sym">${el.sym}</div>
-                    <div class="name">${el.name}</div>
-                `;
-
+                div.innerHTML = `<div class="num">${el.num}</div><div class="sym">${el.sym}</div>`;
                 div.addEventListener('click', () => {
                     panel.classList.add('active');
                     document.getElementById('p-sym').innerText = el.sym;
                     document.getElementById('p-name').innerText = el.name;
-                    document.getElementById('p-data').innerText = `Atomic #: ${el.num} | Mass: ${el.mass}`;
+                    document.getElementById('p-data').innerText = `#${el.num} | ${el.mass}`;
                     document.getElementById('p-cat').innerText = el.cat.replace(/-/g, ' ');
-                    
-                    const color = getComputedStyle(div).color;
-                    document.getElementById('p-sym').style.color = color;
+                    document.getElementById('p-sym').style.color = getComputedStyle(div).color;
                 });
-
                 table.appendChild(div);
             });
         }
-        
-        // Initialize Periodic Table on load
         renderPT();
 
         // --- NAVIGATION ---
         function showSection(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
             if(btn) btn.classList.add('active');
@@ -939,7 +892,6 @@
             b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
         }
 
-        // Games Loading
         function loadGame(codeId) {
             const iframe = document.getElementById('game-frame');
             iframe.srcdoc = document.getElementById(codeId).value;
@@ -953,15 +905,12 @@
             document.getElementById('chatterbox').classList.toggle('fullscreen-active');
         }
 
-        // --- GLOBAL KEY LISTENERS ---
         document.addEventListener('keydown', e => {
             if(e.key === "Escape") {
-                // If chatterbox is fullscreen, close it
                 const c = document.getElementById('chatterbox');
                 if(c.classList.contains('fullscreen-active')) {
                     c.classList.remove('fullscreen-active');
                 } else {
-                    // Otherwise toggle mode
                     toggleMode();
                 }
             }
