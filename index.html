@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall OS 3.2</title>
+    <title>StudyHall OS 3.3</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -27,19 +27,11 @@
             --radius: 16px;
 
             /* Periodic Table Categories */
-            --cat-1: #ef4444; /* Alkali */
-            --cat-2: #f97316; /* Alkaline */
-            --cat-3: #eab308; /* Transition */
-            --cat-4: #22c55e; /* Post-Trans */
-            --cat-5: #06b6d4; /* Metalloid */
-            --cat-6: #3b82f6; /* Reactive Nonmetal */
-            --cat-7: #8b5cf6; /* Noble */
-            --cat-8: #d946ef; /* Lanthanide */
-            --cat-9: #f43f5e; /* Actinide */
-            --cat-0: #94a3b8; /* Unknown */
+            --cat-1: #ef4444; --cat-2: #f97316; --cat-3: #eab308; 
+            --cat-4: #22c55e; --cat-5: #06b6d4; --cat-6: #3b82f6; 
+            --cat-7: #8b5cf6; --cat-8: #d946ef; --cat-9: #f43f5e; --cat-0: #94a3b8;
         }
 
-        /* Dark Theme (Settings Toggle) */
         [data-theme="dark"] {
             --bg-color: #0f172a;
             --sidebar-bg: rgba(30, 41, 59, 0.95);
@@ -52,11 +44,9 @@
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
-        /* Mode Logic */
         body.mode-school .fun-only { display: none !important; }
         body.mode-fun .school-only { display: none !important; }
         
-        /* Secret "Midnight" Mode */
         body.mode-fun {
             --bg-color: #0b0e14;
             --sidebar-bg: rgba(17, 24, 39, 0.95);
@@ -71,7 +61,6 @@
 
         body { display: flex; height: 100vh; background-color: var(--bg-color); color: var(--text-primary); transition: background 0.3s; overflow: hidden; }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -96,7 +85,7 @@
             border-right: 1px solid var(--border);
             display: flex; flex-direction: column; padding: 24px;
             transition: 0.3s; z-index: 100;
-            backdrop-filter: blur(10px); /* Glass effect */
+            backdrop-filter: blur(10px);
         }
         .logo { 
             font-size: 1.5rem; font-weight: 800; margin-bottom: 35px; 
@@ -126,7 +115,7 @@
         }
         .card:hover { border-color: var(--accent); }
 
-        /* --- DASHBOARD --- */
+        /* --- WIDGETS --- */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         
         .timer-circle {
@@ -139,7 +128,6 @@
         }
         .timer-active .timer-circle { border-color: var(--accent); border-right-color: var(--bg-color); animation: spinPulse 2s infinite linear; }
         @keyframes spinPulse { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* Counter-rotate text so it stays upright */
         .timer-active .timer-circle span { animation: spinCounter 2s infinite linear; } 
         @keyframes spinCounter { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
 
@@ -168,47 +156,17 @@
             padding: 30px; resize: vertical;
         }
 
-        /* --- THEMED PERIODIC TABLE --- */
-        .periodic-table {
-            display: grid;
-            grid-template-columns: repeat(18, 1fr);
-            gap: 3px;
-            width: 100%;
-            max-width: 900px; /* Constrained for better look */
-            margin: 0 auto;
-        }
-
+        /* --- PERIODIC TABLE --- */
+        .periodic-table { display: grid; grid-template-columns: repeat(18, 1fr); gap: 3px; width: 100%; max-width: 900px; margin: 0 auto; }
         .element {
-            /* Now uses theme variables for background */
-            background: var(--bg-color); 
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            
-            aspect-ratio: 5/6;
-            padding: 4px;
-            border-radius: 4px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            background: var(--bg-color); border: 1px solid var(--border); color: var(--text-primary);
+            aspect-ratio: 5/6; padding: 4px; border-radius: 4px;
+            cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between;
         }
-
-        .element:hover {
-            transform: scale(1.6);
-            z-index: 100;
-            background: var(--card-bg);
-            border-color: var(--accent);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        /* Element Typography */
+        .element:hover { transform: scale(1.6); z-index: 100; background: var(--card-bg); border-color: var(--accent); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .num { font-size: 8px; opacity: 0.6; }
         .sym { font-size: 14px; font-weight: 700; text-align: center; margin-top: 2px; }
-        .name { display: none; } /* Clean look */
-
-        /* Category Borders (Bottom) */
+        .name { display: none; }
         .cat-alkali { border-bottom: 3px solid var(--cat-1); }
         .cat-alkaline { border-bottom: 3px solid var(--cat-2); }
         .cat-transition { border-bottom: 3px solid var(--cat-3); }
@@ -219,43 +177,25 @@
         .cat-lanthanide { border-bottom: 3px solid var(--cat-8); }
         .cat-actinide { border-bottom: 3px solid var(--cat-9); }
         .cat-unknown { border-bottom: 3px solid var(--cat-0); }
-
-        #pt-panel {
-            background: var(--bg-color);
-            border: 1px solid var(--border);
-            padding: 15px 25px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: none; align-items: center; justify-content: space-between;
-        }
+        #pt-panel { background: var(--bg-color); border: 1px solid var(--border); padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: none; align-items: center; justify-content: space-between; }
         #pt-panel.active { display: flex; animation: fadeIn 0.2s; }
 
-        /* Fullscreen & Extras */
+        /* --- FULLSCREEN LOGIC --- */
+        /* Universal Fullscreen Class */
         .fullscreen-active {
             position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 5000; padding: 0; background: black;
+            z-index: 5000; padding: 0 !important; margin: 0 !important; background: black;
         }
+        .fullscreen-active iframe { height: 100vh !important; border-radius: 0 !important; }
+        .fullscreen-active h2, .fullscreen-active button { display: none !important; } /* Hide header in fullscreen */
+
+        /* To allow exiting fullscreen with ESC, we use the JS listener */
+
         iframe { width: 100%; height: 600px; border: none; border-radius: 12px; background: white; }
 
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 3000;
-            display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(8px);
-        }
-        .login-box {
-            background: var(--card-bg); padding: 40px; border-radius: 24px; 
-            text-align: center; width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.2);
-            border: 1px solid var(--border);
-        }
-        
-        #toast {
-            position: fixed; bottom: 30px; right: 30px;
-            background: var(--text-primary); color: var(--bg-color);
-            padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s;
-            font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.15); pointer-events: none;
-            z-index: 9999;
-        }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .login-box { background: var(--card-bg); padding: 40px; border-radius: 24px; text-align: center; width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); }
+        #toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s; font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.15); pointer-events: none; z-index: 9999; }
     </style>
 </head>
 <body class="mode-school" data-theme="light">
@@ -282,6 +222,7 @@
         </div>
         
         <button class="nav-btn school-only active" onclick="showSection('school-home')">🏠 Dashboard</button>
+        <button class="nav-btn school-only" onclick="showSection('portal')">🏫 School Portal</button>
         <button class="nav-btn school-only" onclick="showSection('todo')">✅ Tasks</button>
         <button class="nav-btn school-only" onclick="showSection('math')">📐 Math Lab</button>
         <button class="nav-btn school-only" onclick="showSection('science')">🧬 Science Lab</button>
@@ -291,6 +232,7 @@
         <button class="nav-btn fun-only" onclick="showSection('fun-home')">🎮 Secret Lounge</button>
         <button class="nav-btn fun-only" onclick="showSection('games')">🕹️ Arcade</button>
         <button class="nav-btn fun-only" onclick="showSection('chatterbox')">💬 ChatterBox</button>
+
         <div style="margin-top:auto;">
             <button class="nav-btn" onclick="showSection('settings')">⚙️ Settings</button>
             <button class="nav-btn" onclick="logoutUser()" style="color:#ef4444;">🚪 Logout</button>
@@ -322,6 +264,28 @@
                         <li style="color:var(--text-secondary);">No pending tasks.</li>
                     </ul>
                 </div>
+                
+                <div class="card" style="border-left: 5px solid #22c55e;">
+                    <h3>Quick Access</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:15px;">Jump to School Portal.</p>
+                    <button class="btn btn-primary" style="width:100%; background:#22c55e;" onclick="showSection('portal')">Launch ClassLink</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="portal" class="section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2>ClassLink Access</h2>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn" onclick="window.open('https://myapps.classlink.com/home', '_blank')">🔗 Open in New Tab</button>
+                    <button class="btn btn-primary" onclick="toggleFullscreenPortal()">⛶ Fullscreen</button>
+                </div>
+            </div>
+            <div class="card" style="padding:0; overflow:hidden;">
+                <p style="text-align:center; padding:10px; font-size:0.8rem; color:#aaa;">
+                    If the screen below is white, your school blocks embedding. Click "Open in New Tab".
+                </p>
+                <iframe src="https://myapps.classlink.com/home"></iframe>
             </div>
         </div>
 
@@ -398,7 +362,6 @@
                     <h3>Periodic Table</h3>
                     <span style="font-size:0.8rem; color:var(--text-secondary);">Interactive</span>
                 </div>
-                
                 <div id="pt-panel">
                     <div>
                         <h2 id="p-sym" style="font-size:2.5rem; margin:0; line-height:1;">H</h2>
@@ -409,7 +372,6 @@
                         <p id="p-data" style="margin:0; font-size:0.9rem; color:var(--text-secondary);">No. 1 | 1.008u</p>
                     </div>
                 </div>
-                
                 <div class="periodic-table" id="table"></div>
             </div>
 
@@ -490,17 +452,14 @@
     <textarea id="drive-mad-code" style="display:none;">
 <!DOCTYPE html><html lang="en"><head><base href="https://cdn.jsdelivr.net/gh/genizy/dmad-poki@49b5ab6b987f5f3be58f9dae59c92e8fc1aab9b0/"><script>window.assgdd={"ancestorOrigins":{"0":"https://games.poki.com","1":"https://poki.com"},"href":"https://f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com/cc1bc57a-e355-4696-97c2-097bf6188606/index.html?cloudsavegames=y"}</script><meta charset="utf-8"><title>Drive Mad</title><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><link rel="stylesheet" href="webapp/fancade.css"><script src="poki-sdk.js"></script></head><body id="body"><div id="canvas_border" class="emscripten_border"><div id="play_content" class="middle center"><div class="edge"><div class="box"><div class="black"><img src="webapp/cover.jpg" class="cover"><p class="title">Drive Mad</p></div></div></div><div id="progress_or_play"><progress id="progress" class="loading" value="0" max="100"></progress></div></div><canvas class="emscripten" id="canvas" tabindex=-1></canvas></div><script type="text/javascript" src="webapp/source_min.js"></script><script type="text/javascript" src="webapp/index.js"></script></body></html>
     </textarea>
-
     <textarea id="snake-code" style="display:none;">
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Snake</title><style>body{display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#111;color:white;font-family:monospace;}canvas{background:#000;border:2px solid #333;box-shadow:0 0 20px rgba(0,255,0,0.2);}.score-board{position:absolute;top:20px;font-size:2em;}</style></head><body><div class="score-board">Score: <span id="score">0</span></div><canvas id="gameCanvas" width="400" height="400"></canvas><script>const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d'),scoreElement=document.getElementById('score');const gridSize=20;let snake=[{x:200,y:200}],food={},dx=gridSize,dy=0,score=0;function main(){setTimeout(()=>{clear();drawFood();move();drawSnake();if(checkOver()){alert("Game Over: "+score);location.reload()}else main()},100)}function clear(){ctx.fillStyle='#000';ctx.fillRect(0,0,400,400)}function drawSnake(){snake.forEach(p=>{ctx.fillStyle='#4CAF50';ctx.fillRect(p.x,p.y,gridSize-2,gridSize-2)})}function move(){const head={x:snake[0].x+dx,y:snake[0].y+dy};snake.unshift(head);if(head.x===food.x&&head.y===food.y){score+=10;scoreElement.innerText=score;placeFood()}else snake.pop()}function placeFood(){food.x=Math.floor(Math.random()*20)*20;food.y=Math.floor(Math.random()*20)*20}function checkOver(){return snake[0].x<0||snake[0].x>=400||snake[0].y<0||snake[0].y>=400||snake.slice(1).some(p=>p.x===snake[0].x&&p.y===snake[0].y)}document.addEventListener('keydown',e=>{if(e.which===37&&dx===0){dx=-20;dy=0}if(e.which===38&&dy===0){dx=0;dy=-20}if(e.which===39&&dx===0){dx=20;dy=0}if(e.which===40&&dy===0){dx=0;dy=20}});placeFood();main();</script></body></html>
     </textarea>
-
     <textarea id="geo-dash-code" style="display:none;">
 <!DOCTYPE html><html lang="en-US"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/"><title>Geometry Dash</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1"></head><body style="margin:0;overflow:hidden;background:#000;"><div id="gameContainer" style="width:100vw;height:100vh;"></div><script src="Build/UnityLoader.js"></script><script>var gameInstance=UnityLoader.instantiate("gameContainer","Build/GeometryDashLite.json");</script></body></html>
     </textarea>
 
     <script>
-        // --- CONFIG ---
         const firebaseConfig = { apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA", authDomain: "chatterbox3000-fb3e2.firebaseapp.com", databaseURL: "https://chatterbox3000-fb3e2-default-rtdb.firebaseio.com", projectId: "chatterbox3000-fb3e2", storageBucket: "chatterbox3000-fb3e2.firebasestorage.app", messagingSenderId: "298622361038", appId: "1:298622361038:web:c1e46432470dbce92a5f9f" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
@@ -508,11 +467,9 @@
         let currentUser = null;
         let todoArray = [];
 
-        // Greeting
         const hour = new Date().getHours();
         document.getElementById('greeting').innerText = hour < 12 ? 'Good Morning.' : hour < 18 ? 'Good Afternoon.' : 'Good Evening.';
 
-        // Auth
         auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUser = user;
@@ -534,7 +491,6 @@
         }
         function logoutUser() { auth.signOut(); location.reload(); }
 
-        // Data & Toasts
         function toast(msg) {
             const t = document.getElementById('toast');
             t.innerText = msg || "Saved automatically";
@@ -557,14 +513,11 @@
                 }
             });
         }
-
         function saveData(subject) {
             if(!currentUser) return;
-            db.ref('users/' + currentUser.uid + '/' + subject).set(document.getElementById('note-' + subject).value)
-                .then(() => toast());
+            db.ref('users/' + currentUser.uid + '/' + subject).set(document.getElementById('note-' + subject).value).then(() => toast());
         }
 
-        // --- TOOLS ---
         function addTodo() {
             const txt = document.getElementById('newTodo').value;
             if(!txt) return;
@@ -590,7 +543,6 @@
             if(pendingCount === 0) mini.innerHTML = '<li style="color:var(--text-secondary);">No pending tasks.</li>';
         }
 
-        // Calculator
         function calc(val) {
             const disp = document.getElementById('calcDisplay');
             if(val === 'C') disp.value = '';
@@ -614,7 +566,6 @@
             document.getElementById('conv-result').innerText = res;
         }
 
-        // Timer
         let timerInt = null;
         let timeLeft = 25 * 60;
         function toggleTimer() {
@@ -648,7 +599,6 @@
             document.getElementById(displayId).innerText = count + " words";
         }
 
-        // --- PERIODIC TABLE ---
         const ptElements = [
             { num: 1, sym: "H", name: "Hydrogen", mass: "1.008", cat: "reactive-nonmetal", col: 1, row: 1 },
             { num: 2, sym: "He", name: "Helium", mass: "4.0026", cat: "noble-gas", col: 18, row: 1 },
@@ -775,11 +725,6 @@
             const panel = document.getElementById('pt-panel');
             ptElements.forEach(el => {
                 const div = document.createElement('div');
-                div.className = `element cat-${el.cat.replace('reactive-nonmetal','6').replace('noble-gas','7').replace('lanthanide','8').replace('actinide','9').replace('unknown','0').replace('alkali','1').replace('alkaline','2').replace('post-transition','4').replace('metalloid','5').replace('transition','3')}`;
-                
-                // Map old categories to new numbers for cleaner CSS or just rely on the replace mess above. 
-                // Actually, let's just stick to the specific classes.
-                // Re-mapping for safety:
                 let c = 'cat-unknown';
                 if(el.cat==='alkali') c='cat-alkali';
                 if(el.cat==='alkaline') c='cat-alkaline';
@@ -791,7 +736,6 @@
                 if(el.cat==='lanthanide') c='cat-lanthanide';
                 if(el.cat==='actinide') c='cat-actinide';
                 div.className = `element ${c}`;
-
                 div.style.gridColumn = el.col;
                 div.style.gridRow = el.row;
                 div.innerHTML = `<div class="num">${el.num}</div><div class="sym">${el.sym}</div>`;
@@ -808,7 +752,6 @@
         }
         renderPT();
 
-        // --- NAVIGATION ---
         function showSection(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -837,18 +780,16 @@
         function loadSnakeGame() { loadGame('snake-code'); }
         function loadGeoDash() { loadGame('geo-dash-code'); }
 
-        function toggleFullscreenChat() {
-            document.getElementById('chatterbox').classList.toggle('fullscreen-active');
-        }
+        function toggleFullscreenChat() { document.getElementById('chatterbox').classList.toggle('fullscreen-active'); }
+        function toggleFullscreenPortal() { document.getElementById('portal').classList.toggle('fullscreen-active'); }
 
         document.addEventListener('keydown', e => {
             if(e.key === "Escape") {
                 const c = document.getElementById('chatterbox');
-                if(c.classList.contains('fullscreen-active')) {
-                    c.classList.remove('fullscreen-active');
-                } else {
-                    toggleMode();
-                }
+                const p = document.getElementById('portal');
+                if(c.classList.contains('fullscreen-active')) c.classList.remove('fullscreen-active');
+                else if(p.classList.contains('fullscreen-active')) p.classList.remove('fullscreen-active');
+                else toggleMode();
             }
         });
     </script>
