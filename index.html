@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall OS 3.1</title>
+    <title>StudyHall OS 3.2</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -14,220 +14,221 @@
     <style>
         /* --- CSS VARIABLES & THEMES --- */
         :root {
-            --bg-color: #f0f2f5;
-            --sidebar-bg: #ffffff;
+            --bg-color: #f1f5f9;
+            --sidebar-bg: rgba(255, 255, 255, 0.95);
             --card-bg: #ffffff;
-            --text-primary: #1e293b;
+            --text-primary: #0f172a;
             --text-secondary: #64748b;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
             --border: #e2e8f0;
             --success: #10b981;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --radius: 16px;
 
-            /* Periodic Table Colors */
-            --alkali: #ff6b6b;
-            --alkaline: #ff9f43;
-            --transition: #feca57;
-            --post: #48dbfb;
-            --meta: #1dd1a1;
-            --non: #00d2d3;
-            --noble: #5f27cd;
-            --lanth: #ff9ff3;
-            --act: #f368e0;
-            --unk: #8395a7;
+            /* Periodic Table Categories */
+            --cat-1: #ef4444; /* Alkali */
+            --cat-2: #f97316; /* Alkaline */
+            --cat-3: #eab308; /* Transition */
+            --cat-4: #22c55e; /* Post-Trans */
+            --cat-5: #06b6d4; /* Metalloid */
+            --cat-6: #3b82f6; /* Reactive Nonmetal */
+            --cat-7: #8b5cf6; /* Noble */
+            --cat-8: #d946ef; /* Lanthanide */
+            --cat-9: #f43f5e; /* Actinide */
+            --cat-0: #94a3b8; /* Unknown */
         }
 
         /* Dark Theme (Settings Toggle) */
         [data-theme="dark"] {
             --bg-color: #0f172a;
-            --sidebar-bg: #1e293b;
+            --sidebar-bg: rgba(30, 41, 59, 0.95);
             --card-bg: #1e293b;
-            --text-primary: #f1f5f9;
+            --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --accent: #6366f1;
             --accent-hover: #4f46e5;
             --border: #334155;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
-        /* --- MODE LOGIC --- */
+        /* Mode Logic */
         body.mode-school .fun-only { display: none !important; }
         body.mode-fun .school-only { display: none !important; }
         
-        /* New "Fun Mode" (Midnight Theme - No longer Green/Black) */
+        /* Secret "Midnight" Mode */
         body.mode-fun {
-            --bg-color: #111827;       /* Very dark blue/gray */
-            --sidebar-bg: #1f2937;     /* Dark gray sidebar */
-            --card-bg: #374151;        /* Lighter gray cards */
-            --text-primary: #f3f4f6;   /* White text */
-            --text-secondary: #9ca3af; /* Light gray text */
-            --accent: #8b5cf6;         /* Purple accent */
-            --border: #4b5563;
+            --bg-color: #0b0e14;
+            --sidebar-bg: rgba(17, 24, 39, 0.95);
+            --card-bg: #1f2937;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent: #a855f7;
+            --border: #374151;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body { display: flex; height: 100vh; background-color: var(--bg-color); color: var(--text-primary); transition: background 0.3s; overflow: hidden; }
 
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
         /* --- UI COMPONENTS --- */
-        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 0.9rem; }
-        .btn-primary { background: var(--accent); color: white; }
+        .btn { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 0.9rem; }
+        .btn-primary { background: var(--accent); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-danger { background: #ef4444; color: white; }
         
         input, textarea, select {
             background: var(--bg-color); border: 1px solid var(--border);
-            color: var(--text-primary); padding: 10px; border-radius: 6px;
-            outline: none; transition: 0.2s; width: 100%;
+            color: var(--text-primary); padding: 12px; border-radius: 8px;
+            outline: none; transition: 0.2s; width: 100%; font-size: 0.95rem;
         }
-        input:focus, textarea:focus { border-color: var(--accent); }
-
-        /* --- LOGIN OVERLAY --- */
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 3000;
-            display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(5px);
-        }
-        .login-box {
-            background: var(--card-bg); padding: 40px; border-radius: 20px; 
-            text-align: center; width: 350px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            border: 1px solid var(--border);
-        }
+        input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1); }
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: 240px; background-color: var(--sidebar-bg);
+            width: 250px; background-color: var(--sidebar-bg);
             border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 20px;
+            display: flex; flex-direction: column; padding: 24px;
             transition: 0.3s; z-index: 100;
+            backdrop-filter: blur(10px); /* Glass effect */
         }
         .logo { 
-            font-size: 1.4rem; font-weight: 800; margin-bottom: 30px; 
-            color: var(--accent); display: flex; align-items: center; gap: 8px;
+            font-size: 1.5rem; font-weight: 800; margin-bottom: 35px; 
+            color: var(--accent); display: flex; align-items: center; gap: 10px;
         }
         .nav-btn {
             background: none; border: none; color: var(--text-secondary);
-            padding: 10px 14px; text-align: left; cursor: pointer; border-radius: 8px;
-            margin-bottom: 2px; font-size: 0.9rem; font-weight: 500;
-            display: flex; align-items: center; gap: 10px; transition: 0.2s;
+            padding: 12px 14px; text-align: left; cursor: pointer; border-radius: 10px;
+            margin-bottom: 4px; font-size: 0.95rem; font-weight: 500;
+            display: flex; align-items: center; gap: 12px; transition: 0.2s;
         }
         .nav-btn:hover { background: var(--bg-color); color: var(--text-primary); }
-        .nav-btn.active { background: var(--accent); color: white; }
+        .nav-btn.active { background: var(--accent); color: white; font-weight: 600; }
 
         /* --- MAIN CONTENT --- */
-        .main-content { flex: 1; padding: 25px; overflow-y: auto; position: relative; }
-        .section { display: none; animation: fadeIn 0.3s ease-out; max-width: 1000px; margin: 0 auto; }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
+        .section { display: none; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-width: 1100px; margin: 0 auto; }
         .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        h2 { font-size: 1.8rem; margin-bottom: 15px; font-weight: 700; color: var(--text-primary); }
+        h2 { font-size: 2rem; margin-bottom: 20px; font-weight: 700; letter-spacing: -0.5px; }
         
         .card {
             background: var(--card-bg); border-radius: var(--radius);
-            padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow);
-            border: 1px solid var(--border);
+            padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
+            border: 1px solid var(--border); transition: 0.2s;
         }
+        .card:hover { border-color: var(--accent); }
 
-        /* --- WIDGETS --- */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        /* --- DASHBOARD --- */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        
         .timer-circle {
-            width: 120px; height: 120px; border-radius: 50%;
-            border: 5px solid var(--accent); display: flex;
-            align-items: center; justify-content: center;
-            font-size: 2rem; font-weight: bold; margin: 0 auto 15px auto;
-            background: var(--bg-color);
+            width: 140px; height: 140px; border-radius: 50%;
+            border: 6px solid var(--border); border-top-color: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem; font-weight: 700; margin: 0 auto 20px auto;
+            background: var(--bg-color); color: var(--text-primary);
+            transition: 0.3s;
         }
-        .todo-item {
-            background: var(--bg-color); padding: 12px; margin-bottom: 6px;
-            border-radius: 6px; display: flex; justify-content: space-between; align-items: center;
-            border-left: 3px solid var(--accent); transition: 0.2s;
-        }
-        .todo-item.done { opacity: 0.5; text-decoration: line-through; border-left-color: var(--success); }
+        .timer-active .timer-circle { border-color: var(--accent); border-right-color: var(--bg-color); animation: spinPulse 2s infinite linear; }
+        @keyframes spinPulse { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Counter-rotate text so it stays upright */
+        .timer-active .timer-circle span { animation: spinCounter 2s infinite linear; } 
+        @keyframes spinCounter { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
 
-        /* Calculator */
-        .calc-wrapper { display: flex; gap: 15px; flex-wrap: wrap; }
-        .calc-body { width: 260px; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-        .calc-btn {
-            padding: 12px; border-radius: 6px; font-size: 1rem;
-            background: var(--bg-color); border: 1px solid var(--border);
-            cursor: pointer; color: var(--text-primary);
+        .todo-item {
+            background: var(--bg-color); padding: 14px; margin-bottom: 8px;
+            border-radius: 10px; display: flex; justify-content: space-between; align-items: center;
+            border-left: 4px solid var(--accent); transition: 0.2s;
         }
-        .calc-btn:hover { background: var(--border); }
+        .todo-item.done { opacity: 0.6; text-decoration: line-through; border-left-color: var(--success); }
+
+        /* --- MATH & EDITOR --- */
+        .calc-wrapper { display: flex; gap: 20px; flex-wrap: wrap; }
+        .calc-body { width: 280px; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .calc-btn {
+            padding: 15px; border-radius: 8px; font-size: 1.1rem;
+            background: var(--bg-color); border: 1px solid var(--border);
+            cursor: pointer; color: var(--text-primary); transition: 0.1s;
+        }
+        .calc-btn:active { transform: scale(0.95); }
         .calc-btn.op { background: var(--accent); color: white; border: none; }
 
-        .editor-container { position: relative; }
         textarea.notes-area {
-            height: 400px; line-height: 1.6; font-size: 1rem;
+            height: 500px; line-height: 1.6; font-size: 1.05rem;
             background: var(--card-bg); border: 1px solid var(--border);
-            padding: 20px; resize: vertical;
+            padding: 30px; resize: vertical;
         }
 
-        /* --- COMPACT PERIODIC TABLE --- */
+        /* --- THEMED PERIODIC TABLE --- */
         .periodic-table {
             display: grid;
             grid-template-columns: repeat(18, 1fr);
-            gap: 2px; /* Smaller Gap */
+            gap: 3px;
             width: 100%;
-            max-width: 800px; /* Constrain width to make it smaller */
+            max-width: 900px; /* Constrained for better look */
             margin: 0 auto;
         }
 
         .element {
-            background: #252525;
-            border: 1px solid #333;
-            padding: 2px; /* Less padding */
-            aspect-ratio: 1/1.1; /* Tighter aspect ratio */
+            /* Now uses theme variables for background */
+            background: var(--bg-color); 
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            
+            aspect-ratio: 5/6;
+            padding: 4px;
+            border-radius: 4px;
             position: relative;
             cursor: pointer;
-            transition: 0.1s;
+            transition: all 0.2s ease;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Center content */
-            align-items: center;
-            color: #fff;
-            min-height: 35px; /* Force minimum height */
+            justify-content: space-between;
         }
 
         .element:hover {
-            transform: scale(1.8);
-            z-index: 50;
-            background: #333;
-            border-color: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transform: scale(1.6);
+            z-index: 100;
+            background: var(--card-bg);
+            border-color: var(--accent);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
-        /* Smaller Fonts for Elements */
-        .num { font-size: 7px; position: absolute; top: 2px; left: 2px; opacity: 0.7; }
-        .sym { font-size: 12px; font-weight: bold; }
-        .name { display: none; } /* Hide name on grid to save space, show on hover/panel */
+        /* Element Typography */
+        .num { font-size: 8px; opacity: 0.6; }
+        .sym { font-size: 14px; font-weight: 700; text-align: center; margin-top: 2px; }
+        .name { display: none; } /* Clean look */
 
-        /* Category Colors */
-        .cat-alkali { border-bottom: 2px solid var(--alkali); color: var(--alkali); }
-        .cat-alkaline { border-bottom: 2px solid var(--alkaline); color: var(--alkaline); }
-        .cat-transition { border-bottom: 2px solid var(--transition); color: var(--transition); }
-        .cat-post-transition { border-bottom: 2px solid var(--post); color: var(--post); }
-        .cat-metalloid { border-bottom: 2px solid var(--meta); color: var(--meta); }
-        .cat-reactive-nonmetal { border-bottom: 2px solid var(--non); color: var(--non); }
-        .cat-noble-gas { border-bottom: 2px solid var(--noble); color: var(--noble); }
-        .cat-lanthanide { border-bottom: 2px solid var(--lanth); color: var(--lanth); }
-        .cat-actinide { border-bottom: 2px solid var(--act); color: var(--act); }
-        .cat-unknown { border-bottom: 2px solid var(--unk); color: var(--unk); }
+        /* Category Borders (Bottom) */
+        .cat-alkali { border-bottom: 3px solid var(--cat-1); }
+        .cat-alkaline { border-bottom: 3px solid var(--cat-2); }
+        .cat-transition { border-bottom: 3px solid var(--cat-3); }
+        .cat-post-transition { border-bottom: 3px solid var(--cat-4); }
+        .cat-metalloid { border-bottom: 3px solid var(--cat-5); }
+        .cat-reactive-nonmetal { border-bottom: 3px solid var(--cat-6); }
+        .cat-noble-gas { border-bottom: 3px solid var(--cat-7); }
+        .cat-lanthanide { border-bottom: 3px solid var(--cat-8); }
+        .cat-actinide { border-bottom: 3px solid var(--cat-9); }
+        .cat-unknown { border-bottom: 3px solid var(--cat-0); }
 
         #pt-panel {
-            background: var(--card-bg);
+            background: var(--bg-color);
             border: 1px solid var(--border);
-            padding: 10px 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none; /* Hidden by default */
-            align-items: center; 
-            justify-content: space-between;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none; align-items: center; justify-content: space-between;
         }
-        #pt-panel.active { display: flex; }
+        #pt-panel.active { display: flex; animation: fadeIn 0.2s; }
 
         /* Fullscreen & Extras */
         .fullscreen-active {
@@ -236,11 +237,23 @@
         }
         iframe { width: 100%; height: 600px; border: none; border-radius: 12px; background: white; }
 
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 3000;
+            display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(8px);
+        }
+        .login-box {
+            background: var(--card-bg); padding: 40px; border-radius: 24px; 
+            text-align: center; width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+        }
+        
         #toast {
-            position: fixed; bottom: 20px; right: 20px;
+            position: fixed; bottom: 30px; right: 30px;
             background: var(--text-primary); color: var(--bg-color);
-            padding: 10px 20px; border-radius: 50px; opacity: 0; transition: 0.3s;
-            font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.2); pointer-events: none;
+            padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s;
+            font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.15); pointer-events: none;
             z-index: 9999;
         }
     </style>
@@ -250,7 +263,7 @@
     <div id="login-overlay">
         <div class="login-box">
             <h1 style="color: var(--accent); margin-bottom:10px;">StudyHall OS</h1>
-            <p style="color: var(--text-secondary); margin-bottom:20px;">Access your workspace</p>
+            <p style="color: var(--text-secondary); margin-bottom:25px;">Enter your workspace</p>
             <input type="email" id="email" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="password" placeholder="Password" style="margin-bottom:20px;">
             <button class="btn btn-primary" onclick="loginUser()" style="width:100%;">Enter Dashboard</button>
@@ -262,9 +275,10 @@
 
     <nav class="sidebar">
         <div class="logo">📘 StudyHall</div>
-        <div style="margin-bottom: 20px;">
-            <div id="user-display" style="font-weight:bold; font-size:0.9rem;">Guest</div>
-            <div style="font-size:0.8rem; color:var(--text-secondary);">Student Mode</div>
+        
+        <div style="margin-bottom: 25px; padding: 15px; background: var(--bg-color); border-radius: 12px;">
+            <div id="user-display" style="font-weight:700; font-size:0.95rem;">Guest</div>
+            <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;">Student Mode</div>
         </div>
         
         <button class="nav-btn school-only active" onclick="showSection('school-home')">🏠 Dashboard</button>
@@ -277,10 +291,8 @@
         <button class="nav-btn fun-only" onclick="showSection('fun-home')">🎮 Secret Lounge</button>
         <button class="nav-btn fun-only" onclick="showSection('games')">🕹️ Arcade</button>
         <button class="nav-btn fun-only" onclick="showSection('chatterbox')">💬 ChatterBox</button>
-        <button class="nav-btn fun-only" onclick="showSection('socials')">🌐 Web Browser</button>
-
         <div style="margin-top:auto;">
-            <button class="nav-btn" onclick="showSection('settings')">⚙️ System</button>
+            <button class="nav-btn" onclick="showSection('settings')">⚙️ Settings</button>
             <button class="nav-btn" onclick="logoutUser()" style="color:#ef4444;">🚪 Logout</button>
         </div>
     </nav>
@@ -288,15 +300,18 @@
     <main class="main-content">
         
         <div id="school-home" class="section active">
-            <header style="margin-bottom:30px;">
-                <h1 id="greeting">Good Morning.</h1>
-                <p style="color:var(--text-secondary);">Here is your study overview.</p>
+            <header style="margin-bottom:35px;">
+                <h1 id="greeting">Welcome Back.</h1>
+                <p style="color:var(--text-secondary);">Your academic dashboard is ready.</p>
             </header>
 
             <div class="dashboard-grid">
                 <div class="card" style="text-align:center;">
                     <h3>Focus Timer</h3>
-                    <div class="timer-circle" id="timer-display">25:00</div>
+                    <p style="color:var(--text-secondary); margin-bottom:20px; font-size:0.9rem;">25m Focus • 5m Break</p>
+                    <div class="timer-circle" id="timer-ui">
+                        <span id="timer-display">25:00</span>
+                    </div>
                     <button class="btn btn-primary" onclick="toggleTimer()">Start / Pause</button>
                     <button class="btn" onclick="resetTimer()">Reset</button>
                 </div>
@@ -312,10 +327,10 @@
 
         <div id="todo" class="section">
             <div class="card">
-                <h2>Assignment Tracker</h2>
+                <h2 style="font-size:1.5rem;">Assignment Tracker</h2>
                 <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <input type="text" id="newTodo" placeholder="What needs to be done?">
-                    <button class="btn btn-primary" onclick="addTodo()">Add Task</button>
+                    <input type="text" id="newTodo" placeholder="Add a new task...">
+                    <button class="btn btn-primary" onclick="addTodo()">Add</button>
                 </div>
                 <div id="todoList"></div>
             </div>
@@ -325,7 +340,7 @@
             <h2>Mathematics Laboratory</h2>
             <div class="calc-wrapper">
                 <div class="card calc-body">
-                    <input type="text" id="calcDisplay" readonly style="margin-bottom:15px; text-align:right; font-size:1.5rem; font-family:monospace;">
+                    <input type="text" id="calcDisplay" readonly style="margin-bottom:15px; text-align:right; font-size:1.5rem; font-family:monospace; font-weight:600;">
                     <div class="calc-grid">
                         <button class="calc-btn" onclick="calc('sin(')">sin</button>
                         <button class="calc-btn" onclick="calc('cos(')">cos</button>
@@ -354,10 +369,8 @@
                     </div>
                 </div>
                 <div class="card" style="flex:1;">
-                    <h3>Notes</h3>
-                    <div class="editor-container">
-                        <textarea id="note-math" class="notes-area" oninput="saveData('math')" placeholder="Enter formulas..."></textarea>
-                    </div>
+                    <h3>Notes & Formulas</h3>
+                    <textarea id="note-math" class="notes-area" oninput="saveData('math')" placeholder="Write your formulas here..."></textarea>
                 </div>
             </div>
         </div>
@@ -367,81 +380,80 @@
             
             <div class="card">
                 <h3>Unit Converter</h3>
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <input type="number" id="conv-input" placeholder="Value">
-                    <select id="conv-type">
-                        <option value="c-f">C to F</option>
-                        <option value="f-c">F to C</option>
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <input type="number" id="conv-input" placeholder="Value" style="width:120px;">
+                    <select id="conv-type" style="width:180px;">
+                        <option value="c-f">Celsius to Fahrenheit</option>
+                        <option value="f-c">Fahrenheit to Celsius</option>
                         <option value="kg-lbs">Kg to Lbs</option>
                         <option value="m-ft">Meters to Feet</option>
                     </select>
-                    <button class="btn btn-primary" onclick="convertUnit()">Go</button>
-                    <div id="conv-result" style="font-weight:bold; margin-left:10px;"></div>
+                    <button class="btn btn-primary" onclick="convertUnit()">Convert</button>
+                    <div id="conv-result" style="font-weight:bold; margin-left:10px; color:var(--accent);"></div>
                 </div>
             </div>
 
             <div class="card">
-                <h3 style="margin-bottom:5px;">Periodic Table</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3>Periodic Table</h3>
+                    <span style="font-size:0.8rem; color:var(--text-secondary);">Interactive</span>
+                </div>
+                
                 <div id="pt-panel">
                     <div>
-                        <h2 id="p-sym" style="font-size:2rem; margin:0;">H</h2>
-                        <span id="p-cat" style="font-size:0.8rem; text-transform:uppercase;">Unknown</span>
+                        <h2 id="p-sym" style="font-size:2.5rem; margin:0; line-height:1;">H</h2>
+                        <span id="p-cat" style="font-size:0.85rem; text-transform:uppercase; font-weight:600; letter-spacing:0.5px;">Unknown</span>
                     </div>
                     <div style="text-align:right;">
                         <h3 id="p-name" style="margin:0;">Hydrogen</h3>
-                        <p id="p-data" style="margin:0; font-size:0.9rem; color:var(--text-secondary);">#1 | 1.008</p>
+                        <p id="p-data" style="margin:0; font-size:0.9rem; color:var(--text-secondary);">No. 1 | 1.008u</p>
                     </div>
                 </div>
+                
                 <div class="periodic-table" id="table"></div>
             </div>
 
             <div class="card">
-                <h3>Lab Report Notes</h3>
-                <div class="editor-container">
-                    <textarea id="note-science" class="notes-area" oninput="saveData('science')" placeholder="Hypothesis..."></textarea>
-                </div>
+                <h3>Lab Report</h3>
+                <textarea id="note-science" class="notes-area" oninput="saveData('science')" placeholder="Draft your lab report here..."></textarea>
             </div>
         </div>
 
         <div id="ela" class="section">
             <h2>Writing Studio</h2>
             <div class="card">
-                <div class="editor-container">
-                    <textarea id="note-ela" class="notes-area" oninput="saveData('ela'); countWords('note-ela', 'ela-count')" placeholder="Start your essay..."></textarea>
-                    <div style="text-align:right; margin-top:5px; font-size:0.8rem; color:var(--text-secondary);" id="ela-count">0 words</div>
-                </div>
+                <textarea id="note-ela" class="notes-area" oninput="saveData('ela'); countWords('note-ela', 'ela-count')" placeholder="Start your essay..."></textarea>
+                <div style="text-align:right; margin-top:8px; font-size:0.85rem; color:var(--text-secondary);" id="ela-count">0 words</div>
             </div>
         </div>
 
         <div id="history" class="section">
             <h2>History Archives</h2>
             <div class="card">
-                <div class="editor-container">
-                    <textarea id="note-history" class="notes-area" oninput="saveData('history'); countWords('note-history', 'hist-count')" placeholder="Timeline of events..."></textarea>
-                    <div style="text-align:right; margin-top:5px; font-size:0.8rem; color:var(--text-secondary);" id="hist-count">0 words</div>
-                </div>
+                <textarea id="note-history" class="notes-area" oninput="saveData('history'); countWords('note-history', 'hist-count')" placeholder="Record historical events..."></textarea>
+                <div style="text-align:right; margin-top:8px; font-size:0.85rem; color:var(--text-secondary);" id="hist-count">0 words</div>
             </div>
         </div>
 
         <div id="fun-home" class="section">
             <h2>Secret Lounge</h2>
-            <p>Welcome to the relaxed zone.</p>
+            <p style="color:var(--text-secondary);">Welcome to the unlocked zone.</p>
         </div>
 
         <div id="games" class="section">
             <h2>Arcade</h2>
             <div class="dashboard-grid">
-                <div class="card">
+                <div class="card" style="text-align:center;">
                     <h3>Geometry Dash</h3>
-                    <button class="btn btn-primary" onclick="loadGeoDash()">Play Now</button>
+                    <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGeoDash()">Play</button>
                 </div>
-                <div class="card">
+                <div class="card" style="text-align:center;">
                     <h3>Drive Mad</h3>
-                    <button class="btn btn-primary" onclick="loadDriveMad()">Play Now</button>
+                    <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadDriveMad()">Play</button>
                 </div>
-                <div class="card">
+                <div class="card" style="text-align:center;">
                     <h3>Snake</h3>
-                    <button class="btn btn-primary" onclick="loadSnakeGame()">Play Now</button>
+                    <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadSnakeGame()">Play</button>
                 </div>
             </div>
             <div class="card" style="padding:0; overflow:hidden; margin-top:20px;">
@@ -450,16 +462,11 @@
         </div>
 
         <div id="chatterbox" class="section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <h2>ChatterBox</h2>
                 <button class="btn" onclick="toggleFullscreenChat()">⛶ Fullscreen</button>
             </div>
             <iframe src="https://whatever-works123.github.io/Chatter-Box/"></iframe>
-        </div>
-
-        <div id="socials" class="section">
-            <h2>Web Browser</h2>
-            <iframe src="https://bing.com"></iframe>
         </div>
 
         <div id="settings" class="section">
@@ -467,13 +474,13 @@
             <div class="dashboard-grid">
                 <div class="card">
                     <h3>🔒 Stealth Mode</h3>
-                    <p>Toggle between School and Lounge mode.</p>
+                    <p style="color:var(--text-secondary); margin-bottom:15px;">Instantly switch between School and Secret modes.</p>
                     <button class="btn btn-primary" onclick="toggleMode()">Switch Mode</button>
-                    <p style="font-size:0.8rem; margin-top:10px; color:var(--text-secondary);">Shortcut: Press <strong>ESC</strong> key.</p>
+                    <p style="font-size:0.8rem; margin-top:10px; color:var(--text-secondary);">Shortcut: Press <strong>ESC</strong> key</p>
                 </div>
                 <div class="card">
                     <h3>🎨 Appearance</h3>
-                    <p>Switch between Light and Dark themes.</p>
+                    <p style="color:var(--text-secondary); margin-bottom:15px;">Switch between Light and Dark interface.</p>
                     <button class="btn" onclick="toggleTheme()">Toggle Theme</button>
                 </div>
             </div>
@@ -481,94 +488,20 @@
     </main>
 
     <textarea id="drive-mad-code" style="display:none;">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <base href="https://cdn.jsdelivr.net/gh/genizy/dmad-poki@49b5ab6b987f5f3be58f9dae59c92e8fc1aab9b0/">
-  <script>
-  window.assgdd = {
-    "ancestorOrigins": { "0": "https://games.poki.com", "1": "https://poki.com" },
-    "href": "https://f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com/cc1bc57a-e355-4696-97c2-097bf6188606/index.html?cloudsavegames=y"
-  }
-  </script>
-  <meta charset="utf-8"><title>Drive Mad</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <link rel="stylesheet" href="webapp/fancade.css">
-  <script src="poki-sdk.js" ></script>
-</head>
-<body id="body">
-  <div id="canvas_border" class="emscripten_border">
-    <div id="play_content" class="middle center">
-      <div class="edge"><div class="box"><div class="black"><img src="webapp/cover.jpg" class="cover"><p class="title">Drive Mad</p></div></div></div>
-      <div id="progress_or_play"><progress id="progress" class="loading" value="0" max="100"></progress></div>
-    </div>
-    <canvas class="emscripten" id="canvas" tabindex=-1></canvas>
-  </div>
-  <script type="text/javascript" src="webapp/source_min.js"></script>
-  <script type="text/javascript" src="webapp/index.js"></script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><base href="https://cdn.jsdelivr.net/gh/genizy/dmad-poki@49b5ab6b987f5f3be58f9dae59c92e8fc1aab9b0/"><script>window.assgdd={"ancestorOrigins":{"0":"https://games.poki.com","1":"https://poki.com"},"href":"https://f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com/cc1bc57a-e355-4696-97c2-097bf6188606/index.html?cloudsavegames=y"}</script><meta charset="utf-8"><title>Drive Mad</title><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><link rel="stylesheet" href="webapp/fancade.css"><script src="poki-sdk.js"></script></head><body id="body"><div id="canvas_border" class="emscripten_border"><div id="play_content" class="middle center"><div class="edge"><div class="box"><div class="black"><img src="webapp/cover.jpg" class="cover"><p class="title">Drive Mad</p></div></div></div><div id="progress_or_play"><progress id="progress" class="loading" value="0" max="100"></progress></div></div><canvas class="emscripten" id="canvas" tabindex=-1></canvas></div><script type="text/javascript" src="webapp/source_min.js"></script><script type="text/javascript" src="webapp/index.js"></script></body></html>
     </textarea>
 
     <textarea id="snake-code" style="display:none;">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"><title>Snake</title>
-    <style>body{display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#333;color:white;font-family:monospace;}canvas{background:#000;border:2px solid #fff;}.score-board{margin-bottom:10px;font-size:1.5em;}</style>
-</head>
-<body>
-    <div class="score-board">Score: <span id="score">0</span></div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-    <script>
-        const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d'),scoreElement=document.getElementById('score');
-        const gridSize=20;let snake=[{x:200,y:200}],food={},dx=gridSize,dy=0,score=0;
-        function main(){setTimeout(()=>{clear();drawFood();move();drawSnake();if(checkOver()){alert("Game Over: "+score);location.reload()}else main()},100)}
-        function clear(){ctx.fillStyle='#000';ctx.fillRect(0,0,400,400)}
-        function drawSnake(){snake.forEach(p=>{ctx.fillStyle='#4CAF50';ctx.fillRect(p.x,p.y,gridSize,gridSize);ctx.strokeRect(p.x,p.y,gridSize,gridSize)})}
-        function move(){const head={x:snake[0].x+dx,y:snake[0].y+dy};snake.unshift(head);if(head.x===food.x&&head.y===food.y){score+=10;scoreElement.innerText=score;placeFood()}else snake.pop()}
-        function placeFood(){food.x=Math.floor(Math.random()*20)*20;food.y=Math.floor(Math.random()*20)*20}
-        function checkOver(){return snake[0].x<0||snake[0].x>=400||snake[0].y<0||snake[0].y>=400||snake.slice(1).some(p=>p.x===snake[0].x&&p.y===snake[0].y)}
-        document.addEventListener('keydown',e=>{
-            if(e.which===37&&dx===0){dx=-20;dy=0}if(e.which===38&&dy===0){dx=0;dy=-20}
-            if(e.which===39&&dx===0){dx=20;dy=0}if(e.which===40&&dy===0){dx=0;dy=20}
-        });
-        placeFood();main();
-    </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Snake</title><style>body{display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#111;color:white;font-family:monospace;}canvas{background:#000;border:2px solid #333;box-shadow:0 0 20px rgba(0,255,0,0.2);}.score-board{position:absolute;top:20px;font-size:2em;}</style></head><body><div class="score-board">Score: <span id="score">0</span></div><canvas id="gameCanvas" width="400" height="400"></canvas><script>const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d'),scoreElement=document.getElementById('score');const gridSize=20;let snake=[{x:200,y:200}],food={},dx=gridSize,dy=0,score=0;function main(){setTimeout(()=>{clear();drawFood();move();drawSnake();if(checkOver()){alert("Game Over: "+score);location.reload()}else main()},100)}function clear(){ctx.fillStyle='#000';ctx.fillRect(0,0,400,400)}function drawSnake(){snake.forEach(p=>{ctx.fillStyle='#4CAF50';ctx.fillRect(p.x,p.y,gridSize-2,gridSize-2)})}function move(){const head={x:snake[0].x+dx,y:snake[0].y+dy};snake.unshift(head);if(head.x===food.x&&head.y===food.y){score+=10;scoreElement.innerText=score;placeFood()}else snake.pop()}function placeFood(){food.x=Math.floor(Math.random()*20)*20;food.y=Math.floor(Math.random()*20)*20}function checkOver(){return snake[0].x<0||snake[0].x>=400||snake[0].y<0||snake[0].y>=400||snake.slice(1).some(p=>p.x===snake[0].x&&p.y===snake[0].y)}document.addEventListener('keydown',e=>{if(e.which===37&&dx===0){dx=-20;dy=0}if(e.which===38&&dy===0){dx=0;dy=-20}if(e.which===39&&dx===0){dx=20;dy=0}if(e.which===40&&dy===0){dx=0;dy=20}});placeFood();main();</script></body></html>
     </textarea>
 
     <textarea id="geo-dash-code" style="display:none;">
-<!DOCTYPE html>
-<html lang="en-US">
-<head>
-    <base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/">
-    <title>Geometry Dash</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1">
-</head>
-<body style="margin:0;overflow:hidden;background:#000;">
-    <div id="gameContainer" style="width:100vw;height:100vh;"></div>
-    <script src="Build/UnityLoader.js"></script>
-    <script>
-        var gameInstance = UnityLoader.instantiate("gameContainer", "Build/GeometryDashLite.json");
-    </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en-US"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/"><title>Geometry Dash</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1"></head><body style="margin:0;overflow:hidden;background:#000;"><div id="gameContainer" style="width:100vw;height:100vh;"></div><script src="Build/UnityLoader.js"></script><script>var gameInstance=UnityLoader.instantiate("gameContainer","Build/GeometryDashLite.json");</script></body></html>
     </textarea>
 
     <script>
-        // --- CONFIG & AUTH ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA",
-            authDomain: "chatterbox3000-fb3e2.firebaseapp.com",
-            databaseURL: "https://chatterbox3000-fb3e2-default-rtdb.firebaseio.com",
-            projectId: "chatterbox3000-fb3e2",
-            storageBucket: "chatterbox3000-fb3e2.firebasestorage.app",
-            messagingSenderId: "298622361038",
-            appId: "1:298622361038:web:c1e46432470dbce92a5f9f"
-        };
+        // --- CONFIG ---
+        const firebaseConfig = { apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA", authDomain: "chatterbox3000-fb3e2.firebaseapp.com", databaseURL: "https://chatterbox3000-fb3e2-default-rtdb.firebaseio.com", projectId: "chatterbox3000-fb3e2", storageBucket: "chatterbox3000-fb3e2.firebasestorage.app", messagingSenderId: "298622361038", appId: "1:298622361038:web:c1e46432470dbce92a5f9f" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
@@ -579,7 +512,7 @@
         const hour = new Date().getHours();
         document.getElementById('greeting').innerText = hour < 12 ? 'Good Morning.' : hour < 18 ? 'Good Afternoon.' : 'Good Evening.';
 
-        // Auth Listener
+        // Auth
         auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUser = user;
@@ -601,7 +534,7 @@
         }
         function logoutUser() { auth.signOut(); location.reload(); }
 
-        // --- DATABASE ---
+        // Data & Toasts
         function toast(msg) {
             const t = document.getElementById('toast');
             t.innerText = msg || "Saved automatically";
@@ -631,7 +564,7 @@
                 .then(() => toast());
         }
 
-        // --- STUDY TOOLS ---
+        // --- TOOLS ---
         function addTodo() {
             const txt = document.getElementById('newTodo').value;
             if(!txt) return;
@@ -639,14 +572,8 @@
             updateTodoDB();
             document.getElementById('newTodo').value = '';
         }
-        function toggleTodo(idx) {
-            todoArray[idx].done = !todoArray[idx].done;
-            updateTodoDB();
-        }
-        function removeTodo(idx) {
-            todoArray.splice(idx, 1);
-            updateTodoDB();
-        }
+        function toggleTodo(idx) { todoArray[idx].done = !todoArray[idx].done; updateTodoDB(); }
+        function removeTodo(idx) { todoArray.splice(idx, 1); updateTodoDB(); }
         function updateTodoDB() {
             if(currentUser) db.ref('users/' + currentUser.uid + '/todos').set(todoArray).then(() => toast("Task updated"));
             renderTodos();
@@ -654,20 +581,11 @@
         function renderTodos() {
             const list = document.getElementById('todoList');
             const mini = document.getElementById('mini-todo-list');
-            list.innerHTML = '';
-            mini.innerHTML = '';
-            
+            list.innerHTML = ''; mini.innerHTML = '';
             let pendingCount = 0;
             todoArray.forEach((task, i) => {
-                list.innerHTML += `
-                    <div class="todo-item ${task.done ? 'done' : ''}">
-                        <span onclick="toggleTodo(${i})" style="cursor:pointer; flex:1;">${task.text}</span>
-                        <button class="btn btn-danger" onclick="removeTodo(${i})" style="padding:4px 8px; font-size:0.8rem;">×</button>
-                    </div>`;
-                if(!task.done) {
-                    pendingCount++;
-                    if(pendingCount <= 3) mini.innerHTML += `<li style="margin-bottom:5px;">• ${task.text}</li>`;
-                }
+                list.innerHTML += `<div class="todo-item ${task.done ? 'done' : ''}"><span onclick="toggleTodo(${i})" style="cursor:pointer; flex:1;">${task.text}</span><button class="btn btn-danger" onclick="removeTodo(${i})" style="padding:4px 8px; font-size:0.8rem;">×</button></div>`;
+                if(!task.done) { pendingCount++; if(pendingCount <= 3) mini.innerHTML += `<li style="margin-bottom:5px;">• ${task.text}</li>`; }
             });
             if(pendingCount === 0) mini.innerHTML = '<li style="color:var(--text-secondary);">No pending tasks.</li>';
         }
@@ -684,7 +602,6 @@
             } else { disp.value += val; }
         }
 
-        // Converter
         function convertUnit() {
             const val = parseFloat(document.getElementById('conv-input').value);
             const type = document.getElementById('conv-type').value;
@@ -701,8 +618,10 @@
         let timerInt = null;
         let timeLeft = 25 * 60;
         function toggleTimer() {
-            if(timerInt) { clearInterval(timerInt); timerInt = null; }
+            const ui = document.getElementById('timer-ui');
+            if(timerInt) { clearInterval(timerInt); timerInt = null; ui.classList.remove('timer-active'); }
             else {
+                ui.classList.add('timer-active');
                 timerInt = setInterval(() => {
                     if(timeLeft > 0) {
                         timeLeft--;
@@ -710,7 +629,7 @@
                         let s = (timeLeft % 60).toString().padStart(2, '0');
                         document.getElementById('timer-display').innerText = `${m}:${s}`;
                     } else {
-                        clearInterval(timerInt);
+                        clearInterval(timerInt); ui.classList.remove('timer-active');
                         alert("Time's up! Take a break.");
                     }
                 }, 1000);
@@ -718,6 +637,7 @@
         }
         function resetTimer() {
             clearInterval(timerInt); timerInt = null;
+            document.getElementById('timer-ui').classList.remove('timer-active');
             timeLeft = 25 * 60;
             document.getElementById('timer-display').innerText = "25:00";
         }
@@ -728,7 +648,7 @@
             document.getElementById(displayId).innerText = count + " words";
         }
 
-        // --- PERIODIC TABLE DATA ---
+        // --- PERIODIC TABLE ---
         const ptElements = [
             { num: 1, sym: "H", name: "Hydrogen", mass: "1.008", cat: "reactive-nonmetal", col: 1, row: 1 },
             { num: 2, sym: "He", name: "Helium", mass: "4.0026", cat: "noble-gas", col: 18, row: 1 },
@@ -855,7 +775,23 @@
             const panel = document.getElementById('pt-panel');
             ptElements.forEach(el => {
                 const div = document.createElement('div');
-                div.className = `element cat-${el.cat}`;
+                div.className = `element cat-${el.cat.replace('reactive-nonmetal','6').replace('noble-gas','7').replace('lanthanide','8').replace('actinide','9').replace('unknown','0').replace('alkali','1').replace('alkaline','2').replace('post-transition','4').replace('metalloid','5').replace('transition','3')}`;
+                
+                // Map old categories to new numbers for cleaner CSS or just rely on the replace mess above. 
+                // Actually, let's just stick to the specific classes.
+                // Re-mapping for safety:
+                let c = 'cat-unknown';
+                if(el.cat==='alkali') c='cat-alkali';
+                if(el.cat==='alkaline') c='cat-alkaline';
+                if(el.cat==='transition') c='cat-transition';
+                if(el.cat==='post-transition') c='cat-post-transition';
+                if(el.cat==='metalloid') c='cat-metalloid';
+                if(el.cat==='reactive-nonmetal') c='cat-reactive-nonmetal';
+                if(el.cat==='noble-gas') c='cat-noble-gas';
+                if(el.cat==='lanthanide') c='cat-lanthanide';
+                if(el.cat==='actinide') c='cat-actinide';
+                div.className = `element ${c}`;
+
                 div.style.gridColumn = el.col;
                 div.style.gridRow = el.row;
                 div.innerHTML = `<div class="num">${el.num}</div><div class="sym">${el.sym}</div>`;
@@ -863,9 +799,9 @@
                     panel.classList.add('active');
                     document.getElementById('p-sym').innerText = el.sym;
                     document.getElementById('p-name').innerText = el.name;
-                    document.getElementById('p-data').innerText = `#${el.num} | ${el.mass}`;
+                    document.getElementById('p-data').innerText = `No. ${el.num} | ${el.mass}u`;
                     document.getElementById('p-cat').innerText = el.cat.replace(/-/g, ' ');
-                    document.getElementById('p-sym').style.color = getComputedStyle(div).color;
+                    document.getElementById('p-sym').style.color = getComputedStyle(div).borderBottomColor;
                 });
                 table.appendChild(div);
             });
