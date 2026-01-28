@@ -743,7 +743,33 @@
         function loadDriveMad() { loadGame('drive-mad-code'); } function loadSnakeGame() { loadGame('snake-code'); } function loadGeoDash() { loadGame('geo-dash-code'); } function loadRagdollHit() { loadGame('ragdoll-hit-code'); }
         function toggleFullscreenEl(id) { const el = document.getElementById(id); if(el.classList.contains('fullscreen-mode')) { el.classList.remove('fullscreen-mode'); } else { document.querySelectorAll('.fullscreen-mode').forEach(e => e.classList.remove('fullscreen-mode')); el.classList.add('fullscreen-mode'); } }
         function exitFullGame() { document.getElementById('game-container').classList.remove('fullscreen-mode'); document.getElementById('exit-game-fs').style.display = 'none'; }
-        document.addEventListener('keydown', e => { if(e.key === "Escape") { document.querySelectorAll('.fullscreen-mode').forEach(el => { el.classList.remove('fullscreen-mode'); if(el.id === 'game-container') document.getElementById('exit-game-fs').style.display = 'none'; }); if(!document.querySelector('.fullscreen-mode') && document.body.classList.contains('mode-fun')) { toggleMode(); } } });
-    </script>
+				document.addEventListener('keydown', e => {
+		    // 1. SAFETY CHECK: If the user is typing in an input or textarea, STOP here.
+		    // This prevents accidental mode switching while writing an essay.
+		    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+		        return;
+		    }
+		
+		    if(e.key === "Escape") {
+		        let wasFullscreen = false;
+		
+		        // Exit fullscreen for any element currently in it
+		        document.querySelectorAll('.fullscreen-mode').forEach(el => {
+		            el.classList.remove('fullscreen-mode');
+		            wasFullscreen = true; // Record that we just exited a game/app
+		            
+		            if(el.id === 'game-container') {
+		                document.getElementById('exit-game-fs').style.display = 'none';
+		            }
+		        });
+		
+		        // Only toggle "Stealth Mode" if we are currently in Fun Mode
+		        // AND we didn't just use ESC to exit a game.
+		        if(!wasFullscreen && document.body.classList.contains('mode-fun')) {
+		            toggleMode();
+		        }
+		    }
+		});
+	</script>
 </body>
 </html>
