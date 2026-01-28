@@ -134,19 +134,11 @@
         #pt-panel { background: var(--bg-color); border: 1px solid var(--border); padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: none; align-items: center; justify-content: space-between; }
         #pt-panel.active { display: flex; animation: fadeIn 0.2s; }
 
-        .fullscreen-mode { position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 99999; padding: 0; margin: 0; display: flex; flex-direction: column; }
-        .fullscreen-mode iframe { width: 100%; height: 100%; border: none; }
-        iframe { width: 100%; height: 600px; border: none; border-radius: 12px; background: white; }
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        .login-box { background: var(--card-bg); padding: 40px; border-radius: 24px; text-align: center; width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); }
-        #toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s; font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.15); pointer-events: none; z-index: 9999; }
-
-        /* --- INSTAGRAM CLONE STYLES (Fixed & Themed) --- */
+        /* --- INSTAGRAM CLONE STYLES --- */
         .insta-main-wrapper {
             max-width: 600px;
             margin: 0 auto;
         }
-
         .insta-navbar {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -157,11 +149,9 @@
             align-items: center;
             justify-content: space-between;
         }
-        
         .insta-nav-icons { display: flex; align-items: center; gap: 15px; }
         .insta-nav-icons i { font-size: 1.4rem; color: var(--text-primary); cursor: pointer; transition: transform 0.2s; }
         .insta-nav-icons i:hover { transform: scale(1.1); }
-
         .insta-post-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -169,7 +159,6 @@
             margin-bottom: 20px;
             overflow: hidden;
         }
-        
         .insta-post-header {
             padding: 12px;
             display: flex;
@@ -188,24 +177,32 @@
         }
         .insta-user-details h3 { font-size: 0.9rem; font-weight: 600; margin: 0; color: var(--text-primary); }
         .insta-user-details span { font-size: 0.75rem; color: var(--text-secondary); }
-
         .insta-post-img { width: 100%; display: block; background: #000; min-height: 200px; object-fit: cover; }
-
         .insta-post-footer { padding: 12px; }
-        
         .insta-actions { display: flex; justify-content: space-between; margin-bottom: 10px; }
         .insta-action-left { display: flex; gap: 15px; }
         .insta-actions i { font-size: 1.5rem; color: var(--text-primary); cursor: pointer; transition: 0.2s; }
         .insta-actions i:hover { color: var(--accent); }
-
-        /* Heart Animation Effect */
         .fa-heart.liked { color: #ed4956; animation: pop 0.3s ease; }
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-
         .insta-likes { font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
         .insta-caption { font-size: 0.9rem; line-height: 1.4; margin-bottom: 6px; }
         .insta-caption b { font-weight: 600; margin-right: 5px; }
         .insta-time { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 5px; }
+
+        /* --- FULLSCREEN UTILS --- */
+        .fullscreen-mode {
+            position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: black; z-index: 99999; padding: 0; margin: 0;
+            display: flex; flex-direction: column; border-radius: 0 !important;
+        }
+        .fullscreen-mode iframe { width: 100%; height: 100%; border: none; border-radius: 0; }
+        
+        iframe { width: 100%; height: 600px; border: none; border-radius: 12px; background: white; }
+        
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .login-box { background: var(--card-bg); padding: 40px; border-radius: 24px; text-align: center; width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); }
+        #toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s; font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.15); pointer-events: none; z-index: 9999; }
     </style>
 </head>
 <body class="mode-school" data-theme="light">
@@ -403,9 +400,12 @@
                 <div class="card" style="text-align:center;"><h3>Snake</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadSnakeGame()">Play</button></div>
                 <div class="card" style="text-align:center;"><h3>Ragdoll Hit</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadRagdollHit()">Play</button></div>
             </div>
-            <div id="game-container" class="card" style="padding:0; overflow:hidden; margin-top:20px;">
+            
+            <div id="game-container" class="card" style="padding:0; overflow:hidden; margin-top:20px; position:relative;">
                 <button class="btn btn-danger" style="position:absolute; top:10px; right:10px; z-index:100; display:none;" id="exit-game-fs" onclick="exitFullGame()">Exit Fullscreen</button>
-                <iframe id="game-frame" src=""></iframe>
+                <button class="btn btn-primary" style="position:absolute; bottom:10px; right:10px; z-index:100;" onclick="enterFullGame()">⛶ Fullscreen</button>
+                
+                <iframe id="game-frame" src="" allow="gamepad *; keyboard-lock *;"></iframe>
             </div>
         </div>
 
@@ -443,38 +443,6 @@
     </textarea>
     <textarea id="geo-dash-code" style="display:none;">
 <!DOCTYPE html><html lang="en-US"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/"><title>Geometry Dash</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1"></head><body style="margin:0;overflow:hidden;background:#000;"><div id="gameContainer" style="width:100vw;height:100vh;"></div><script src="Build/UnityLoader.js"></script><script>var gameInstance=UnityLoader.instantiate("gameContainer","Build/GeometryDashLite.json");</script></body></html>
-    </textarea>
-    <textarea id="ragdoll-hit-code" style="display:none;">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<base href="https://rawcdn.githack.com/genizy/google-class/main/ragdoll-hit/">
-	<meta charset="utf-8">
-	<title>Ragdoll Hit - Poki</title>
-	<script>
-	window.config = {
-		loader: 'unity-2020',
-		debug: false,
-		maxRatio: 24 / 9,
-		minRatio: 9 / 24,
-		title: 'Ragdoll Hit',
-		unityVersion: '2022.3.6f1',
-		unityWebglBuildUrl: '',
-		fileSize: 9,
-		cachedDecompressedFileSizes: {
-			'3276aa7c11496bcc48eb6908f112f0c3.js.unityweb': 66682,
-			'959bf1c60308f1c34bf072f43c3c17d4.data.unityweb': 4377721,
-			'f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb': 5105161,
-			'v84.loader.js': 114199,
-		},
-		"metadata": {"poki_template_version":1,"background_color":"#4D4D4D","code_filename":"f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb","framework_filename":"3276aa7c11496bcc48eb6908f112f0c3.js.unityweb","loader_filename":"v84.loader.js","use_wasm":"true"}
-	};
-	</script>
-</head>
-<body style="margin:0; overflow:hidden; background:#4D4D4D;">
-	<script src="master-loader.js"></script>
-</body>
-</html>
     </textarea>
 
     <script>
@@ -659,7 +627,7 @@
             });
         }
 
-        // UPDATED LIKE FUNCTION (Toggle + Memory)
+        // UPDATED LIKE FUNCTION
         function likePost(postId) {
             if(!currentUser) return alert("Please login to like posts.");
             
@@ -694,10 +662,43 @@
         function toggleMode() { document.body.classList.toggle('mode-school'); document.body.classList.toggle('mode-fun'); showSection(document.body.classList.contains('mode-school') ? 'school-home' : 'fun-home'); }
         function toggleTheme() { const b = document.body; b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
         function loadGame(codeId) { const iframe = document.getElementById('game-frame'); iframe.srcdoc = document.getElementById(codeId).value; iframe.onload = () => { iframe.contentWindow.focus(); const container = document.getElementById('game-container'); if(container.classList.contains('fullscreen-mode')) document.getElementById('exit-game-fs').style.display = 'block'; }; }
-        function loadDriveMad() { loadGame('drive-mad-code'); } function loadSnakeGame() { loadGame('snake-code'); } function loadGeoDash() { loadGame('geo-dash-code'); } function loadRagdollHit() { loadGame('ragdoll-hit-code'); }
+        function loadDriveMad() { loadGame('drive-mad-code'); } function loadSnakeGame() { loadGame('snake-code'); } function loadGeoDash() { loadGame('geo-dash-code'); } 
+        
+        // RAGDOLL HIT FIX (USING EMBED)
+        function loadRagdollHit() { 
+            const iframe = document.getElementById('game-frame');
+            iframe.src = "https://www.crazygames.com/embed/ragdoll-hit";
+        }
+        
         function toggleFullscreenEl(id) { const el = document.getElementById(id); if(el.classList.contains('fullscreen-mode')) { el.classList.remove('fullscreen-mode'); } else { document.querySelectorAll('.fullscreen-mode').forEach(e => e.classList.remove('fullscreen-mode')); el.classList.add('fullscreen-mode'); } }
-        function exitFullGame() { document.getElementById('game-container').classList.remove('fullscreen-mode'); document.getElementById('exit-game-fs').style.display = 'none'; }
-        document.addEventListener('keydown', e => { if(e.key === "Escape") { document.querySelectorAll('.fullscreen-mode').forEach(el => { el.classList.remove('fullscreen-mode'); if(el.id === 'game-container') document.getElementById('exit-game-fs').style.display = 'none'; }); if(!document.querySelector('.fullscreen-mode') && document.body.classList.contains('mode-fun')) { toggleMode(); } } });
+        
+        function enterFullGame() {
+            document.getElementById('game-container').classList.add('fullscreen-mode');
+            document.getElementById('exit-game-fs').style.display = 'block';
+        }
+
+        function exitFullGame() { 
+            document.getElementById('game-container').classList.remove('fullscreen-mode'); 
+            document.getElementById('exit-game-fs').style.display = 'none'; 
+        }
+        
+        document.addEventListener('keydown', e => { 
+            if(e.key === "Escape") { 
+                // Check if any element is in fullscreen
+                const fsElement = document.querySelector('.fullscreen-mode');
+                
+                if (fsElement) {
+                    // PRIORITIZE EXITING FULLSCREEN
+                    fsElement.classList.remove('fullscreen-mode');
+                    if(fsElement.id === 'game-container') {
+                        document.getElementById('exit-game-fs').style.display = 'none';
+                    }
+                } else if (document.body.classList.contains('mode-fun')) {
+                    // IF NOT FULLSCREEN, TOGGLE STEALTH
+                    toggleMode(); 
+                }
+            } 
+        });
     </script>
 </body>
 </html>
