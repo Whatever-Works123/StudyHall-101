@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall OS 5.1 (Day Cycle Edition)</title>
+    <title>StudyHall OS 5.2 (Fixed Login)</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -211,10 +211,16 @@
         <div class="login-box">
             <h1 style="color: var(--accent); margin-bottom:10px;">StudyHall OS</h1>
             <p style="color: var(--text-secondary); margin-bottom:25px;">Enter your workspace</p>
+            
             <input type="email" id="email" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="password" placeholder="Password" style="margin-bottom:20px;">
-            <button class="btn btn-primary" onclick="loginUser()" style="width:100%;">Enter Dashboard</button>
-            <p id="login-error" style="margin-top:15px; color:#ef4444; font-size:0.9rem;"></p>
+            
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-primary" onclick="loginUser()" style="width:100%;">Log In</button>
+                <button class="btn" onclick="registerUser()" style="width:100%; border:1px solid var(--border);">Sign Up</button>
+            </div>
+            
+            <p id="login-error" style="margin-top:15px; color:#ef4444; font-size:0.9rem; min-height: 20px;"></p>
         </div>
     </div>
 
@@ -504,6 +510,7 @@
     </textarea>
 
     <script>
+        // CONFIG
         const firebaseConfig = { apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA", authDomain: "chatterbox3000-fb3e2.firebaseapp.com", databaseURL: "https://chatterbox3000-fb3e2-default-rtdb.firebaseio.com", projectId: "chatterbox3000-fb3e2", storageBucket: "chatterbox3000-fb3e2.firebasestorage.app", messagingSenderId: "298622361038", appId: "1:298622361038:web:c1e46432470dbce92a5f9f" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
@@ -544,9 +551,51 @@
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
             const err = document.getElementById('login-error');
+            
+            if (!email || !pass) {
+                err.innerText = "Please enter both email and password.";
+                return;
+            }
+
             err.innerText = "Authenticating...";
-            auth.signInWithEmailAndPassword(email, pass).catch(e => err.innerText = e.message);
+            auth.signInWithEmailAndPassword(email, pass).catch(e => {
+                err.innerText = "Error: " + e.message;
+            });
         }
+
+        function registerUser() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            const err = document.getElementById('login-error');
+
+            if (!email || !pass) {
+                err.innerText = "Please enter an email and password to sign up.";
+                return;
+            }
+
+            if (pass.length < 6) {
+                err.innerText = "Password must be at least 6 characters.";
+                return;
+            }
+
+            err.innerText = "Creating Account...";
+            auth.createUserWithEmailAndPassword(email, pass)
+                .then((userCredential) => {
+                    // Signed in automatically
+                    toast("Account Created! Welcome.");
+                    
+                    // Create default schedule placeholder for new user
+                    const uid = userCredential.user.uid;
+                    db.ref('users/' + uid + '/schedule').set({
+                        r1: "Free", r2: "Free", r3: "Free", r4: "Free",
+                        g5: "Free", g6: "Free", g7: "Free", g8: "Free"
+                    });
+                })
+                .catch((error) => {
+                    err.innerText = "Error: " + error.message;
+                });
+        }
+
         function logoutUser() { auth.signOut(); location.reload(); }
         function toast(msg) { const t = document.getElementById('toast'); t.innerText = msg || "Saved automatically"; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2000); }
 
