@@ -356,6 +356,7 @@
                 <div class="card" style="text-align:center;"><h3>Geometry Dash</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGeoDash()">Play</button></div>
                 <div class="card" style="text-align:center;"><h3>Drive Mad</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadDriveMad()">Play</button></div>
                 <div class="card" style="text-align:center;"><h3>Snake</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadSnakeGame()">Play</button></div>
+                <div class="card" style="text-align:center;"><h3>Ragdoll Hit</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadRagdollHit()">Play</button></div>
             </div>
             <div id="game-container" class="card" style="padding:0; overflow:hidden; margin-top:20px;">
                 <button class="btn btn-danger" style="position:absolute; top:10px; right:10px; z-index:100; display:none;" id="exit-game-fs" onclick="exitFullGame()">Exit Fullscreen</button>
@@ -397,6 +398,53 @@
     </textarea>
     <textarea id="geo-dash-code" style="display:none;">
 <!DOCTYPE html><html lang="en-US"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/"><title>Geometry Dash</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1"></head><body style="margin:0;overflow:hidden;background:#000;"><div id="gameContainer" style="width:100vw;height:100vh;"></div><script src="Build/UnityLoader.js"></script><script>var gameInstance=UnityLoader.instantiate("gameContainer","Build/GeometryDashLite.json");</script></body></html>
+    </textarea>
+    <textarea id="ragdoll-hit-code" style="display:none;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<script src="https://cdn.jsdelivr.net/npm/p5@1.11.5/lib/p5.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/p5@1.11.5/lib/addons/p5.sound.min.js"></script>
+	<script src="mySketch.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css">
+<html>
+<head>
+	<base href="https://rawcdn.githack.com/genizy/google-class/main/ragdoll-hit/">
+	<meta name="robots" content="noindex,nofollow" />
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Ragdoll Hit - Poki</title>
+	<script>
+	window.config = {
+		loader: 'unity-2020',
+		debug: false,
+		maxRatio: 24 / 9,
+		minRatio: 9 / 24,
+
+		title: 'Ragdoll Hit',
+		thumbnail: 'thumbnail.png',
+		numScreenshots:  4 ,
+
+		unityVersion: '2022.3.6f1',
+		unityWebglBuildUrl: '',
+
+		fileSize:  9 ,
+		cachedDecompressedFileSizes: {
+			'3276aa7c11496bcc48eb6908f112f0c3.js.unityweb':  66682 ,
+			'959bf1c60308f1c34bf072f43c3c17d4.data.unityweb':  4377721 ,
+			'f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb':  5105161 ,
+			'v84.loader.js':  114199 ,
+		},
+		"metadata": {"poki_template_version":1,"background_color":"#4D4D4D","code_filename":"f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb","company_name":"Ericetto","data_filename":"959bf1c60308f1c34bf072f43c3c17d4.data.unityweb","decompression_fallback":"Brotli","development_player":"false","framework_filename":"3276aa7c11496bcc48eb6908f112f0c3.js.unityweb","height":"600","loader_filename":"v84.loader.js","product_name":"Ragdoll Hit","product_version":"0.1","splash_screen_style":"Dark","unity_version":"2022.3.6f1","use_data_caching":"true","use_threads":"false","use_wasm":"true","use_webgl_1_0":"true","use_webgl_2_0":"true","width":"960"}
+	};
+	</script>
+<script src="MobileDetect.js"></script>
+</head>
+<body>
+	<script src="master-loader.js"></script>
+</body>
+</html>
     </textarea>
 
     <script>
@@ -563,7 +611,7 @@
         function toggleMode() { document.body.classList.toggle('mode-school'); document.body.classList.toggle('mode-fun'); showSection(document.body.classList.contains('mode-school') ? 'school-home' : 'fun-home'); }
         function toggleTheme() { const b = document.body; b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
         function loadGame(codeId) { const iframe = document.getElementById('game-frame'); iframe.srcdoc = document.getElementById(codeId).value; iframe.onload = () => { iframe.contentWindow.focus(); const container = document.getElementById('game-container'); if(container.classList.contains('fullscreen-mode')) document.getElementById('exit-game-fs').style.display = 'block'; }; }
-        function loadDriveMad() { loadGame('drive-mad-code'); } function loadSnakeGame() { loadGame('snake-code'); } function loadGeoDash() { loadGame('geo-dash-code'); }
+        function loadDriveMad() { loadGame('drive-mad-code'); } function loadSnakeGame() { loadGame('snake-code'); } function loadGeoDash() { loadGame('geo-dash-code'); } function loadRagdollHit() { loadGame('ragdoll-hit-code'); }
         function toggleFullscreenEl(id) { const el = document.getElementById(id); if(el.classList.contains('fullscreen-mode')) { el.classList.remove('fullscreen-mode'); } else { document.querySelectorAll('.fullscreen-mode').forEach(e => e.classList.remove('fullscreen-mode')); el.classList.add('fullscreen-mode'); } }
         function exitFullGame() { document.getElementById('game-container').classList.remove('fullscreen-mode'); document.getElementById('exit-game-fs').style.display = 'none'; }
         document.addEventListener('keydown', e => { if(e.key === "Escape") { document.querySelectorAll('.fullscreen-mode').forEach(el => { el.classList.remove('fullscreen-mode'); if(el.id === 'game-container') document.getElementById('exit-game-fs').style.display = 'none'; }); if(!document.querySelector('.fullscreen-mode') && document.body.classList.contains('mode-fun')) { toggleMode(); } } });
