@@ -237,6 +237,7 @@
         <button class="nav-btn fun-only" onclick="showSection('games')">🕹️ Arcade</button>
         <button class="nav-btn fun-only" onclick="showSection('social-feed')">📸 Social Feed</button>
         <button class="nav-btn fun-only" onclick="showSection('chatterbox')">💬 ChatterBox</button>
+        <button class="nav-btn fun-only" onclick="showSection('music')">🎧 Vibes</button>
 
         <div style="margin-top:auto;">
             <button class="nav-btn" onclick="showSection('settings')">⚙️ Settings</button>
@@ -413,6 +414,14 @@
             <iframe src="https://whatever-works123.github.io/Chatter-Box/" style="height:500px;"></iframe>
         </div>
 
+        <div id="music" class="section">
+            <h2>Study Vibes</h2>
+            <div class="card" style="text-align:center;">
+                <h3>Lofi Radio - Beats to Relax/Study To</h3>
+                <iframe width="100%" height="400" src="https://www.youtube.com/embed/jfKfPfyJRdk" title="Lofi Girl" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px; margin-top:20px;"></iframe>
+            </div>
+        </div>
+
         <div id="settings" class="section">
             <h2>System Settings</h2>
             <div class="dashboard-grid">
@@ -474,302 +483,241 @@
     </textarea>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA", authDomain: "chatterbox3000-fb3e2.firebaseapp.com", databaseURL: "https://chatterbox3000-fb3e2-default-rtdb.firebaseio.com", projectId: "chatterbox3000-fb3e2", storageBucket: "chatterbox3000-fb3e2.firebasestorage.app", messagingSenderId: "298622361038", appId: "1:298622361038:web:c1e46432470dbce92a5f9f" };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        // --- 1. FIREBASE CONFIGURATION (PASTE YOUR KEYS HERE) ---
+        const firebaseConfig = {
+            apiKey: "PASTE_YOUR_API_KEY_HERE",
+            authDomain: "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://PASTE_YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "PASTE_YOUR_PROJECT_ID",
+            storageBucket: "PASTE_YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "PASTE_YOUR_SENDER_ID",
+            appId: "PASTE_YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const auth = firebase.auth();
         const db = firebase.database();
         let currentUser = null;
-        let todoArray = [];
 
-        const hour = new Date().getHours();
-        document.getElementById('greeting').innerText = hour < 12 ? 'Good Morning.' : hour < 18 ? 'Good Afternoon.' : 'Good Evening.';
-
-        auth.onAuthStateChanged((user) => {
+        // --- 2. AUTHENTICATION LOGIC ---
+        auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('user-display').innerText = user.email.split('@')[0];
                 loadUserData();
-                loadPosts(); // Load Social Feed automatically on login
             } else {
-                document.getElementById('login-overlay').style.display = 'flex';
                 currentUser = null;
+                document.getElementById('login-overlay').style.display = 'flex';
             }
         });
 
         function loginUser() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
             const err = document.getElementById('login-error');
             err.innerText = "Authenticating...";
-            auth.signInWithEmailAndPassword(email, pass).catch(e => err.innerText = e.message);
+            auth.signInWithEmailAndPassword(e, p).catch(error => {
+                err.innerText = error.message;
+            });
         }
-        function logoutUser() { auth.signOut(); location.reload(); }
-        function toast(msg) { const t = document.getElementById('toast'); t.innerText = msg || "Saved automatically"; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2000); }
+
+        function logoutUser() {
+            auth.signOut();
+            location.reload();
+        }
+
+        // --- 3. NAVIGATION & SAVING ---
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            // Highlight the button that was clicked
+            if(event && event.target) event.target.classList.add('active');
+        }
+
+        function saveData(type) {
+            if (!currentUser) return;
+            const val = document.getElementById('note-' + type).value;
+            db.ref('users/' + currentUser.uid + '/notes/' + type).set(val);
+            
+            // Show "Saved" toast
+            const t = document.getElementById('toast');
+            t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 2000);
+        }
 
         function loadUserData() {
-            if(!currentUser) return;
-            db.ref('users/' + currentUser.uid).once('value').then(snap => {
-                const data = snap.val();
-                if (data) {
-                    ['math', 'science', 'ela', 'history'].forEach(sub => {
-                        if(data[sub]) {
-                            document.getElementById('note-' + sub).value = data[sub];
-                            if(sub === 'ela' || sub === 'history') countWords('note-'+sub, sub==='ela'?'ela-count':'hist-count');
-                        }
-                    });
-                    if(data.todos) { todoArray = data.todos; renderTodos(); }
-                }
-            });
-        }
-        function saveData(subject) { if(!currentUser) return; db.ref('users/' + currentUser.uid + '/' + subject).set(document.getElementById('note-' + subject).value).then(() => toast()); }
-
-        function addTodo() { const txt = document.getElementById('newTodo').value; if(!txt) return; todoArray.push({text: txt, done: false}); updateTodoDB(); document.getElementById('newTodo').value = ''; }
-        function toggleTodo(idx) { todoArray[idx].done = !todoArray[idx].done; updateTodoDB(); }
-        function removeTodo(idx) { todoArray.splice(idx, 1); updateTodoDB(); }
-        function updateTodoDB() { if(currentUser) db.ref('users/' + currentUser.uid + '/todos').set(todoArray).then(() => toast("Task updated")); renderTodos(); }
-        function renderTodos() {
-            const list = document.getElementById('todoList');
-            const mini = document.getElementById('mini-todo-list');
-            list.innerHTML = ''; mini.innerHTML = '';
-            let pendingCount = 0;
-            todoArray.forEach((task, i) => {
-                list.innerHTML += `<div class="todo-item ${task.done ? 'done' : ''}"><span onclick="toggleTodo(${i})" style="cursor:pointer; flex:1;">${task.text}</span><button class="btn btn-danger" onclick="removeTodo(${i})" style="padding:4px 8px; font-size:0.8rem;">×</button></div>`;
-                if(!task.done) { pendingCount++; if(pendingCount <= 3) mini.innerHTML += `<li style="margin-bottom:5px;">• ${task.text}</li>`; }
-            });
-            if(pendingCount === 0) mini.innerHTML = '<li style="color:var(--text-secondary);">No pending tasks.</li>';
-        }
-
-		      function calc(val) {
-		    const disp = document.getElementById('calcDisplay');
-		
-		    if (val === 'C') {
-		        // Clear screen
-		        disp.value = '';
-		    } else if (val === '=') {
-		        try {
-		            let expr = disp.value;
-		
-		            // 1. Translate screen text to JavaScript Math code
-		            expr = expr.replace(/sin\(/g, 'Math.sin(');
-		            expr = expr.replace(/cos\(/g, 'Math.cos(');
-		            expr = expr.replace(/tan\(/g, 'Math.tan(');
-		            expr = expr.replace(/sqrt\(/g, 'Math.sqrt(');
-		            expr = expr.replace(/PI/g, 'Math.PI');
-		            
-		            // 2. Handle Power (convert '2^3' to '2**3')
-		            expr = expr.replace(/\^/g, '**');
-		
-		            // 3. Calculate
-		            const result = eval(expr);
-		            
-		            // Limit decimals to avoid messy numbers (like 2.000000001)
-		            if (Number.isInteger(result)) {
-		                disp.value = result;
-		            } else {
-		                disp.value = result.toFixed(4).replace(/\.?0+$/, '');
-		            }
-		
-		        } catch (e) {
-		            disp.value = 'Error';
-		        }
-		    } else {
-		        // If the user clicks "x^y", we show "^" instead of "pow("
-		        if (val === 'pow(') {
-		            disp.value += '^';
-		        } else {
-		            disp.value += val;
-		        }
-		    }
-		}
-        // --- REAL-TIME INSTA LOGIC ---
-
-        function createInstaPost() {
-            if(!currentUser) return alert("Please login first.");
-            
-            const caption = document.getElementById('post-caption-input').value;
-            const imgUrl = document.getElementById('post-img-url').value;
-            
-            if(!caption && !imgUrl) return alert("Please write a caption or add an image.");
-
-            const newPost = {
-                username: currentUser.email.split('@')[0],
-                image: imgUrl || '', // Optional Image
-                caption: caption,
-                likes: 0,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                comments: []
-            };
-
-            db.ref('posts').push(newPost).then(() => {
-                toast("Shared to Feed!");
-                document.getElementById('post-caption-input').value = '';
-                document.getElementById('post-img-url').value = '';
-                document.getElementById('new-post-area').style.display = 'none';
-            });
-        }
-
-		function loadPosts() {
-		    const feed = document.getElementById('feed-container');
-		    
-		    // Update the user profile pic in the nav bar if logged in
-		    if(currentUser) {
-		        document.getElementById('nav-user-pic').innerText = currentUser.email.charAt(0).toUpperCase();
-		    }
-		
-		    // FIX: Turn off previous listeners so we don't duplicate them
-		    db.ref('posts').off(); 
-		
-		    // Now start the new listener
-		    db.ref('posts').limitToLast(20).on('value', snapshot => {
-		        feed.innerHTML = '';
-		        const posts = [];
-		        
-		        snapshot.forEach(child => {
-		            posts.push({ id: child.key, ...child.val() });
-		        });
-		
-		        if(posts.length === 0) {
-		            feed.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary);">No posts yet.</div>';
-		            return;
-		        }
-		        
-		        // Reverse so newest posts show first
-		        posts.reverse().forEach(post => {
-		            const card = document.createElement('div');
-		            card.className = 'insta-post-card';
-		            
-		            // Safety check: ensure image exists and isn't empty
-		            const hasImage = post.image && post.image.trim() !== '';
-		            
-		            card.innerHTML = `
-		                <div class="insta-post-header">
-		                    <div class="insta-user-details">
-		                        <div class="insta-profile-pic">
-		                            <div style="display:flex; align-items:center; justify-content:center; font-weight:700; color:#333; background:#eee; width:100%; height:100%; border-radius:50%;">
-		                                ${post.username.charAt(0).toUpperCase()}
-		                            </div>
-		                        </div>
-		                        <div>
-		                            <h3>${post.username}</h3>
-		                            <span>StudyHall Student</span>
-		                        </div>
-		                    </div>
-		                </div>
-		                ${hasImage ? `<img class="insta-post-img" src="${post.image}">` : ''}
-		                <div class="insta-post-footer">
-		                    <div class="insta-actions">
-		                        <div class="insta-action-left">
-		                            <i class="far fa-heart" onclick="likePost('${post.id}')" style="cursor: pointer;"></i>
-		                        </div>
-		                    </div>
-		                    <p class="insta-likes">${post.likes || 0} likes</p>
-		                    <div class="insta-caption"><b>${post.username}</b> ${post.caption || ''}</div>
-		                </div>
-		            `;
-		            feed.appendChild(card);
-		        });
-		    });
-		}
-                
-                // Show newest first
-                posts.reverse().forEach(post => {
-                    const hasImage = post.image && post.image.trim() !== '';
-                    const userInitial = post.username.charAt(0).toUpperCase();
-                    
-                    const card = document.createElement('div');
-                    card.className = 'insta-post-card';
-                    
-                    let imageHTML = '';
-                    if(hasImage) {
-                        imageHTML = `<img class="insta-post-img" src="${post.image}" onerror="this.style.display='none'">`;
-                    }
-
-                    card.innerHTML = `
-                        <div class="insta-post-header">
-                            <div class="insta-user-details">
-                                <div class="insta-profile-pic">
-                                    <div style="display:flex; align-items:center; justify-content:center; font-weight:700; color:#333; background:#eee; width:100%; height:100%; border-radius:50%;">${userInitial}</div>
-                                </div>
-                                <div>
-                                    <h3>${post.username}</h3>
-                                    <span>StudyHall Student</span>
-                                </div>
-                            </div>
-                            <i class="fas fa-ellipsis-h insta-post-menu"></i>
-                        </div>
-                        ${imageHTML}
-                        <div class="insta-post-footer">
-                            <div class="insta-actions">
-                                <div class="insta-action-left">
-                                    <i class="far fa-heart" onclick="likePost('${post.id}')"></i>
-                                    <i class="far fa-comment"></i>
-                                    <i class="far fa-paper-plane"></i>
-                                </div>
-                                <i class="far fa-bookmark"></i>
-                            </div>
-                            <p class="insta-likes">${post.likes || 0} likes</p>
-                            <div class="insta-caption">
-                                <b>${post.username}</b> ${post.caption || ''}
-                            </div>
-                            <p class="insta-time">Recently</p>
-                        </div>
-                    `;
-                    feed.appendChild(card);
+            const types = ['math', 'science', 'ela', 'history'];
+            types.forEach(t => {
+                db.ref('users/' + currentUser.uid + '/notes/' + t).once('value', s => {
+                    if(s.val()) document.getElementById('note-' + t).value = s.val();
                 });
             });
         }
 
-        function likePost(postId) {
-            const postRef = db.ref('posts/' + postId + '/likes');
-            postRef.transaction(currentLikes => (currentLikes || 0) + 1);
+        // --- 4. CALCULATOR (FIXED) ---
+        function calc(val) {
+            const disp = document.getElementById('calcDisplay');
+            if (val === 'C') {
+                disp.value = '';
+            } else if (val === '=') {
+                try {
+                    let expr = disp.value
+                        .replace(/sin\(/g, 'Math.sin(')
+                        .replace(/cos\(/g, 'Math.cos(')
+                        .replace(/tan\(/g, 'Math.tan(')
+                        .replace(/sqrt\(/g, 'Math.sqrt(')
+                        .replace(/PI/g, 'Math.PI')
+                        .replace(/\^/g, '**');
+                    
+                    let res = eval(expr);
+                    disp.value = Number.isInteger(res) ? res : res.toFixed(4).replace(/\.?0+$/, '');
+                } catch { disp.value = 'Error'; }
+            } else {
+                disp.value += (val === 'pow(' ? '^' : val);
+            }
         }
 
-        // --- PERIODIC TABLE ---
-        const ptElements = [ { num: 1, sym: "H", name: "Hydrogen", mass: "1.008", cat: "reactive-nonmetal", col: 1, row: 1 }, { num: 2, sym: "He", name: "Helium", mass: "4.0026", cat: "noble-gas", col: 18, row: 1 }, { num: 3, sym: "Li", name: "Lithium", mass: "6.94", cat: "alkali", col: 1, row: 2 }, { num: 4, sym: "Be", name: "Beryllium", mass: "9.0122", cat: "alkaline", col: 2, row: 2 }, { num: 5, sym: "B", name: "Boron", mass: "10.81", cat: "metalloid", col: 13, row: 2 }, { num: 6, sym: "C", name: "Carbon", mass: "12.011", cat: "reactive-nonmetal", col: 14, row: 2 }, { num: 7, sym: "N", name: "Nitrogen", mass: "14.007", cat: "reactive-nonmetal", col: 15, row: 2 }, { num: 8, sym: "O", name: "Oxygen", mass: "15.999", cat: "reactive-nonmetal", col: 16, row: 2 }, { num: 9, sym: "F", name: "Fluorine", mass: "18.998", cat: "reactive-nonmetal", col: 17, row: 2 }, { num: 10, sym: "Ne", name: "Neon", mass: "20.180", cat: "noble-gas", col: 18, row: 2 }, { num: 11, sym: "Na", name: "Sodium", mass: "22.990", cat: "alkali", col: 1, row: 3 }, { num: 12, sym: "Mg", name: "Magnesium", mass: "24.305", cat: "alkaline", col: 2, row: 3 }, { num: 13, sym: "Al", name: "Aluminum", mass: "26.982", cat: "post-transition", col: 13, row: 3 }, { num: 14, sym: "Si", name: "Silicon", mass: "28.085", cat: "metalloid", col: 14, row: 3 }, { num: 15, sym: "P", name: "Phosphorus", mass: "30.974", cat: "reactive-nonmetal", col: 15, row: 3 }, { num: 16, sym: "S", name: "Sulfur", mass: "32.06", cat: "reactive-nonmetal", col: 16, row: 3 }, { num: 17, sym: "Cl", name: "Chlorine", mass: "35.45", cat: "reactive-nonmetal", col: 17, row: 3 }, { num: 18, sym: "Ar", name: "Argon", mass: "39.948", cat: "noble-gas", col: 18, row: 3 }, { num: 19, sym: "K", name: "Potassium", mass: "39.098", cat: "alkali", col: 1, row: 4 }, { num: 20, sym: "Ca", name: "Calcium", mass: "40.078", cat: "alkaline", col: 2, row: 4 }, { num: 21, sym: "Sc", name: "Scandium", mass: "44.956", cat: "transition", col: 3, row: 4 }, { num: 22, sym: "Ti", name: "Titanium", mass: "47.867", cat: "transition", col: 4, row: 4 }, { num: 23, sym: "V", name: "Vanadium", mass: "50.942", cat: "transition", col: 5, row: 4 }, { num: 24, sym: "Cr", name: "Chromium", mass: "51.996", cat: "transition", col: 6, row: 4 }, { num: 25, sym: "Mn", name: "Manganese", mass: "54.938", cat: "transition", col: 7, row: 4 }, { num: 26, sym: "Fe", name: "Iron", mass: "55.845", cat: "transition", col: 8, row: 4 }, { num: 27, sym: "Co", name: "Cobalt", mass: "58.933", cat: "transition", col: 9, row: 4 }, { num: 28, sym: "Ni", name: "Nickel", mass: "58.693", cat: "transition", col: 10, row: 4 }, { num: 29, sym: "Cu", name: "Copper", mass: "63.546", cat: "transition", col: 11, row: 4 }, { num: 30, sym: "Zn", name: "Zinc", mass: "65.38", cat: "transition", col: 12, row: 4 }, { num: 31, sym: "Ga", name: "Gallium", mass: "69.723", cat: "post-transition", col: 13, row: 4 }, { num: 32, sym: "Ge", name: "Germanium", mass: "72.630", cat: "metalloid", col: 14, row: 4 }, { num: 33, sym: "As", name: "Arsenic", mass: "74.922", cat: "metalloid", col: 15, row: 4 }, { num: 34, sym: "Se", name: "Selenium", mass: "78.971", cat: "reactive-nonmetal", col: 16, row: 4 }, { num: 35, sym: "Br", name: "Bromine", mass: "79.904", cat: "reactive-nonmetal", col: 17, row: 4 }, { num: 36, sym: "Kr", name: "Krypton", mass: "83.798", cat: "noble-gas", col: 18, row: 4 }, { num: 37, sym: "Rb", name: "Rubidium", mass: "85.468", cat: "alkali", col: 1, row: 5 }, { num: 38, sym: "Sr", name: "Strontium", mass: "87.62", cat: "alkaline", col: 2, row: 5 }, { num: 39, sym: "Y", name: "Yttrium", mass: "88.906", cat: "transition", col: 3, row: 5 }, { num: 40, sym: "Zr", name: "Zirconium", mass: "91.224", cat: "transition", col: 4, row: 5 }, { num: 41, sym: "Nb", name: "Niobium", mass: "92.906", cat: "transition", col: 5, row: 5 }, { num: 42, sym: "Mo", name: "Molybdenum", mass: "95.95", cat: "transition", col: 6, row: 5 }, { num: 43, sym: "Tc", name: "Technetium", mass: "98", cat: "transition", col: 7, row: 5 }, { num: 44, sym: "Ru", name: "Ruthenium", mass: "101.07", cat: "transition", col: 8, row: 5 }, { num: 45, sym: "Rh", name: "Rhodium", mass: "102.91", cat: "transition", col: 9, row: 5 }, { num: 46, sym: "Pd", name: "Palladium", mass: "106.42", cat: "transition", col: 10, row: 5 }, { num: 47, sym: "Ag", name: "Silver", mass: "107.87", cat: "transition", col: 11, row: 5 }, { num: 48, sym: "Cd", name: "Cadmium", mass: "112.41", cat: "transition", col: 12, row: 5 }, { num: 49, sym: "In", name: "Indium", mass: "114.82", cat: "post-transition", col: 13, row: 5 }, { num: 50, sym: "Sn", name: "Tin", mass: "118.71", cat: "post-transition", col: 14, row: 5 }, { num: 51, sym: "Sb", name: "Antimony", mass: "121.76", cat: "metalloid", col: 15, row: 5 }, { num: 52, sym: "Te", name: "Tellurium", mass: "127.60", cat: "metalloid", col: 16, row: 5 }, { num: 53, sym: "I", name: "Iodine", mass: "126.90", cat: "reactive-nonmetal", col: 17, row: 5 }, { num: 54, sym: "Xe", name: "Xenon", mass: "131.29", cat: "noble-gas", col: 18, row: 5 }, { num: 55, sym: "Cs", name: "Cesium", mass: "132.91", cat: "alkali", col: 1, row: 6 }, { num: 56, sym: "Ba", name: "Barium", mass: "137.33", cat: "alkaline", col: 2, row: 6 }, { num: 57, sym: "La", name: "Lanthanum", mass: "138.91", cat: "lanthanide", col: 4, row: 9 }, { num: 58, sym: "Ce", name: "Cerium", mass: "140.12", cat: "lanthanide", col: 5, row: 9 }, { num: 59, sym: "Pr", name: "Praseodymium", mass: "140.91", cat: "lanthanide", col: 6, row: 9 }, { num: 60, sym: "Nd", name: "Neodymium", mass: "144.24", cat: "lanthanide", col: 7, row: 9 }, { num: 61, sym: "Pm", name: "Promethium", mass: "145", cat: "lanthanide", col: 8, row: 9 }, { num: 62, sym: "Sm", name: "Samarium", mass: "150.36", cat: "lanthanide", col: 9, row: 9 }, { num: 63, sym: "Eu", name: "Europium", mass: "151.96", cat: "lanthanide", col: 10, row: 9 }, { num: 64, sym: "Gd", name: "Gadolinium", mass: "157.25", cat: "lanthanide", col: 11, row: 9 }, { num: 65, sym: "Tb", name: "Terbium", mass: "158.93", cat: "lanthanide", col: 12, row: 9 }, { num: 66, sym: "Dy", name: "Dysprosium", mass: "162.50", cat: "lanthanide", col: 13, row: 9 }, { num: 67, sym: "Ho", name: "Holmium", mass: "164.93", cat: "lanthanide", col: 14, row: 9 }, { num: 68, sym: "Er", name: "Erbium", mass: "167.26", cat: "lanthanide", col: 15, row: 9 }, { num: 69, sym: "Tm", name: "Thulium", mass: "168.93", cat: "lanthanide", col: 16, row: 9 }, { num: 70, sym: "Yb", name: "Ytterbium", mass: "173.05", cat: "lanthanide", col: 17, row: 9 }, { num: 71, sym: "Lu", name: "Lutetium", mass: "174.97", cat: "lanthanide", col: 18, row: 9 }, { num: 72, sym: "Hf", name: "Hafnium", mass: "178.49", cat: "transition", col: 4, row: 6 }, { num: 73, sym: "Ta", name: "Tantalum", mass: "180.95", cat: "transition", col: 5, row: 6 }, { num: 74, sym: "W", name: "Tungsten", mass: "183.84", cat: "transition", col: 6, row: 6 }, { num: 75, sym: "Re", name: "Rhenium", mass: "186.21", cat: "transition", col: 7, row: 6 }, { num: 76, sym: "Os", name: "Osmium", mass: "190.23", cat: "transition", col: 8, row: 6 }, { num: 77, sym: "Ir", name: "Iridium", mass: "192.22", cat: "transition", col: 9, row: 6 }, { num: 78, sym: "Pt", name: "Platinum", mass: "195.08", cat: "transition", col: 10, row: 6 }, { num: 79, sym: "Au", name: "Gold", mass: "196.97", cat: "transition", col: 11, row: 6 }, { num: 80, sym: "Hg", name: "Mercury", mass: "200.59", cat: "transition", col: 12, row: 6 }, { num: 81, sym: "Tl", name: "Thallium", mass: "204.38", cat: "post-transition", col: 13, row: 6 }, { num: 82, sym: "Pb", name: "Lead", mass: "207.2", cat: "post-transition", col: 14, row: 6 }, { num: 83, sym: "Bi", name: "Bismuth", mass: "208.98", cat: "post-transition", col: 15, row: 6 }, { num: 84, sym: "Po", name: "Polonium", mass: "209", cat: "post-transition", col: 16, row: 6 }, { num: 85, sym: "At", name: "Astatine", mass: "210", cat: "metalloid", col: 17, row: 6 }, { num: 86, sym: "Rn", name: "Radon", mass: "222", cat: "noble-gas", col: 18, row: 6 }, { num: 87, sym: "Fr", name: "Francium", mass: "223", cat: "alkali", col: 1, row: 7 }, { num: 88, sym: "Ra", name: "Radium", mass: "226", cat: "alkaline", col: 2, row: 7 }, { num: 89, sym: "Ac", name: "Actinium", mass: "227", cat: "actinide", col: 4, row: 10 }, { num: 90, sym: "Th", name: "Thorium", mass: "232.04", cat: "actinide", col: 5, row: 10 }, { num: 91, sym: "Pa", name: "Protactinium", mass: "231.04", cat: "actinide", col: 6, row: 10 }, { num: 92, sym: "U", name: "Uranium", mass: "238.03", cat: "actinide", col: 7, row: 10 }, { num: 93, sym: "Np", name: "Neptunium", mass: "237", cat: "actinide", col: 8, row: 10 }, { num: 94, sym: "Pu", name: "Plutonium", mass: "244", cat: "actinide", col: 9, row: 10 }, { num: 95, sym: "Am", name: "Americium", mass: "243", cat: "actinide", col: 10, row: 10 }, { num: 96, sym: "Cm", name: "Curium", mass: "247", cat: "actinide", col: 11, row: 10 }, { num: 97, sym: "Bk", name: "Berkelium", mass: "247", cat: "actinide", col: 12, row: 10 }, { num: 98, sym: "Cf", name: "Californium", mass: "251", cat: "actinide", col: 13, row: 10 }, { num: 99, sym: "Es", name: "Einsteinium", mass: "252", cat: "actinide", col: 14, row: 10 }, { num: 100, sym: "Fm", name: "Fermium", mass: "257", cat: "actinide", col: 15, row: 10 }, { num: 101, sym: "Md", name: "Mendelevium", mass: "258", cat: "actinide", col: 16, row: 10 }, { num: 102, sym: "No", name: "Nobelium", mass: "259", cat: "actinide", col: 17, row: 10 }, { num: 103, sym: "Lr", name: "Lawrencium", mass: "266", cat: "actinide", col: 18, row: 10 }, { num: 104, sym: "Rf", name: "Rutherfordium", mass: "267", cat: "transition", col: 4, row: 7 }, { num: 105, sym: "Db", name: "Dubnium", mass: "268", cat: "transition", col: 5, row: 7 }, { num: 106, sym: "Sg", name: "Seaborgium", mass: "269", cat: "transition", col: 6, row: 7 }, { num: 107, sym: "Bh", name: "Bohrium", mass: "270", cat: "transition", col: 7, row: 7 }, { num: 108, sym: "Hs", name: "Hassium", mass: "277", cat: "transition", col: 8, row: 7 }, { num: 109, sym: "Mt", name: "Meitnerium", mass: "278", cat: "unknown", col: 9, row: 7 }, { num: 110, sym: "Ds", name: "Darmstadtium", mass: "281", cat: "unknown", col: 10, row: 7 }, { num: 111, sym: "Rg", name: "Roentgenium", mass: "282", cat: "unknown", col: 11, row: 7 }, { num: 112, sym: "Cn", name: "Copernicium", mass: "285", cat: "transition", col: 12, row: 7 }, { num: 113, sym: "Nh", name: "Nihonium", mass: "286", cat: "unknown", col: 13, row: 7 }, { num: 114, sym: "Fl", name: "Flerovium", mass: "289", cat: "unknown", col: 14, row: 7 }, { num: 115, sym: "Mc", name: "Moscovium", mass: "290", cat: "unknown", col: 15, row: 7 }, { num: 116, sym: "Lv", name: "Livermorium", mass: "293", cat: "unknown", col: 16, row: 7 }, { num: 117, sym: "Ts", name: "Tennessine", mass: "294", cat: "unknown", col: 17, row: 7 }, { num: 118, sym: "Og", name: "Oganesson", mass: "294", cat: "unknown", col: 18, row: 7 } ];
-        function renderPT() {
-            const table = document.getElementById('table'); const panel = document.getElementById('pt-panel');
-            ptElements.forEach(el => {
-                const div = document.createElement('div'); let c = 'cat-unknown'; if(el.cat==='alkali') c='cat-alkali'; if(el.cat==='alkaline') c='cat-alkaline'; if(el.cat==='transition') c='cat-transition'; if(el.cat==='post-transition') c='cat-post-transition'; if(el.cat==='metalloid') c='cat-metalloid'; if(el.cat==='reactive-nonmetal') c='cat-reactive-nonmetal'; if(el.cat==='noble-gas') c='cat-noble-gas'; if(el.cat==='lanthanide') c='cat-lanthanide'; if(el.cat==='actinide') c='cat-actinide'; div.className = `element ${c}`; div.style.gridColumn = el.col; div.style.gridRow = el.row; div.innerHTML = `<div class="num">${el.num}</div><div class="sym">${el.sym}</div>`;
-                div.addEventListener('click', () => { panel.classList.add('active'); document.getElementById('p-sym').innerText = el.sym; document.getElementById('p-name').innerText = el.name; document.getElementById('p-data').innerText = `No. ${el.num} | ${el.mass}u`; document.getElementById('p-cat').innerText = el.cat.replace(/-/g, ' '); document.getElementById('p-sym').style.color = getComputedStyle(div).borderBottomColor; }); table.appendChild(div);
+        // --- 5. SOCIAL FEED (FIXED MEMORY LEAK) ---
+        function loadPosts() {
+            const feed = document.getElementById('feed-container');
+            db.ref('posts').off(); // DETACH OLD LISTENER
+            
+            db.ref('posts').limitToLast(10).on('value', snapshot => {
+                feed.innerHTML = '';
+                const posts = [];
+                snapshot.forEach(c => posts.push({ id: c.key, ...c.val() }));
+                
+                if(!posts.length) { feed.innerHTML = '<p style="text-align:center;color:#888;">No posts yet.</p>'; return; }
+
+                posts.reverse().forEach(p => {
+                    const d = document.createElement('div');
+                    d.className = 'insta-post-card';
+                    d.innerHTML = `
+                        <div class="insta-post-header"><strong>${p.username}</strong></div>
+                        ${p.image ? `<img src="${p.image}" class="insta-post-img">` : ''}
+                        <div class="insta-post-footer">
+                            <div class="insta-likes">❤️ ${p.likes || 0} likes</div>
+                            <div class="insta-caption"><b>${p.username}</b> ${p.caption}</div>
+                        </div>`;
+                    feed.appendChild(d);
+                });
             });
         }
-        renderPT();
 
-        function showSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id)); if(btn) btn.classList.add('active'); }
-        function toggleMode() { document.body.classList.toggle('mode-school'); document.body.classList.toggle('mode-fun'); showSection(document.body.classList.contains('mode-school') ? 'school-home' : 'fun-home'); }
-        function toggleTheme() { const b = document.body; b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
-        function loadGame(codeId) { const iframe = document.getElementById('game-frame'); iframe.srcdoc = document.getElementById(codeId).value; iframe.onload = () => { iframe.contentWindow.focus(); const container = document.getElementById('game-container'); if(container.classList.contains('fullscreen-mode')) document.getElementById('exit-game-fs').style.display = 'block'; }; }
-        function loadDriveMad() { loadGame('drive-mad-code'); } function loadSnakeGame() { loadGame('snake-code'); } function loadGeoDash() { loadGame('geo-dash-code'); } function loadRagdollHit() { loadGame('ragdoll-hit-code'); }
-        function toggleFullscreenEl(id) { const el = document.getElementById(id); if(el.classList.contains('fullscreen-mode')) { el.classList.remove('fullscreen-mode'); } else { document.querySelectorAll('.fullscreen-mode').forEach(e => e.classList.remove('fullscreen-mode')); el.classList.add('fullscreen-mode'); } }
-        function exitFullGame() { document.getElementById('game-container').classList.remove('fullscreen-mode'); document.getElementById('exit-game-fs').style.display = 'none'; }
-				document.addEventListener('keydown', e => {
-		    // 1. SAFETY CHECK: If the user is typing in an input or textarea, STOP here.
-		    // This prevents accidental mode switching while writing an essay.
-		    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
-		        return;
-		    }
-		
-		    if(e.key === "Escape") {
-		        let wasFullscreen = false;
-		
-		        // Exit fullscreen for any element currently in it
-		        document.querySelectorAll('.fullscreen-mode').forEach(el => {
-		            el.classList.remove('fullscreen-mode');
-		            wasFullscreen = true; // Record that we just exited a game/app
-		            
-		            if(el.id === 'game-container') {
-		                document.getElementById('exit-game-fs').style.display = 'none';
-		            }
-		        });
-		
-		        // Only toggle "Stealth Mode" if we are currently in Fun Mode
-		        // AND we didn't just use ESC to exit a game.
-		        if(!wasFullscreen && document.body.classList.contains('mode-fun')) {
-		            toggleMode();
-		        }
-		    }
-		});
-	</script>
+        function createInstaPost() {
+            const img = document.getElementById('post-img-url').value;
+            const cap = document.getElementById('post-caption-input').value;
+            if(!cap && !img) return;
+            
+            const newPost = db.ref('posts').push();
+            newPost.set({
+                username: currentUser.email.split('@')[0],
+                image: img,
+                caption: cap,
+                likes: 0,
+                timestamp: Date.now()
+            });
+            document.getElementById('new-post-area').style.display = 'none';
+            document.getElementById('post-caption-input').value = '';
+        }
+
+        // --- 6. GAMES & FULLSCREEN ---
+        function loadGeoDash() { loadGame('geo-dash-code'); }
+        function loadDriveMad() { loadGame('drive-mad-code'); }
+        function loadSnakeGame() { loadGame('snake-code'); }
+        function loadRagdollHit() { loadGame('ragdoll-hit-code'); }
+
+        function loadGame(codeId) {
+            const container = document.getElementById('game-container');
+            const frame = document.getElementById('game-frame');
+            
+            // Enter fullscreen for game
+            container.classList.add('fullscreen-mode');
+            document.getElementById('exit-game-fs').style.display = 'block';
+
+            // Inject code into iframe
+            frame.srcdoc = document.getElementById(codeId).value;
+            
+            // Ensure iframe focuses so keyboard works
+            frame.onload = () => frame.contentWindow.focus();
+        }
+
+        function exitFullGame() {
+            const c = document.getElementById('game-container');
+            c.classList.remove('fullscreen-mode');
+            document.getElementById('exit-game-fs').style.display = 'none';
+            document.getElementById('game-frame').srcdoc = ''; // Stop game sound
+        }
+
+        function toggleFullscreenEl(id) {
+            const el = document.getElementById(id);
+            if(el.classList.contains('fullscreen-mode')) {
+                 el.classList.remove('fullscreen-mode');
+            } else {
+                 document.querySelectorAll('.fullscreen-mode').forEach(e => e.classList.remove('fullscreen-mode'));
+                 el.classList.add('fullscreen-mode');
+            }
+        }
+
+        // --- 7. SYSTEM SETTINGS (THEME & MODE) ---
+        function toggleTheme() {
+            const b = document.body;
+            b.dataset.theme = b.dataset.theme === 'light' ? 'dark' : 'light';
+        }
+
+        function toggleMode() {
+            document.body.classList.toggle('mode-school');
+            document.body.classList.toggle('mode-fun');
+            
+            // Default to dashboard when switching
+            if(document.body.classList.contains('mode-school')) showSection('school-home');
+            else showSection('fun-home');
+        }
+
+        // --- 8. GLOBAL EVENT LISTENERS (ESCAPE KEY FIX) ---
+        document.addEventListener('keydown', e => {
+            // If typing in a box, IGNORE Escape key
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+
+            if (e.key === "Escape") {
+                // If in a game, exit game first
+                if (document.querySelector('.fullscreen-mode')) {
+                    exitFullGame();
+                    document.querySelectorAll('.fullscreen-mode').forEach(el => el.classList.remove('fullscreen-mode'));
+                } 
+                // If not in a game, toggle Stealth Mode
+                else if (document.body.classList.contains('mode-fun')) {
+                    toggleMode();
+                }
+            }
+        });
+
+        // --- 9. UTILS ---
+        function countWords(area, display) {
+            const txt = document.getElementById(area).value.trim();
+            document.getElementById(display).innerText = txt ? txt.split(/\s+/).length + " words" : "0 words";
+        }
+        
+        // Timer Logic
+        let timerInt;
+        function toggleTimer() {
+            if(timerInt) { clearInterval(timerInt); timerInt = null; }
+            else {
+                timerInt = setInterval(() => {
+                    const el = document.getElementById('timer-display');
+                    let [m, s] = el.innerText.split(':').map(Number);
+                    if(s===0) { if(m===0) return clearInterval(timerInt); m--; s=59; } else s--;
+                    el.innerText = `${m}:${s<10?'0'+s:s}`;
+                }, 1000);
+            }
+        }
+        function resetTimer() { clearInterval(timerInt); timerInt=null; document.getElementById('timer-display').innerText="25:00"; }
+    </script>
 </body>
 </html>
