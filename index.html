@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall 101</title>
+    <title>StudyHall OS 4.0 (Social Edition)</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -141,7 +141,7 @@
         .login-box { background: var(--card-bg); padding: 40px; border-radius: 24px; text-align: center; width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); }
         #toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s; font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.15); pointer-events: none; z-index: 9999; }
 
-        /* --- INSTAGRAM CLONE STYLES (Cleaned & Themed) --- */
+        /* --- INSTAGRAM CLONE STYLES (Fixed & Themed) --- */
         .insta-main-wrapper {
             max-width: 600px;
             margin: 0 auto;
@@ -189,7 +189,7 @@
         .insta-user-details h3 { font-size: 0.9rem; font-weight: 600; margin: 0; color: var(--text-primary); }
         .insta-user-details span { font-size: 0.75rem; color: var(--text-secondary); }
 
-        .insta-post-img { width: 100%; display: block; background: #000; }
+        .insta-post-img { width: 100%; display: block; background: #000; min-height: 200px; object-fit: cover; }
 
         .insta-post-footer { padding: 12px; }
         
@@ -197,6 +197,10 @@
         .insta-action-left { display: flex; gap: 15px; }
         .insta-actions i { font-size: 1.5rem; color: var(--text-primary); cursor: pointer; transition: 0.2s; }
         .insta-actions i:hover { color: var(--accent); }
+
+        /* Heart Animation Effect */
+        .fa-heart.liked { color: #ed4956; animation: pop 0.3s ease; }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
         .insta-likes { font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
         .insta-caption { font-size: 0.9rem; line-height: 1.4; margin-bottom: 6px; }
@@ -571,8 +575,7 @@
                 image: imgUrl || '', // Optional Image
                 caption: caption,
                 likes: 0,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                comments: []
+                timestamp: firebase.database.ServerValue.TIMESTAMP
             };
 
             db.ref('posts').push(newPost).then(() => {
@@ -608,6 +611,11 @@
                     const hasImage = post.image && post.image.trim() !== '';
                     const userInitial = post.username.charAt(0).toUpperCase();
                     
+                    // CHECK IF LIKED BY CURRENT USER
+                    const likedBy = post.likedBy || {};
+                    const isLiked = currentUser && likedBy[currentUser.uid];
+                    const heartClass = isLiked ? "fas fa-heart liked" : "far fa-heart";
+
                     const card = document.createElement('div');
                     card.className = 'insta-post-card';
                     
@@ -633,7 +641,7 @@
                         <div class="insta-post-footer">
                             <div class="insta-actions">
                                 <div class="insta-action-left">
-                                    <i class="far fa-heart" onclick="likePost('${post.id}')"></i>
+                                    <i class="${heartClass}" onclick="likePost('${post.id}')"></i>
                                     <i class="far fa-comment"></i>
                                     <i class="far fa-paper-plane"></i>
                                 </div>
@@ -651,9 +659,24 @@
             });
         }
 
+        // UPDATED LIKE FUNCTION (Toggle + Memory)
         function likePost(postId) {
-            const postRef = db.ref('posts/' + postId + '/likes');
-            postRef.transaction(currentLikes => (currentLikes || 0) + 1);
+            if(!currentUser) return alert("Please login to like posts.");
+            
+            const uid = currentUser.uid;
+            
+            // Check if user already liked
+            db.ref('posts/' + postId + '/likedBy/' + uid).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    // ALREADY LIKED -> UNLIKE
+                    db.ref('posts/' + postId + '/likedBy/' + uid).remove();
+                    db.ref('posts/' + postId + '/likes').transaction(current => (current || 0) - 1);
+                } else {
+                    // NOT LIKED -> LIKE
+                    db.ref('posts/' + postId + '/likedBy/' + uid).set(true);
+                    db.ref('posts/' + postId + '/likes').transaction(current => (current || 0) + 1);
+                }
+            });
         }
 
         // --- PERIODIC TABLE ---
