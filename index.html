@@ -583,25 +583,68 @@
             });
         }
 
-        function loadPosts() {
-            const feed = document.getElementById('feed-container');
-            
-            // Update nav avatar
-            if(currentUser) {
-                document.getElementById('nav-user-pic').innerText = currentUser.email.charAt(0).toUpperCase();
-            }
-
-            db.ref('posts').limitToLast(20).on('value', snapshot => {
-                feed.innerHTML = '';
-                const posts = [];
-                snapshot.forEach(child => {
-                    posts.push({ id: child.key, ...child.val() });
-                });
-
-                if(posts.length === 0) {
-                    feed.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary);">No posts yet.<br>Be the first to share something!</div>';
-                    return;
-                }
+		function loadPosts() {
+		    const feed = document.getElementById('feed-container');
+		    
+		    // Update the user profile pic in the nav bar if logged in
+		    if(currentUser) {
+		        document.getElementById('nav-user-pic').innerText = currentUser.email.charAt(0).toUpperCase();
+		    }
+		
+		    // FIX: Turn off previous listeners so we don't duplicate them
+		    db.ref('posts').off(); 
+		
+		    // Now start the new listener
+		    db.ref('posts').limitToLast(20).on('value', snapshot => {
+		        feed.innerHTML = '';
+		        const posts = [];
+		        
+		        snapshot.forEach(child => {
+		            posts.push({ id: child.key, ...child.val() });
+		        });
+		
+		        if(posts.length === 0) {
+		            feed.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary);">No posts yet.</div>';
+		            return;
+		        }
+		        
+		        // Reverse so newest posts show first
+		        posts.reverse().forEach(post => {
+		            const card = document.createElement('div');
+		            card.className = 'insta-post-card';
+		            
+		            // Safety check: ensure image exists and isn't empty
+		            const hasImage = post.image && post.image.trim() !== '';
+		            
+		            card.innerHTML = `
+		                <div class="insta-post-header">
+		                    <div class="insta-user-details">
+		                        <div class="insta-profile-pic">
+		                            <div style="display:flex; align-items:center; justify-content:center; font-weight:700; color:#333; background:#eee; width:100%; height:100%; border-radius:50%;">
+		                                ${post.username.charAt(0).toUpperCase()}
+		                            </div>
+		                        </div>
+		                        <div>
+		                            <h3>${post.username}</h3>
+		                            <span>StudyHall Student</span>
+		                        </div>
+		                    </div>
+		                </div>
+		                ${hasImage ? `<img class="insta-post-img" src="${post.image}">` : ''}
+		                <div class="insta-post-footer">
+		                    <div class="insta-actions">
+		                        <div class="insta-action-left">
+		                            <i class="far fa-heart" onclick="likePost('${post.id}')" style="cursor: pointer;"></i>
+		                        </div>
+		                    </div>
+		                    <p class="insta-likes">${post.likes || 0} likes</p>
+		                    <div class="insta-caption"><b>${post.username}</b> ${post.caption || ''}</div>
+		                </div>
+		            `;
+		            feed.appendChild(card);
+		        });
+		    });
+		}
                 
                 // Show newest first
                 posts.reverse().forEach(post => {
