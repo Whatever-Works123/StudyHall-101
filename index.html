@@ -26,11 +26,6 @@
             --success: #10b981;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             --radius: 16px;
-            
-            /* Periodic Table Colors */
-            --cat-1: #ef4444; --cat-2: #f97316; --cat-3: #eab308; 
-            --cat-4: #22c55e; --cat-5: #06b6d4; --cat-6: #3b82f6; 
-            --cat-7: #8b5cf6; --cat-8: #d946ef; --cat-9: #f43f5e; --cat-0: #94a3b8;
         }
 
         [data-theme="dark"] {
@@ -59,10 +54,7 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { display: flex; height: 100vh; background-color: var(--bg-color); color: var(--text-primary); transition: background 0.3s; overflow: hidden; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
+        
         /* --- UI COMPONENTS --- */
         .btn { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 0.9rem; }
         .btn-primary { background: var(--accent); color: white; }
@@ -102,7 +94,6 @@
             border: 1px solid var(--border);
         }
 
-        /* --- DASHBOARD WIDGETS --- */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .timer-circle {
             width: 140px; height: 140px; border-radius: 50%;
@@ -111,6 +102,8 @@
             font-size: 2.2rem; font-weight: 700; margin: 0 auto 20px auto;
             background: var(--bg-color); color: var(--text-primary);
         }
+
+        /* --- TO-DO LIST --- */
         .todo-item { background: var(--bg-color); padding: 14px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent); }
         .todo-item.done { opacity: 0.6; text-decoration: line-through; border-left-color: var(--success); }
 
@@ -121,87 +114,24 @@
         .calc-btn { padding: 15px; border-radius: 8px; font-size: 1.1rem; background: var(--bg-color); border: 1px solid var(--border); cursor: pointer; color: var(--text-primary); }
         textarea.notes-area { height: 500px; line-height: 1.6; font-size: 1.05rem; background: var(--card-bg); border: 1px solid var(--border); padding: 30px; resize: vertical; }
 
-        /* --- PERIODIC TABLE --- */
-        .periodic-table { display: grid; grid-template-columns: repeat(18, 1fr); gap: 3px; width: 100%; max-width: 900px; margin: 0 auto; }
-        .element { background: var(--bg-color); border: 1px solid var(--border); color: var(--text-primary); aspect-ratio: 5/6; padding: 4px; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
-        .element:hover { transform: scale(1.6); z-index: 100; background: var(--card-bg); border-color: var(--accent); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .num { font-size: 8px; opacity: 0.6; } .sym { font-size: 14px; font-weight: 700; text-align: center; }
-        .cat-alkali { border-bottom: 3px solid var(--cat-1); } .cat-alkaline { border-bottom: 3px solid var(--cat-2); }
-        .cat-transition { border-bottom: 3px solid var(--cat-3); } .cat-post-transition { border-bottom: 3px solid var(--cat-4); }
-        .cat-metalloid { border-bottom: 3px solid var(--cat-5); } .cat-reactive-nonmetal { border-bottom: 3px solid var(--cat-6); }
-        .cat-noble-gas { border-bottom: 3px solid var(--cat-7); } .cat-lanthanide { border-bottom: 3px solid var(--cat-8); }
-        .cat-actinide { border-bottom: 3px solid var(--cat-9); } .cat-unknown { border-bottom: 3px solid var(--cat-0); }
-        #pt-panel { background: var(--bg-color); border: 1px solid var(--border); padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: none; align-items: center; justify-content: space-between; }
-        #pt-panel.active { display: flex; animation: fadeIn 0.2s; }
-
+        /* --- FULLSCREEN GAMES --- */
         .fullscreen-mode { position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 99999; padding: 0; margin: 0; display: flex; flex-direction: column; }
         .fullscreen-mode iframe { width: 100%; height: 100%; border: none; }
         iframe { width: 100%; height: 600px; border: none; border-radius: 12px; background: white; }
+        
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
         .login-box { background: var(--card-bg); padding: 40px; border-radius: 24px; text-align: center; width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); }
-        #toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s; font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.15); pointer-events: none; z-index: 9999; }
+        #toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s; font-weight: 600; pointer-events: none; z-index: 9999; }
 
-        /* --- INSTAGRAM CLONE STYLES (Cleaned & Themed) --- */
-        .insta-main-wrapper {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .insta-navbar {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 20px;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
+        /* --- INSTAGRAM CLONE STYLES --- */
+        .insta-main-wrapper { max-width: 600px; margin: 0 auto; }
+        .insta-navbar { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
         .insta-nav-icons { display: flex; align-items: center; gap: 15px; }
-        .insta-nav-icons i { font-size: 1.4rem; color: var(--text-primary); cursor: pointer; transition: transform 0.2s; }
-        .insta-nav-icons i:hover { transform: scale(1.1); }
-
-        .insta-post-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        
-        .insta-post-header {
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .insta-user-details { display: flex; align-items: center; gap: 10px; }
-        .insta-profile-pic {
-            width: 32px; height: 32px;
-            border-radius: 50%; padding: 1.5px;
-            background: linear-gradient(45deg, #f09433, #bc1888);
-        }
-        .insta-profile-pic div, .insta-profile-pic img {
-            width: 100%; height: 100%; border-radius: 50%;
-            border: 1.5px solid var(--card-bg); object-fit: cover;
-        }
-        .insta-user-details h3 { font-size: 0.9rem; font-weight: 600; margin: 0; color: var(--text-primary); }
-        .insta-user-details span { font-size: 0.75rem; color: var(--text-secondary); }
-
+        .insta-nav-icons i { font-size: 1.4rem; color: var(--text-primary); cursor: pointer; }
+        .insta-post-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .insta-post-header { padding: 12px; display: flex; align-items: center; justify-content: space-between; }
         .insta-post-img { width: 100%; display: block; background: #000; }
-
         .insta-post-footer { padding: 12px; }
-        
-        .insta-actions { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .insta-action-left { display: flex; gap: 15px; }
-        .insta-actions i { font-size: 1.5rem; color: var(--text-primary); cursor: pointer; transition: 0.2s; }
-        .insta-actions i:hover { color: var(--accent); }
-
-        .insta-likes { font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
-        .insta-caption { font-size: 0.9rem; line-height: 1.4; margin-bottom: 6px; }
-        .insta-caption b { font-weight: 600; margin-right: 5px; }
-        .insta-time { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 5px; }
     </style>
 </head>
 <body class="mode-school" data-theme="light">
@@ -323,17 +253,6 @@
         <div id="science" class="section">
             <h2>Science Laboratory</h2>
             <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3>Periodic Table</h3>
-                    <span style="font-size:0.8rem; color:var(--text-secondary);">Interactive</span>
-                </div>
-                <div id="pt-panel">
-                    <div><h2 id="p-sym" style="font-size:2.5rem; margin:0; line-height:1;">H</h2><span id="p-cat">Unknown</span></div>
-                    <div style="text-align:right;"><h3 id="p-name" style="margin:0;">Hydrogen</h3><p id="p-data" style="margin:0; font-size:0.9rem;">No. 1 | 1.008u</p></div>
-                </div>
-                <div class="periodic-table" id="table"></div>
-            </div>
-            <div class="card">
                 <h3>Lab Report</h3>
                 <textarea id="note-science" class="notes-area" oninput="saveData('science')" placeholder="Draft your lab report here..."></textarea>
             </div>
@@ -362,11 +281,8 @@
 
         <div id="social-feed" class="section">
             <div class="insta-main-wrapper">
-                
                 <div class="insta-navbar">
-                    <div class="logo" style="font-family: 'Inter', sans-serif; font-weight:700; font-size:1.2rem;">
-                        StudyHall Social
-                    </div>
+                    <div class="logo" style="font-family: 'Inter', sans-serif; font-weight:700; font-size:1.2rem;">StudyHall Social</div>
                     <div class="insta-nav-icons">
                         <i class="fas fa-home" onclick="loadPosts()" title="Refresh Feed"></i>
                         <i class="far fa-plus-square" onclick="document.getElementById('new-post-area').style.display = 'block'" title="New Post"></i>
@@ -378,8 +294,8 @@
 
                 <div id="new-post-area" class="insta-post-card" style="padding:20px; display:none;">
                     <h3 style="margin-bottom:15px;">New Post</h3>
-                    <input type="text" id="post-img-url" placeholder="Image URL (optional)..." style="width:100%; margin-bottom:10px; padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--bg-color); color:var(--text-primary);">
-                    <textarea id="post-caption-input" placeholder="What's on your mind?" style="width:100%; height:60px; margin-bottom:10px; padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--bg-color); color:var(--text-primary);"></textarea>
+                    <input type="text" id="post-img-url" placeholder="Image URL (optional)..." style="width:100%; margin-bottom:10px; padding:8px; border:1px solid var(--border); border-radius:4px;">
+                    <textarea id="post-caption-input" placeholder="What's on your mind?" style="width:100%; height:60px; margin-bottom:10px; padding:8px; border:1px solid var(--border); border-radius:4px;"></textarea>
                     <div style="display:flex; gap:10px;">
                         <button class="btn btn-primary" onclick="createInstaPost()" style="width:100%;">Share</button>
                         <button class="btn" onclick="document.getElementById('new-post-area').style.display='none'" style="width:100%;">Cancel</button>
@@ -395,10 +311,12 @@
         <div id="games" class="section">
             <h2>Arcade</h2>
             <div class="dashboard-grid">
-                <div class="card" style="text-align:center;"><h3>Geometry Dash</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGeoDash()">Play</button></div>
-                <div class="card" style="text-align:center;"><h3>Drive Mad</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadDriveMad()">Play</button></div>
-                <div class="card" style="text-align:center;"><h3>Snake</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadSnakeGame()">Play</button></div>
-                <div class="card" style="text-align:center;"><h3>Ragdoll Hit</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadRagdollHit()">Play</button></div>
+                <div class="card" style="text-align:center;"><h3>Geometry Dash</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('geo-dash-code')">Play</button></div>
+                <div class="card" style="text-align:center;"><h3>Drive Mad</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('drive-mad-code')">Play</button></div>
+                <div class="card" style="text-align:center;"><h3>Snake</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('snake-code')">Play</button></div>
+                <div class="card" style="text-align:center;"><h3>Ragdoll Hit</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('ragdoll-hit-code')">Play</button></div>
+                <div class="card" style="text-align:center;"><h3>Breakout</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('breakout-code')">Play</button></div>
+                <div class="card" style="text-align:center;"><h3>Pong</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('pong-code')">Play</button></div>
             </div>
             <div id="game-container" class="card" style="padding:0; overflow:hidden; margin-top:20px;">
                 <button class="btn btn-danger" style="position:absolute; top:10px; right:10px; z-index:100; display:none;" id="exit-game-fs" onclick="exitFullGame()">Exit Fullscreen</button>
@@ -417,7 +335,7 @@
         <div id="music" class="section">
             <h2>Study Vibes</h2>
             <div class="card" style="text-align:center;">
-                <h3>Lofi Radio - Beats to Relax/Study To</h3>
+                <h3>Lofi Radio</h3>
                 <iframe width="100%" height="400" src="https://www.youtube.com/embed/jfKfPfyJRdk" title="Lofi Girl" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px; margin-top:20px;"></iframe>
             </div>
         </div>
@@ -440,52 +358,17 @@
         </div>
     </main>
 
-    <textarea id="drive-mad-code" style="display:none;">
-<!DOCTYPE html><html lang="en"><head><base href="https://cdn.jsdelivr.net/gh/genizy/dmad-poki@49b5ab6b987f5f3be58f9dae59c92e8fc1aab9b0/"><script>window.assgdd={"ancestorOrigins":{"0":"https://games.poki.com","1":"https://poki.com"},"href":"https://f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com/cc1bc57a-e355-4696-97c2-097bf6188606/index.html?cloudsavegames=y"}</script><meta charset="utf-8"><title>Drive Mad</title><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><link rel="stylesheet" href="webapp/fancade.css"><script src="poki-sdk.js"></script></head><body id="body"><div id="canvas_border" class="emscripten_border"><div id="play_content" class="middle center"><div class="edge"><div class="box"><div class="black"><img src="webapp/cover.jpg" class="cover"><p class="title">Drive Mad</p></div></div></div><div id="progress_or_play"><progress id="progress" class="loading" value="0" max="100"></progress></div></div><canvas class="emscripten" id="canvas" tabindex=-1></canvas></div><script type="text/javascript" src="webapp/source_min.js"></script><script type="text/javascript" src="webapp/index.js"></script></body></html>
-    </textarea>
-    <textarea id="snake-code" style="display:none;">
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Snake</title><style>body{display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#111;color:white;font-family:monospace;}canvas{background:#000;border:2px solid #333;box-shadow:0 0 20px rgba(0,255,0,0.2);}.score-board{position:absolute;top:20px;font-size:2em;}</style></head><body><div class="score-board">Score: <span id="score">0</span></div><canvas id="gameCanvas" width="400" height="400"></canvas><script>const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d'),scoreElement=document.getElementById('score');const gridSize=20;let snake=[{x:200,y:200}],food={},dx=gridSize,dy=0,score=0;function main(){setTimeout(()=>{clear();drawFood();move();drawSnake();if(checkOver()){alert("Game Over: "+score);location.reload()}else main()},100)}function clear(){ctx.fillStyle='#000';ctx.fillRect(0,0,400,400)}function drawSnake(){snake.forEach(p=>{ctx.fillStyle='#4CAF50';ctx.fillRect(p.x,p.y,gridSize-2,gridSize-2)})}function move(){const head={x:snake[0].x+dx,y:snake[0].y+dy};snake.unshift(head);if(head.x===food.x&&head.y===food.y){score+=10;scoreElement.innerText=score;placeFood()}else snake.pop()}function placeFood(){food.x=Math.floor(Math.random()*20)*20;food.y=Math.floor(Math.random()*20)*20}function checkOver(){return snake[0].x<0||snake[0].x>=400||snake[0].y<0||snake[0].y>=400||snake.slice(1).some(p=>p.x===snake[0].x&&p.y===snake[0].y)}document.addEventListener('keydown',e=>{if(e.which===37&&dx===0){dx=-20;dy=0}if(e.which===38&&dy===0){dx=0;dy=-20}if(e.which===39&&dx===0){dx=20;dy=0}if(e.which===40&&dy===0){dx=0;dy=20}});placeFood();main();</script></body></html>
-    </textarea>
-    <textarea id="geo-dash-code" style="display:none;">
-<!DOCTYPE html><html lang="en-US"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/"><title>Geometry Dash</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1"></head><body style="margin:0;overflow:hidden;background:#000;"><div id="gameContainer" style="width:100vw;height:100vh;"></div><script src="Build/UnityLoader.js"></script><script>var gameInstance=UnityLoader.instantiate("gameContainer","Build/GeometryDashLite.json");</script></body></html>
-    </textarea>
-    <textarea id="ragdoll-hit-code" style="display:none;">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<base href="https://rawcdn.githack.com/genizy/google-class/main/ragdoll-hit/">
-	<meta charset="utf-8">
-	<title>Ragdoll Hit - Poki</title>
-	<script>
-	window.config = {
-		loader: 'unity-2020',
-		debug: false,
-		maxRatio: 24 / 9,
-		minRatio: 9 / 24,
-		title: 'Ragdoll Hit',
-		unityVersion: '2022.3.6f1',
-		unityWebglBuildUrl: '',
-		fileSize: 9,
-		cachedDecompressedFileSizes: {
-			'3276aa7c11496bcc48eb6908f112f0c3.js.unityweb': 66682,
-			'959bf1c60308f1c34bf072f43c3c17d4.data.unityweb': 4377721,
-			'f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb': 5105161,
-			'v84.loader.js': 114199,
-		},
-		"metadata": {"poki_template_version":1,"background_color":"#4D4D4D","code_filename":"f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb","framework_filename":"3276aa7c11496bcc48eb6908f112f0c3.js.unityweb","loader_filename":"v84.loader.js","use_wasm":"true"}
-	};
-	</script>
-</head>
-<body style="margin:0; overflow:hidden; background:#4D4D4D;">
-	<script src="master-loader.js"></script>
-</body>
-</html>
-    </textarea>
+    <textarea id="drive-mad-code" style="display:none;"><!DOCTYPE html><html lang="en"><head><base href="https://cdn.jsdelivr.net/gh/genizy/dmad-poki@49b5ab6b987f5f3be58f9dae59c92e8fc1aab9b0/"><script>window.assgdd={"ancestorOrigins":{"0":"https://games.poki.com","1":"https://poki.com"},"href":"https://f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com/cc1bc57a-e355-4696-97c2-097bf6188606/index.html?cloudsavegames=y"}</script><meta charset="utf-8"><title>Drive Mad</title><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><link rel="stylesheet" href="webapp/fancade.css"><script src="poki-sdk.js"></script></head><body id="body"><div id="canvas_border" class="emscripten_border"><div id="play_content" class="middle center"><div class="edge"><div class="box"><div class="black"><img src="webapp/cover.jpg" class="cover"><p class="title">Drive Mad</p></div></div></div><div id="progress_or_play"><progress id="progress" class="loading" value="0" max="100"></progress></div></div><canvas class="emscripten" id="canvas" tabindex=-1></canvas></div><script type="text/javascript" src="webapp/source_min.js"></script><script type="text/javascript" src="webapp/index.js"></script></body></html></textarea>
+    <textarea id="snake-code" style="display:none;"><!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;color:#fff;font-family:monospace;"><div style="position:absolute;top:10px;">Score: <span id="score">0</span></div><canvas id="c" width="400" height="400" style="border:1px solid #333"></canvas><script>c=document.getElementById('c');x=c.getContext('2d');S=20;p=[{x:10,y:10}];a={x:15,y:15};v={x:0,y:0};sc=0;setInterval(()=>{p.forEach(e=>{x.fillStyle='#000';x.fillRect(e.x*S,e.y*S,S-2,S-2)});p=[{x:p[0].x+v.x,y:p[0].y+v.y},...p.slice(0,sc+1)];if(p[0].x==a.x&&p[0].y==a.y){sc++;document.getElementById('score').innerText=sc;a={x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)}}if(p[0].x<0||p[0].x>19||p[0].y<0||p[0].y>19)location.reload();x.fillStyle='#f00';x.fillRect(a.x*S,a.y*S,S-2,S-2);x.fillStyle='#0f0';p.forEach(e=>x.fillRect(e.x*S,e.y*S,S-2,S-2))},100);document.onkeydown=e=>{k=e.keyCode;v={x:k==37?-1:k==39?1:0,y:k==38?-1:k==40?1:0}}</script></body></html></textarea>
+    <textarea id="geo-dash-code" style="display:none;"><!DOCTYPE html><html lang="en-US"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/"><title>Geometry Dash</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1"></head><body style="margin:0;overflow:hidden;background:#000;"><div id="gameContainer" style="width:100vw;height:100vh;"></div><script src="Build/UnityLoader.js"></script><script>var gameInstance=UnityLoader.instantiate("gameContainer","Build/GeometryDashLite.json");</script></body></html></textarea>
+    <textarea id="ragdoll-hit-code" style="display:none;"><!DOCTYPE html><html lang="en"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/ragdoll-hit/"><meta charset="utf-8"><title>Ragdoll Hit</title><script>window.config={loader:'unity-2020',debug:false,maxRatio:24/9,minRatio:9/24,title:'Ragdoll Hit',unityVersion:'2022.3.6f1',unityWebglBuildUrl:'',fileSize:9,cachedDecompressedFileSizes:{'3276aa7c11496bcc48eb6908f112f0c3.js.unityweb':66682,'959bf1c60308f1c34bf072f43c3c17d4.data.unityweb':4377721,'f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb':5105161,'v84.loader.js':114199,},"metadata":{"poki_template_version":1,"background_color":"#4D4D4D","code_filename":"f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb","framework_filename":"3276aa7c11496bcc48eb6908f112f0c3.js.unityweb","loader_filename":"v84.loader.js","use_wasm":"true"}};</script></head><body style="margin:0;overflow:hidden;background:#4D4D4D;"><script src="master-loader.js"></script></body></html></textarea>
+    <textarea id="breakout-code" style="display:none;"><!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;"><canvas id="c" width="480" height="320" style="background:#eee;border:2px solid #555"></canvas><script>var c=document.getElementById("c"),ctx=c.getContext("2d");var x=c.width/2,y=c.height-30,dx=2,dy=-2,ballRadius=10,paddleHeight=10,paddleWidth=75,paddleX=(c.width-paddleWidth)/2,rightPressed=false,leftPressed=false,brickRowCount=3,brickColumnCount=5,brickWidth=75,brickHeight=20,brickPadding=10,brickOffsetTop=30,brickOffsetLeft=30,bricks=[];for(var cCol=0;cCol<brickColumnCount;cCol++){bricks[cCol]=[];for(var r=0;r<brickRowCount;r++){bricks[cCol][r]={x:0,y:0,status:1}}}document.addEventListener("keydown",keyDownHandler,false);document.addEventListener("keyup",keyUpHandler,false);function keyDownHandler(e){if(e.key=="Right"||e.key=="ArrowRight"){rightPressed=true}else if(e.key=="Left"||e.key=="ArrowLeft"){leftPressed=true}}function keyUpHandler(e){if(e.key=="Right"||e.key=="ArrowRight"){rightPressed=false}else if(e.key=="Left"||e.key=="ArrowLeft"){leftPressed=false}}function collisionDetection(){for(var cCol=0;cCol<brickColumnCount;cCol++){for(var r=0;r<brickRowCount;r++){var b=bricks[cCol][r];if(b.status==1){if(x>b.x&&x<b.x+brickWidth&&y>b.y&&y<b.y+brickHeight){dy=-dy;b.status=0}}}}}function drawBall(){ctx.beginPath();ctx.arc(x,y,ballRadius,0,Math.PI*2);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}function drawPaddle(){ctx.beginPath();ctx.rect(paddleX,c.height-paddleHeight,paddleWidth,paddleHeight);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}function drawBricks(){for(var cCol=0;cCol<brickColumnCount;cCol++){for(var r=0;r<brickRowCount;r++){if(bricks[cCol][r].status==1){var brickX=(cCol*(brickWidth+brickPadding))+brickOffsetLeft;var brickY=(r*(brickHeight+brickPadding))+brickOffsetTop;bricks[cCol][r].x=brickX;bricks[cCol][r].y=brickY;ctx.beginPath();ctx.rect(brickX,brickY,brickWidth,brickHeight);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}}}}function draw(){ctx.clearRect(0,0,c.width,c.height);drawBricks();drawBall();drawPaddle();collisionDetection();if(x+dx>c.width-ballRadius||x+dx<ballRadius){dx=-dx}if(y+dy<ballRadius){dy=-dy}else if(y+dy>c.height-ballRadius){if(x>paddleX&&x<paddleX+paddleWidth){dy=-dy}else{document.location.reload()}}if(rightPressed&&paddleX<c.width-paddleWidth){paddleX+=7}else if(leftPressed&&paddleX>0){paddleX-=7}x+=dx;y+=dy;requestAnimationFrame(draw)}draw();</script></body></html></textarea>
+    <textarea id="pong-code" style="display:none;"><!DOCTYPE html><html><body style="margin:0;background:black;display:flex;justify-content:center;align-items:center;height:100vh;"><canvas id="gameCanvas" width="600" height="400"></canvas><script>var canvas=document.getElementById('gameCanvas');var canvasContext=canvas.getContext('2d');var ballX=50;var ballY=50;var ballSpeedX=10;var ballSpeedY=4;var paddle1Y=250;var paddle2Y=250;var playerScore=0;var computerScore=0;const PADDLE_HEIGHT=100;const PADDLE_THICKNESS=10;function calculateMousePos(evt){var rect=canvas.getBoundingClientRect();var root=document.documentElement;var mouseX=evt.clientX-rect.left-root.scrollLeft;var mouseY=evt.clientY-rect.top-root.scrollTop;return{x:mouseX,y:mouseY}}window.onload=function(){var framesPerSecond=30;setInterval(function(){moveEverything();drawEverything()},1000/framesPerSecond);canvas.addEventListener('mousemove',function(evt){var mousePos=calculateMousePos(evt);paddle1Y=mousePos.y-(PADDLE_HEIGHT/2)})};function ballReset(){if(playerScore>=3||computerScore>=3){playerScore=0;computerScore=0}ballSpeedX=-ballSpeedX;ballX=canvas.width/2;ballY=canvas.height/2}function computerMovement(){var paddle2YCenter=paddle2Y+(PADDLE_HEIGHT/2);if(paddle2YCenter<ballY-35){paddle2Y+=6}else if(paddle2YCenter>ballY+35){paddle2Y-=6}}function moveEverything(){computerMovement();ballX+=ballSpeedX;ballY+=ballSpeedY;if(ballX<0){if(ballY>paddle1Y&&ballY<paddle1Y+PADDLE_HEIGHT){ballSpeedX=-ballSpeedX;var deltaY=ballY-(paddle1Y+PADDLE_HEIGHT/2);ballSpeedY=deltaY*0.35}else{computerScore++;ballReset()}}if(ballX>canvas.width){if(ballY>paddle2Y&&ballY<paddle2Y+PADDLE_HEIGHT){ballSpeedX=-ballSpeedX;var deltaY=ballY-(paddle2Y+PADDLE_HEIGHT/2);ballSpeedY=deltaY*0.35}else{playerScore++;ballReset()}}if(ballY<0){ballSpeedY=-ballSpeedY}if(ballY>canvas.height){ballSpeedY=-ballSpeedY}}function drawEverything(){canvasContext.fillStyle='black';canvasContext.fillRect(0,0,canvas.width,canvas.height);canvasContext.fillStyle='white';canvasContext.fillRect(0,paddle1Y,PADDLE_THICKNESS,PADDLE_HEIGHT);canvasContext.fillRect(canvas.width-PADDLE_THICKNESS,paddle2Y,PADDLE_THICKNESS,PADDLE_HEIGHT);canvasContext.beginPath();canvasContext.arc(ballX,ballY,10,0,Math.PI*2,true);canvasContext.fill();canvasContext.fillText(playerScore,100,100);canvasContext.fillText(computerScore,canvas.width-100,100)}</script></body></html></textarea>
 
     <script>
-        // --- 1. FIREBASE CONFIGURATION (PASTE YOUR KEYS HERE) ---
+        // --- 1. FIREBASE CONFIGURATION (UPDATED WITH YOUR KEYS) ---
         const firebaseConfig = {
-			apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA",
+            apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA",
             authDomain: "chatterbox3000-fb3e2.firebaseapp.com",
             databaseURL: "https://chatterbox3000-fb3e2-default-rtdb.firebaseio.com",
             projectId: "chatterbox3000-fb3e2",
@@ -536,7 +419,6 @@
             document.getElementById(id).classList.add('active');
             
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            // Highlight the button that was clicked
             if(event && event.target) event.target.classList.add('active');
         }
 
@@ -558,6 +440,8 @@
                     if(s.val()) document.getElementById('note-' + t).value = s.val();
                 });
             });
+            // Initialize To-Do List Listener
+            initTodoListener();
         }
 
         // --- 4. CALCULATOR (FIXED) ---
@@ -627,24 +511,56 @@
             document.getElementById('post-caption-input').value = '';
         }
 
-        // --- 6. GAMES & FULLSCREEN ---
-        function loadGeoDash() { loadGame('geo-dash-code'); }
-        function loadDriveMad() { loadGame('drive-mad-code'); }
-        function loadSnakeGame() { loadGame('snake-code'); }
-        function loadRagdollHit() { loadGame('ragdoll-hit-code'); }
+        // --- 6. TO-DO LIST (NEW) ---
+        function addTodo() {
+            const input = document.getElementById('newTodo');
+            const text = input.value.trim();
+            if (!text || !currentUser) return;
+            db.ref('users/' + currentUser.uid + '/todos').push({ text: text, done: false });
+            input.value = '';
+        }
 
+        function initTodoListener() {
+            if (!currentUser) return;
+            const list = document.getElementById('todoList');
+            const miniList = document.getElementById('mini-todo-list');
+
+            db.ref('users/' + currentUser.uid + '/todos').on('value', snapshot => {
+                list.innerHTML = '';
+                miniList.innerHTML = '';
+                let count = 0;
+
+                snapshot.forEach(child => {
+                    const task = child.val();
+                    const key = child.key;
+                    
+                    const div = document.createElement('div');
+                    div.className = `todo-item ${task.done ? 'done' : ''}`;
+                    div.innerHTML = `<span>${task.text}</span><div><button class="btn" style="padding:5px 10px; font-size:0.8rem;" onclick="toggleTodo('${key}', ${!task.done})">${task.done ? 'Undo' : 'Done'}</button><button class="btn btn-danger" style="padding:5px 10px; font-size:0.8rem; margin-left:5px;" onclick="deleteTodo('${key}')">X</button></div>`;
+                    list.appendChild(div);
+
+                    if (!task.done) {
+                        count++;
+                        const li = document.createElement('li');
+                        li.innerText = '• ' + task.text;
+                        miniList.appendChild(li);
+                    }
+                });
+                if (count === 0) miniList.innerHTML = '<li style="color:var(--text-secondary);">No pending tasks.</li>';
+            });
+        }
+
+        function toggleTodo(key, status) { db.ref('users/' + currentUser.uid + '/todos/' + key).update({ done: status }); }
+        function deleteTodo(key) { db.ref('users/' + currentUser.uid + '/todos/' + key).remove(); }
+
+
+        // --- 7. GAMES & FULLSCREEN ---
         function loadGame(codeId) {
             const container = document.getElementById('game-container');
             const frame = document.getElementById('game-frame');
-            
-            // Enter fullscreen for game
             container.classList.add('fullscreen-mode');
             document.getElementById('exit-game-fs').style.display = 'block';
-
-            // Inject code into iframe
             frame.srcdoc = document.getElementById(codeId).value;
-            
-            // Ensure iframe focuses so keyboard works
             frame.onload = () => frame.contentWindow.focus();
         }
 
@@ -652,7 +568,7 @@
             const c = document.getElementById('game-container');
             c.classList.remove('fullscreen-mode');
             document.getElementById('exit-game-fs').style.display = 'none';
-            document.getElementById('game-frame').srcdoc = ''; // Stop game sound
+            document.getElementById('game-frame').srcdoc = '';
         }
 
         function toggleFullscreenEl(id) {
@@ -665,7 +581,7 @@
             }
         }
 
-        // --- 7. SYSTEM SETTINGS (THEME & MODE) ---
+        // --- 8. SYSTEM SETTINGS ---
         function toggleTheme() {
             const b = document.body;
             b.dataset.theme = b.dataset.theme === 'light' ? 'dark' : 'light';
@@ -674,37 +590,31 @@
         function toggleMode() {
             document.body.classList.toggle('mode-school');
             document.body.classList.toggle('mode-fun');
-            
-            // Default to dashboard when switching
             if(document.body.classList.contains('mode-school')) showSection('school-home');
             else showSection('fun-home');
         }
 
-        // --- 8. GLOBAL EVENT LISTENERS (ESCAPE KEY FIX) ---
+        // --- 9. GLOBAL EVENT LISTENERS (ESCAPE KEY FAIL-SAFE) ---
         document.addEventListener('keydown', e => {
-            // If typing in a box, IGNORE Escape key
+            // SAFE CHECK: If typing in a box, IGNORE Escape key
             if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
 
             if (e.key === "Escape") {
-                // If in a game, exit game first
                 if (document.querySelector('.fullscreen-mode')) {
                     exitFullGame();
                     document.querySelectorAll('.fullscreen-mode').forEach(el => el.classList.remove('fullscreen-mode'));
-                } 
-                // If not in a game, toggle Stealth Mode
-                else if (document.body.classList.contains('mode-fun')) {
+                } else if (document.body.classList.contains('mode-fun')) {
                     toggleMode();
                 }
             }
         });
 
-        // --- 9. UTILS ---
+        // --- 10. UTILS ---
         function countWords(area, display) {
             const txt = document.getElementById(area).value.trim();
             document.getElementById(display).innerText = txt ? txt.split(/\s+/).length + " words" : "0 words";
         }
         
-        // Timer Logic
         let timerInt;
         function toggleTimer() {
             if(timerInt) { clearInterval(timerInt); timerInt = null; }
