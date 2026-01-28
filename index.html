@@ -6,7 +6,7 @@
     <title>StudyHall OS 4.0 (Social Edition)</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -34,7 +34,7 @@
         }
 
         [data-theme="dark"] {
-            --bg-color: #000000; /* True Black for Insta feel */
+            --bg-color: #000000;
             --sidebar-bg: #121212;
             --card-bg: #121212;
             --text-primary: #f8fafc;
@@ -141,13 +141,12 @@
         .login-box { background: var(--card-bg); padding: 40px; border-radius: 24px; text-align: center; width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); }
         #toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s; font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.15); pointer-events: none; z-index: 9999; }
 
-        /* --- INSTAGRAM CLONE STYLES (Fixed & Integrated) --- */
+        /* --- INSTAGRAM CLONE STYLES (Cleaned & Themed) --- */
         .insta-main-wrapper {
             max-width: 600px;
             margin: 0 auto;
         }
 
-        /* Insta Navbar (Feed Header) */
         .insta-navbar {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -159,97 +158,16 @@
             justify-content: space-between;
         }
         
-        .insta-navbar .logo img {
-            height: 28px;
-            display: block;
-            /* Invert logo for dark mode if needed, or use a text logo */
-        }
-        [data-theme="dark"] .insta-navbar .logo img { filter: invert(1); }
-
-        .insta-search {
-            position: relative;
-            width: 200px;
-        }
-        .insta-search input {
-            background: var(--bg-color);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 10px 8px 30px;
-            font-size: 0.85rem;
-            width: 100%;
-        }
-        .insta-search i {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-        }
-
-        .insta-nav-icons {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .insta-nav-icons i {
-            font-size: 1.4rem;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
+        .insta-nav-icons { display: flex; align-items: center; gap: 15px; }
+        .insta-nav-icons i { font-size: 1.4rem; color: var(--text-primary); cursor: pointer; transition: transform 0.2s; }
         .insta-nav-icons i:hover { transform: scale(1.1); }
 
-        /* Stories / Statuses */
-        .insta-statuses {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-        }
-        .insta-status {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 66px;
-            cursor: pointer;
-        }
-        .insta-status-ring {
-            width: 66px;
-            height: 66px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-            padding: 2px;
-            margin-bottom: 5px;
-        }
-        .insta-status-ring img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 2px solid var(--card-bg);
-            object-fit: cover;
-            background: #fff;
-        }
-        .insta-status p {
-            font-size: 0.75rem;
-            color: var(--text-primary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 100%;
-            text-align: center;
-        }
-
-        /* Post Card */
         .insta-post-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 8px;
             margin-bottom: 20px;
+            overflow: hidden;
         }
         
         .insta-post-header {
@@ -258,119 +176,32 @@
             align-items: center;
             justify-content: space-between;
         }
-        .insta-user-details {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .insta-user-details { display: flex; align-items: center; gap: 10px; }
         .insta-profile-pic {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            padding: 1.5px;
+            width: 32px; height: 32px;
+            border-radius: 50%; padding: 1.5px;
             background: linear-gradient(45deg, #f09433, #bc1888);
         }
-        .insta-profile-pic img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 1.5px solid var(--card-bg);
-            object-fit: cover;
+        .insta-profile-pic div, .insta-profile-pic img {
+            width: 100%; height: 100%; border-radius: 50%;
+            border: 1.5px solid var(--card-bg); object-fit: cover;
         }
-        .insta-user-details h3 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            line-height: 1.2;
-            margin: 0;
-            color: var(--text-primary);
-        }
-        .insta-user-details span {
-            font-size: 0.75rem;
-            font-weight: 400;
-            color: var(--text-secondary);
-        }
-        .insta-post-menu {
-            color: var(--text-primary);
-            cursor: pointer;
-        }
+        .insta-user-details h3 { font-size: 0.9rem; font-weight: 600; margin: 0; color: var(--text-primary); }
+        .insta-user-details span { font-size: 0.75rem; color: var(--text-secondary); }
 
-        .insta-post-img {
-            width: 100%;
-            display: block;
-            background: #000;
-        }
+        .insta-post-img { width: 100%; display: block; background: #000; }
 
-        .insta-post-footer {
-            padding: 12px;
-        }
+        .insta-post-footer { padding: 12px; }
         
-        .insta-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
+        .insta-actions { display: flex; justify-content: space-between; margin-bottom: 10px; }
         .insta-action-left { display: flex; gap: 15px; }
-        .insta-svg { 
-            cursor: pointer; 
-            fill: var(--text-primary); 
-            color: var(--text-primary);
-            transition: transform 0.1s;
-        }
-        .insta-svg:hover { transform: scale(1.1); }
-        .insta-svg.liked { fill: #ed4956; color: #ed4956; }
+        .insta-actions i { font-size: 1.5rem; color: var(--text-primary); cursor: pointer; transition: 0.2s; }
+        .insta-actions i:hover { color: var(--accent); }
 
-        .insta-likes {
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 6px;
-            cursor: pointer;
-        }
-
-        .insta-caption {
-            font-size: 0.9rem;
-            line-height: 1.4;
-            margin-bottom: 6px;
-        }
+        .insta-likes { font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
+        .insta-caption { font-size: 0.9rem; line-height: 1.4; margin-bottom: 6px; }
         .insta-caption b { font-weight: 600; margin-right: 5px; }
-
-        .insta-comments-link {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            cursor: pointer;
-            margin-bottom: 6px;
-            display: block;
-            text-decoration: none;
-        }
-
-        .insta-time {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
-
-        .insta-add-comment {
-            border-top: 1px solid var(--border);
-            padding-top: 12px;
-            display: flex;
-            align-items: center;
-        }
-        .insta-add-comment input {
-            border: none;
-            background: transparent;
-            padding: 0 10px;
-            flex: 1;
-            font-size: 0.9rem;
-        }
-        .insta-add-comment input:focus { border: none; }
-        .insta-post-btn {
-            color: #0095f6;
-            font-weight: 600;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
+        .insta-time { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 5px; }
     </style>
 </head>
 <body class="mode-school" data-theme="light">
@@ -532,139 +363,31 @@
             <div class="insta-main-wrapper">
                 
                 <div class="insta-navbar">
-                    <div class="logo">
-                        <img src="https://media.geeksforgeeks.org/wp-content/uploads/20220609090809/download-200x200.png" alt="Instagram">
-                    </div>
-                    <div class="insta-search">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search">
+                    <div class="logo" style="font-family: 'Inter', sans-serif; font-weight:700; font-size:1.2rem;">
+                        StudyHall Social
                     </div>
                     <div class="insta-nav-icons">
-                        <i class="fas fa-home"></i>
-                        <i class="fab fa-facebook-messenger"></i>
-                        <i class="far fa-compass"></i>
-                        <i class="far fa-heart"></i>
+                        <i class="fas fa-home" onclick="loadPosts()" title="Refresh Feed"></i>
+                        <i class="far fa-plus-square" onclick="document.getElementById('new-post-area').style.display = 'block'" title="New Post"></i>
                         <div class="insta-profile-pic" style="width:28px; height:28px; padding:0;">
-                            <img src="https://media.geeksforgeeks.org/wp-content/uploads/20220609093221/g2-200x200.jpg" alt="Profile" style="border:none;">
+                            <div id="nav-user-pic" style="width:100%; height:100%; border-radius:50%; background:#333; color:white; display:flex; justify-content:center; align-items:center; font-size:12px;">U</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="insta-statuses">
-                    <div class="insta-status">
-                        <div class="insta-status-ring"><img src="https://media.geeksforgeeks.org/wp-content/uploads/20220604085434/GeeksForGeeks-300x243.png" alt="Status"></div>
-                        <p>GeeksForGeeks</p>
-                    </div>
-                    <div class="insta-status">
-                        <div class="insta-status-ring"><img src="https://media.geeksforgeeks.org/wp-content/uploads/20220609093221/g2-200x200.jpg" alt="Status"></div>
-                        <p>User_123</p>
-                    </div>
-                    <div class="insta-status">
-                        <div class="insta-status-ring"><img src="https://media.geeksforgeeks.org/wp-content/uploads/20220609093241/g3-200x200.png" alt="Status"></div>
-                        <p>HackerMan</p>
-                    </div>
-                    <div class="insta-status">
-                        <div class="insta-status-ring"><img src="https://media.geeksforgeeks.org/wp-content/uploads/20220609093229/g-200x200.png" alt="Status"></div>
-                        <p>CoderLife</p>
-                    </div>
-                    <div class="insta-status">
-                        <div class="insta-status-ring"><img src="https://media.geeksforgeeks.org/wp-content/uploads/20220609093221/g2-200x200.jpg" alt="Status"></div>
-                        <p>Dev_Jane</p>
+                <div id="new-post-area" class="insta-post-card" style="padding:20px; display:none;">
+                    <h3 style="margin-bottom:15px;">New Post</h3>
+                    <input type="text" id="post-img-url" placeholder="Image URL (optional)..." style="width:100%; margin-bottom:10px; padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--bg-color); color:var(--text-primary);">
+                    <textarea id="post-caption-input" placeholder="What's on your mind?" style="width:100%; height:60px; margin-bottom:10px; padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--bg-color); color:var(--text-primary);"></textarea>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-primary" onclick="createInstaPost()" style="width:100%;">Share</button>
+                        <button class="btn" onclick="document.getElementById('new-post-area').style.display='none'" style="width:100%;">Cancel</button>
                     </div>
                 </div>
 
-                <div class="insta-post-card">
-                    <div class="insta-post-header">
-                        <div class="insta-user-details">
-                            <div class="insta-profile-pic">
-                                <img src="https://media.geeksforgeeks.org/wp-content/uploads/20220609093229/g-200x200.png" alt="user">
-                            </div>
-                            <div>
-                                <h3>Ayush Agarwal</h3>
-                                <span>Mumbai, India</span>
-                            </div>
-                        </div>
-                        <i class="fas fa-ellipsis-h insta-post-menu"></i>
-                    </div>
-                    
-                    <img class="insta-post-img" src="https://media.geeksforgeeks.org/wp-content/uploads/20220609090112/gfg1-298x300.jpeg" alt="Post">
-                    
-                    <div class="insta-post-footer">
-                        <div class="insta-actions">
-                            <div class="insta-action-left">
-                                <svg aria-label="Like" class="insta-svg" height="24" viewBox="0 0 48 48" width="24" onclick="toggleLike(this)">
-                                    <path d="M34.6 6.1c5.7 0 10.4 5.2 10.4 11.5 0 6.8-5.9 11-11.5 16S25 41.3 24 41.9c-1.1-.7-4.7-4-9.5-8.3-5.7-5-11.5-9.2-11.5-16C3 11.3 7.7 6.1 13.4 6.1c4.2 0 6.5 2 8.1 4.3 1.9 2.6 2.2 3.9 2.5 3.9.3.6-1.3 2.5-3.9 1.6-2.3 3.9-4.3 8.1-4.3m0-3c-4.5 0-7.9 1.8-10.6 5.6-2.7-3.7-6.1-5.5-10.6-5.5C6 3.1 0 9.6 0 17.6c0 7.3 5.4 12 10.6 16.5.6.5 1.3 1.1 1.9 1.7l2.3 2c4.4 3.9 6.6 5.9 7.6 6.5.5.3 1.1.5 1.6.5.6 0 1.1-.2 1.6-.5.1-.6 2.8-2.2 7.8-6.8l2-1.8c.7-.6 1.3-1.2 2-1.7C42.7 29.6 48 25 48 17.6c0-8-6-14.5-13.4-14.5z"></path>
-                                </svg>
-                                <svg aria-label="Comment" class="insta-svg" height="24" viewBox="0 0 48 48" width="24">
-                                    <path clip-rule="evenodd" d="M47.5 46.1l-2.8-11c1.8-3.3 2.8-7.1 2.8-11.1C47.5 11 37.5 0.5 24 0.5S0.5 11 0.5 24 10.5 47.5 24 47.5c4 0 7.8-1 11.1-2.8l11 2.8c.8.2 1.6-.6 1.4-1.4zm-3-22.1c0 4-1 7-2.6 10-.2.4-.3.9-.2 1.4l2.1 8.4-8.3-2.1c-.5-.1-1-.1-1.4.2-1.8 1-5.2 2.6-10 2.6-11.4 0-20.6-9.2-20.6-20.5S12.7 3.5 24 3.5 44.5 12.7 44.5 24z" fill-rule="evenodd"></path>
-                                </svg>
-                                <svg aria-label="Share Post" class="insta-svg" height="24" viewBox="0 0 48 48" width="24">
-                                    <path d="M47.8 3.8c-.3-.5-.8-.8-1.3-.8h-45C.9 3.1.3 3.5.1 4S0 5.2.4 5.7l15.9 15.6 5.5 22.6c.1.6.6 1 1.2 1.1h.2c.5 0 1-.3 1.3-.7l23.2-39c.4-.4.4-1.1.1-1.5zM5.2 6.1h35.5L18 18.7 5.2 6.1zm18.7 33.6l-4.4-18.4L42.4 8.6 23.9 39.7z"></path>
-                                </svg>
-                            </div>
-                            <svg aria-label="Save" class="insta-svg" height="24" viewBox="0 0 48 48" width="24">
-                                <path d="M43.5 48c-.4 0-.8-.2-1.1-.4L24 29 5.6 47.6c-.4.4-1.1.6-1.6.3-.6-.2-1-.8-1-1.4v-45C3.7 3.7 0 4.5 0 5.5h39c.8 0 1.5.7 1.5 1.5v45c0 .6-.4 1.2-.9 1.4-.2.1-.4.1-.6.1zM24 26c.8 0 1.6.3 2.2.9l15.8 16V3H6v39.9l15.8-16c.6-.6 1.4-.9 2.2-.9z"></path>
-                            </svg>
-                        </div>
-                        <p class="insta-likes">203 likes</p>
-                        <p class="insta-caption"><b>Ayush Agarwal</b> Just deployed the new update! #StudyHall #Coding</p>
-                        <a href="#" class="insta-comments-link">View all 32 comments</a>
-                        <p class="insta-time">2 HOURS AGO</p>
-                        
-                        <div class="insta-add-comment">
-                            <i class="far fa-smile" style="font-size:1.5rem; color:var(--text-secondary); cursor:pointer;"></i>
-                            <input type="text" placeholder="Add a comment...">
-                            <button class="insta-post-btn">Post</button>
-                        </div>
-                    </div>
+                <div id="feed-container">
+                    <p style="text-align:center; padding:20px; color:var(--text-secondary);">Loading feed...</p>
                 </div>
-
-                <div class="insta-post-card">
-                    <div class="insta-post-header">
-                        <div class="insta-user-details">
-                            <div class="insta-profile-pic">
-                                <img src="https://media.geeksforgeeks.org/wp-content/uploads/20220609093241/g3-200x200.png" alt="user">
-                            </div>
-                            <div>
-                                <h3>Piyush Agarwal</h3>
-                                <span>Delhi, India</span>
-                            </div>
-                        </div>
-                        <i class="fas fa-ellipsis-h insta-post-menu"></i>
-                    </div>
-                    
-                    <img class="insta-post-img" src="https://media.geeksforgeeks.org/wp-content/uploads/20220609090119/gfg2-300x297.jpeg" alt="Post">
-                    
-                    <div class="insta-post-footer">
-                        <div class="insta-actions">
-                            <div class="insta-action-left">
-                                <svg aria-label="Like" class="insta-svg" height="24" viewBox="0 0 48 48" width="24" onclick="toggleLike(this)">
-                                    <path d="M34.6 6.1c5.7 0 10.4 5.2 10.4 11.5 0 6.8-5.9 11-11.5 16S25 41.3 24 41.9c-1.1-.7-4.7-4-9.5-8.3-5.7-5-11.5-9.2-11.5-16C3 11.3 7.7 6.1 13.4 6.1c4.2 0 6.5 2 8.1 4.3 1.9 2.6 2.2 3.9 2.5 3.9.3.6-1.3 2.5-3.9 1.6-2.3 3.9-4.3 8.1-4.3m0-3c-4.5 0-7.9 1.8-10.6 5.6-2.7-3.7-6.1-5.5-10.6-5.5C6 3.1 0 9.6 0 17.6c0 7.3 5.4 12 10.6 16.5.6.5 1.3 1.1 1.9 1.7l2.3 2c4.4 3.9 6.6 5.9 7.6 6.5.5.3 1.1.5 1.6.5.6 0 1.1-.2 1.6-.5.1-.6 2.8-2.2 7.8-6.8l2-1.8c.7-.6 1.3-1.2 2-1.7C42.7 29.6 48 25 48 17.6c0-8-6-14.5-13.4-14.5z"></path>
-                                </svg>
-                                <svg aria-label="Comment" class="insta-svg" height="24" viewBox="0 0 48 48" width="24">
-                                    <path clip-rule="evenodd" d="M47.5 46.1l-2.8-11c1.8-3.3 2.8-7.1 2.8-11.1C47.5 11 37.5 0.5 24 0.5S0.5 11 0.5 24 10.5 47.5 24 47.5c4 0 7.8-1 11.1-2.8l11 2.8c.8.2 1.6-.6 1.4-1.4zm-3-22.1c0 4-1 7-2.6 10-.2.4-.3.9-.2 1.4l2.1 8.4-8.3-2.1c-.5-.1-1-.1-1.4.2-1.8 1-5.2 2.6-10 2.6-11.4 0-20.6-9.2-20.6-20.5S12.7 3.5 24 3.5 44.5 12.7 44.5 24z" fill-rule="evenodd"></path>
-                                </svg>
-                                <svg aria-label="Share Post" class="insta-svg" height="24" viewBox="0 0 48 48" width="24">
-                                    <path d="M47.8 3.8c-.3-.5-.8-.8-1.3-.8h-45C.9 3.1.3 3.5.1 4S0 5.2.4 5.7l15.9 15.6 5.5 22.6c.1.6.6 1 1.2 1.1h.2c.5 0 1-.3 1.3-.7l23.2-39c.4-.4.4-1.1.1-1.5zM5.2 6.1h35.5L18 18.7 5.2 6.1zm18.7 33.6l-4.4-18.4L42.4 8.6 23.9 39.7z"></path>
-                                </svg>
-                            </div>
-                            <svg aria-label="Save" class="insta-svg" height="24" viewBox="0 0 48 48" width="24">
-                                <path d="M43.5 48c-.4 0-.8-.2-1.1-.4L24 29 5.6 47.6c-.4.4-1.1.6-1.6.3-.6-.2-1-.8-1-1.4v-45C3.7 3.7 0 4.5 0 5.5h39c.8 0 1.5.7 1.5 1.5v45c0 .6-.4 1.2-.9 1.4-.2.1-.4.1-.6.1zM24 26c.8 0 1.6.3 2.2.9l15.8 16V3H6v39.9l15.8-16c.6-.6 1.4-.9 2.2-.9z"></path>
-                            </svg>
-                        </div>
-                        <p class="insta-likes">89 likes</p>
-                        <p class="insta-caption"><b>Piyush Agarwal</b> Late night study session. 📚☕ #Grind</p>
-                        <a href="#" class="insta-comments-link">View all 12 comments</a>
-                        <p class="insta-time">5 HOURS AGO</p>
-                        
-                        <div class="insta-add-comment">
-                            <i class="far fa-smile" style="font-size:1.5rem; color:var(--text-secondary); cursor:pointer;"></i>
-                            <input type="text" placeholder="Add a comment...">
-                            <button class="insta-post-btn">Post</button>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
 
@@ -767,6 +490,7 @@
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('user-display').innerText = user.email.split('@')[0];
                 loadUserData();
+                loadPosts(); // Load Social Feed automatically on login
             } else {
                 document.getElementById('login-overlay').style.display = 'flex';
                 currentUser = null;
@@ -832,11 +556,104 @@
         function resetTimer() { clearInterval(timerInt); timerInt = null; document.getElementById('timer-ui').classList.remove('timer-active'); timeLeft = 25 * 60; document.getElementById('timer-display').innerText = "25:00"; }
         function countWords(areaId, displayId) { const txt = document.getElementById(areaId).value.trim(); const count = txt ? txt.split(/\s+/).length : 0; document.getElementById(displayId).innerText = count + " words"; }
 
-        // --- NEW INSTA LOGIC ---
-        function toggleLike(el) {
-            el.classList.toggle('liked');
-            // If you wanted to hook this to Firebase, you'd do it here.
-            // For now, it just toggles the red heart visual.
+        // --- REAL-TIME INSTA LOGIC ---
+
+        function createInstaPost() {
+            if(!currentUser) return alert("Please login first.");
+            
+            const caption = document.getElementById('post-caption-input').value;
+            const imgUrl = document.getElementById('post-img-url').value;
+            
+            if(!caption && !imgUrl) return alert("Please write a caption or add an image.");
+
+            const newPost = {
+                username: currentUser.email.split('@')[0],
+                image: imgUrl || '', // Optional Image
+                caption: caption,
+                likes: 0,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                comments: []
+            };
+
+            db.ref('posts').push(newPost).then(() => {
+                toast("Shared to Feed!");
+                document.getElementById('post-caption-input').value = '';
+                document.getElementById('post-img-url').value = '';
+                document.getElementById('new-post-area').style.display = 'none';
+            });
+        }
+
+        function loadPosts() {
+            const feed = document.getElementById('feed-container');
+            
+            // Update nav avatar
+            if(currentUser) {
+                document.getElementById('nav-user-pic').innerText = currentUser.email.charAt(0).toUpperCase();
+            }
+
+            db.ref('posts').limitToLast(20).on('value', snapshot => {
+                feed.innerHTML = '';
+                const posts = [];
+                snapshot.forEach(child => {
+                    posts.push({ id: child.key, ...child.val() });
+                });
+
+                if(posts.length === 0) {
+                    feed.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary);">No posts yet.<br>Be the first to share something!</div>';
+                    return;
+                }
+                
+                // Show newest first
+                posts.reverse().forEach(post => {
+                    const hasImage = post.image && post.image.trim() !== '';
+                    const userInitial = post.username.charAt(0).toUpperCase();
+                    
+                    const card = document.createElement('div');
+                    card.className = 'insta-post-card';
+                    
+                    let imageHTML = '';
+                    if(hasImage) {
+                        imageHTML = `<img class="insta-post-img" src="${post.image}" onerror="this.style.display='none'">`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="insta-post-header">
+                            <div class="insta-user-details">
+                                <div class="insta-profile-pic">
+                                    <div style="display:flex; align-items:center; justify-content:center; font-weight:700; color:#333; background:#eee; width:100%; height:100%; border-radius:50%;">${userInitial}</div>
+                                </div>
+                                <div>
+                                    <h3>${post.username}</h3>
+                                    <span>StudyHall Student</span>
+                                </div>
+                            </div>
+                            <i class="fas fa-ellipsis-h insta-post-menu"></i>
+                        </div>
+                        ${imageHTML}
+                        <div class="insta-post-footer">
+                            <div class="insta-actions">
+                                <div class="insta-action-left">
+                                    <i class="far fa-heart" onclick="likePost('${post.id}')"></i>
+                                    <i class="far fa-comment"></i>
+                                    <i class="far fa-paper-plane"></i>
+                                </div>
+                                <i class="far fa-bookmark"></i>
+                            </div>
+                            <p class="insta-likes">${post.likes || 0} likes</p>
+                            <div class="insta-caption">
+                                <b>${post.username}</b> ${post.caption || ''}
+                            </div>
+                            <p class="insta-time">Recently</p>
+                        </div>
+                    `;
+                    feed.appendChild(card);
+                });
+            });
+        }
+
+        function likePost(postId) {
+            const postRef = db.ref('posts/' + postId + '/likes');
+            postRef.transaction(currentLikes => (currentLikes || 0) + 1);
         }
 
         // --- PERIODIC TABLE ---
