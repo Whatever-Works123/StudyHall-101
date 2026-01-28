@@ -540,22 +540,48 @@
             if(pendingCount === 0) mini.innerHTML = '<li style="color:var(--text-secondary);">No pending tasks.</li>';
         }
 
-        function calc(val) {
-            const disp = document.getElementById('calcDisplay');
-            if(val === 'C') disp.value = '';
-            else if(val === '=') { try { let expr = disp.value.replace(/sin/g, 'Math.sin').replace(/cos/g, 'Math.cos').replace(/tan/g, 'Math.tan').replace(/sqrt/g, 'Math.sqrt').replace(/pow/g, 'Math.pow').replace(/PI/g, 'Math.PI'); disp.value = eval(expr); } catch { disp.value = 'Error'; } } 
-            else { disp.value += val; }
-        }
-
-        let timerInt = null; let timeLeft = 25 * 60;
-        function toggleTimer() {
-            const ui = document.getElementById('timer-ui');
-            if(timerInt) { clearInterval(timerInt); timerInt = null; ui.classList.remove('timer-active'); }
-            else { ui.classList.add('timer-active'); timerInt = setInterval(() => { if(timeLeft > 0) { timeLeft--; let m = Math.floor(timeLeft / 60).toString().padStart(2, '0'); let s = (timeLeft % 60).toString().padStart(2, '0'); document.getElementById('timer-display').innerText = `${m}:${s}`; } else { clearInterval(timerInt); ui.classList.remove('timer-active'); alert("Time's up!"); } }, 1000); }
-        }
-        function resetTimer() { clearInterval(timerInt); timerInt = null; document.getElementById('timer-ui').classList.remove('timer-active'); timeLeft = 25 * 60; document.getElementById('timer-display').innerText = "25:00"; }
-        function countWords(areaId, displayId) { const txt = document.getElementById(areaId).value.trim(); const count = txt ? txt.split(/\s+/).length : 0; document.getElementById(displayId).innerText = count + " words"; }
-
+		      function calc(val) {
+		    const disp = document.getElementById('calcDisplay');
+		
+		    if (val === 'C') {
+		        // Clear screen
+		        disp.value = '';
+		    } else if (val === '=') {
+		        try {
+		            let expr = disp.value;
+		
+		            // 1. Translate screen text to JavaScript Math code
+		            expr = expr.replace(/sin\(/g, 'Math.sin(');
+		            expr = expr.replace(/cos\(/g, 'Math.cos(');
+		            expr = expr.replace(/tan\(/g, 'Math.tan(');
+		            expr = expr.replace(/sqrt\(/g, 'Math.sqrt(');
+		            expr = expr.replace(/PI/g, 'Math.PI');
+		            
+		            // 2. Handle Power (convert '2^3' to '2**3')
+		            expr = expr.replace(/\^/g, '**');
+		
+		            // 3. Calculate
+		            const result = eval(expr);
+		            
+		            // Limit decimals to avoid messy numbers (like 2.000000001)
+		            if (Number.isInteger(result)) {
+		                disp.value = result;
+		            } else {
+		                disp.value = result.toFixed(4).replace(/\.?0+$/, '');
+		            }
+		
+		        } catch (e) {
+		            disp.value = 'Error';
+		        }
+		    } else {
+		        // If the user clicks "x^y", we show "^" instead of "pow("
+		        if (val === 'pow(') {
+		            disp.value += '^';
+		        } else {
+		            disp.value += val;
+		        }
+		    }
+		}
         // --- REAL-TIME INSTA LOGIC ---
 
         function createInstaPost() {
