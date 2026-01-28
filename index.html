@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall OS 4.0 (Social Edition)</title>
+    <title>StudyHall OS 5.0 (Schedule Edition)</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -135,46 +135,16 @@
         #pt-panel.active { display: flex; animation: fadeIn 0.2s; }
 
         /* --- INSTAGRAM CLONE STYLES --- */
-        .insta-main-wrapper {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .insta-navbar {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 20px;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+        .insta-main-wrapper { max-width: 600px; margin: 0 auto; }
+        .insta-navbar { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
         .insta-nav-icons { display: flex; align-items: center; gap: 15px; }
         .insta-nav-icons i { font-size: 1.4rem; color: var(--text-primary); cursor: pointer; transition: transform 0.2s; }
         .insta-nav-icons i:hover { transform: scale(1.1); }
-        .insta-post-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        .insta-post-header {
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+        .insta-post-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .insta-post-header { padding: 12px; display: flex; align-items: center; justify-content: space-between; }
         .insta-user-details { display: flex; align-items: center; gap: 10px; }
-        .insta-profile-pic {
-            width: 32px; height: 32px;
-            border-radius: 50%; padding: 1.5px;
-            background: linear-gradient(45deg, #f09433, #bc1888);
-        }
-        .insta-profile-pic div, .insta-profile-pic img {
-            width: 100%; height: 100%; border-radius: 50%;
-            border: 1.5px solid var(--card-bg); object-fit: cover;
-        }
+        .insta-profile-pic { width: 32px; height: 32px; border-radius: 50%; padding: 1.5px; background: linear-gradient(45deg, #f09433, #bc1888); }
+        .insta-profile-pic div, .insta-profile-pic img { width: 100%; height: 100%; border-radius: 50%; border: 1.5px solid var(--card-bg); object-fit: cover; }
         .insta-user-details h3 { font-size: 0.9rem; font-weight: 600; margin: 0; color: var(--text-primary); }
         .insta-user-details span { font-size: 0.75rem; color: var(--text-secondary); }
         .insta-post-img { width: 100%; display: block; background: #000; min-height: 200px; object-fit: cover; }
@@ -197,12 +167,22 @@
             display: flex; flex-direction: column; border-radius: 0 !important;
         }
         .fullscreen-mode iframe { width: 100%; height: 100%; border: none; border-radius: 0; }
-        
         iframe { width: 100%; height: 600px; border: none; border-radius: 12px; background: white; }
         
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        /* --- OVERLAYS (Login & Setup) --- */
+        #login-overlay, #setup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
         .login-box { background: var(--card-bg); padding: 40px; border-radius: 24px; text-align: center; width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); }
         #toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s; font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.15); pointer-events: none; z-index: 9999; }
+        
+        /* --- SCHEDULE STYLES --- */
+        .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; text-align: left; }
+        .schedule-col h4 { margin-bottom: 10px; color: var(--text-secondary); border-bottom: 2px solid; padding-bottom: 5px; display: inline-block; }
+        .red-day h4 { border-color: #ef4444; color: #ef4444; }
+        .green-day h4 { border-color: #10b981; color: #10b981; }
+        .class-input { margin-bottom: 8px; font-size: 0.9rem; }
+        .schedule-display-list { list-style: none; padding: 0; }
+        .schedule-display-list li { padding: 8px; border-bottom: 1px solid var(--border); font-size: 0.9rem; display: flex; justify-content: space-between; }
+        .schedule-display-list li span { font-weight: 700; color: var(--text-secondary); width: 40px; }
     </style>
 </head>
 <body class="mode-school" data-theme="light">
@@ -215,6 +195,32 @@
             <input type="password" id="password" placeholder="Password" style="margin-bottom:20px;">
             <button class="btn btn-primary" onclick="loginUser()" style="width:100%;">Enter Dashboard</button>
             <p id="login-error" style="margin-top:15px; color:#ef4444; font-size:0.9rem;"></p>
+        </div>
+    </div>
+
+    <div id="setup-overlay" style="display:none;">
+        <div class="login-box" style="width: 500px; text-align: left;">
+            <h2 style="color: var(--accent); margin-bottom:10px; text-align:center;">Setup Schedule</h2>
+            <p style="color: var(--text-secondary); margin-bottom:20px; text-align:center;">Please enter your classes for the block schedule.</p>
+            
+            <div class="schedule-grid">
+                <div class="schedule-col red-day">
+                    <h4>🟥 Red Day</h4>
+                    <input class="class-input" id="setup-r1" placeholder="R1 Class Name">
+                    <input class="class-input" id="setup-r2" placeholder="R2 Class Name">
+                    <input class="class-input" id="setup-r3" placeholder="R3 Class Name">
+                    <input class="class-input" id="setup-r4" placeholder="R4 Class Name">
+                </div>
+                <div class="schedule-col green-day">
+                    <h4>🟩 Green Day</h4>
+                    <input class="class-input" id="setup-g5" placeholder="G5 Class Name">
+                    <input class="class-input" id="setup-g6" placeholder="G6 Class Name">
+                    <input class="class-input" id="setup-g7" placeholder="G7 Class Name">
+                    <input class="class-input" id="setup-g8" placeholder="G8 Class Name">
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveInitialSetup()" style="width:100%;">Save & Enter OS</button>
         </div>
     </div>
 
@@ -253,6 +259,31 @@
                 <p style="color:var(--text-secondary);">Your academic dashboard is ready.</p>
             </header>
             <div class="dashboard-grid">
+                
+                <div class="card">
+                    <h3>📅 My Schedule</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:15px;">
+                        <div>
+                            <h4 style="color:#ef4444; margin-bottom:10px;">Red Day</h4>
+                            <ul class="schedule-display-list" id="dash-red-list">
+                                <li><span>R1</span> ...</li>
+                                <li><span>R2</span> ...</li>
+                                <li><span>R3</span> ...</li>
+                                <li><span>R4</span> ...</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="color:#10b981; margin-bottom:10px;">Green Day</h4>
+                            <ul class="schedule-display-list" id="dash-green-list">
+                                <li><span>G5</span> ...</li>
+                                <li><span>G6</span> ...</li>
+                                <li><span>G7</span> ...</li>
+                                <li><span>G8</span> ...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card" style="text-align:center;">
                     <h3>Focus Timer</h3>
                     <div class="timer-circle" id="timer-ui"><span id="timer-display">25:00</span></div>
@@ -362,7 +393,6 @@
 
         <div id="social-feed" class="section">
             <div class="insta-main-wrapper">
-                
                 <div class="insta-navbar">
                     <div class="logo" style="font-family: 'Inter', sans-serif; font-weight:700; font-size:1.2rem;">
                         StudyHall Social
@@ -375,7 +405,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="new-post-area" class="insta-post-card" style="padding:20px; display:none;">
                     <h3 style="margin-bottom:15px;">New Post</h3>
                     <input type="text" id="post-img-url" placeholder="Image URL (optional)..." style="width:100%; margin-bottom:10px; padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--bg-color); color:var(--text-primary);">
@@ -385,7 +414,6 @@
                         <button class="btn" onclick="document.getElementById('new-post-area').style.display='none'" style="width:100%;">Cancel</button>
                     </div>
                 </div>
-
                 <div id="feed-container">
                     <p style="text-align:center; padding:20px; color:var(--text-secondary);">Loading feed...</p>
                 </div>
@@ -397,14 +425,11 @@
             <div class="dashboard-grid">
                 <div class="card" style="text-align:center;"><h3>Geometry Dash</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGeoDash()">Play</button></div>
                 <div class="card" style="text-align:center;"><h3>Drive Mad</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadDriveMad()">Play</button></div>
-                <div class="card" style="text-align:center;"><h3>Snake</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadSnakeGame()">Play</button></div>
-                <div class="card" style="text-align:center;"><h3>Ragdoll Hit</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadRagdollHit()">Play</button></div>
             </div>
             
             <div id="game-container" class="card" style="padding:0; overflow:hidden; margin-top:20px; position:relative;">
                 <button class="btn btn-danger" style="position:absolute; top:10px; right:10px; z-index:100; display:none;" id="exit-game-fs" onclick="exitFullGame()">Exit Fullscreen</button>
                 <button class="btn btn-primary" style="position:absolute; bottom:10px; right:10px; z-index:100;" onclick="enterFullGame()">⛶ Fullscreen</button>
-                
                 <iframe id="game-frame" src="" allow="gamepad *; keyboard-lock *;"></iframe>
             </div>
         </div>
@@ -420,6 +445,27 @@
         <div id="settings" class="section">
             <h2>System Settings</h2>
             <div class="dashboard-grid">
+                <div class="card" style="grid-column: span 2;">
+                    <h3>📅 Edit Class Schedule</h3>
+                    <div class="schedule-grid" style="margin-top:15px;">
+                        <div class="schedule-col red-day">
+                            <h4>🟥 Red Day</h4>
+                            <input class="class-input" id="set-r1" placeholder="R1 Class">
+                            <input class="class-input" id="set-r2" placeholder="R2 Class">
+                            <input class="class-input" id="set-r3" placeholder="R3 Class">
+                            <input class="class-input" id="set-r4" placeholder="R4 Class">
+                        </div>
+                        <div class="schedule-col green-day">
+                            <h4>🟩 Green Day</h4>
+                            <input class="class-input" id="set-g5" placeholder="G5 Class">
+                            <input class="class-input" id="set-g6" placeholder="G6 Class">
+                            <input class="class-input" id="set-g7" placeholder="G7 Class">
+                            <input class="class-input" id="set-g8" placeholder="G8 Class">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveSettingsSchedule()">Update Schedule</button>
+                </div>
+
                 <div class="card">
                     <h3>🔒 Stealth Mode</h3>
                     <p style="color:var(--text-secondary); margin-bottom:15px;">Instantly switch between School and Secret modes.</p>
@@ -437,9 +483,6 @@
 
     <textarea id="drive-mad-code" style="display:none;">
 <!DOCTYPE html><html lang="en"><head><base href="https://cdn.jsdelivr.net/gh/genizy/dmad-poki@49b5ab6b987f5f3be58f9dae59c92e8fc1aab9b0/"><script>window.assgdd={"ancestorOrigins":{"0":"https://games.poki.com","1":"https://poki.com"},"href":"https://f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com/cc1bc57a-e355-4696-97c2-097bf6188606/index.html?cloudsavegames=y"}</script><meta charset="utf-8"><title>Drive Mad</title><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><link rel="stylesheet" href="webapp/fancade.css"><script src="poki-sdk.js"></script></head><body id="body"><div id="canvas_border" class="emscripten_border"><div id="play_content" class="middle center"><div class="edge"><div class="box"><div class="black"><img src="webapp/cover.jpg" class="cover"><p class="title">Drive Mad</p></div></div></div><div id="progress_or_play"><progress id="progress" class="loading" value="0" max="100"></progress></div></div><canvas class="emscripten" id="canvas" tabindex=-1></canvas></div><script type="text/javascript" src="webapp/source_min.js"></script><script type="text/javascript" src="webapp/index.js"></script></body></html>
-    </textarea>
-    <textarea id="snake-code" style="display:none;">
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Snake</title><style>body{display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#111;color:white;font-family:monospace;}canvas{background:#000;border:2px solid #333;box-shadow:0 0 20px rgba(0,255,0,0.2);}.score-board{position:absolute;top:20px;font-size:2em;}</style></head><body><div class="score-board">Score: <span id="score">0</span></div><canvas id="gameCanvas" width="400" height="400"></canvas><script>const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d'),scoreElement=document.getElementById('score');const gridSize=20;let snake=[{x:200,y:200}],food={},dx=gridSize,dy=0,score=0;function main(){setTimeout(()=>{clear();drawFood();move();drawSnake();if(checkOver()){alert("Game Over: "+score);location.reload()}else main()},100)}function clear(){ctx.fillStyle='#000';ctx.fillRect(0,0,400,400)}function drawSnake(){snake.forEach(p=>{ctx.fillStyle='#4CAF50';ctx.fillRect(p.x,p.y,gridSize-2,gridSize-2)})}function move(){const head={x:snake[0].x+dx,y:snake[0].y+dy};snake.unshift(head);if(head.x===food.x&&head.y===food.y){score+=10;scoreElement.innerText=score;placeFood()}else snake.pop()}function placeFood(){food.x=Math.floor(Math.random()*20)*20;food.y=Math.floor(Math.random()*20)*20}function checkOver(){return snake[0].x<0||snake[0].x>=400||snake[0].y<0||snake[0].y>=400||snake.slice(1).some(p=>p.x===snake[0].x&&p.y===snake[0].y)}document.addEventListener('keydown',e=>{if(e.which===37&&dx===0){dx=-20;dy=0}if(e.which===38&&dy===0){dx=0;dy=-20}if(e.which===39&&dx===0){dx=20;dy=0}if(e.which===40&&dy===0){dx=0;dy=20}});placeFood();main();</script></body></html>
     </textarea>
     <textarea id="geo-dash-code" style="display:none;">
 <!DOCTYPE html><html lang="en-US"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/"><title>Geometry Dash</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1"></head><body style="margin:0;overflow:hidden;background:#000;"><div id="gameContainer" style="width:100vw;height:100vh;"></div><script src="Build/UnityLoader.js"></script><script>var gameInstance=UnityLoader.instantiate("gameContainer","Build/GeometryDashLite.json");</script></body></html>
@@ -462,7 +505,18 @@
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('user-display').innerText = user.email.split('@')[0];
                 loadUserData();
-                loadPosts(); // Load Social Feed automatically on login
+                loadPosts(); 
+                
+                // CHECK IF SCHEDULE IS SET
+                db.ref('users/' + user.uid + '/schedule').once('value').then(snap => {
+                    if(!snap.exists()) {
+                        document.getElementById('setup-overlay').style.display = 'flex';
+                    } else {
+                        renderSchedule(snap.val());
+                        fillSettingsInputs(snap.val());
+                    }
+                });
+
             } else {
                 document.getElementById('login-overlay').style.display = 'flex';
                 currentUser = null;
@@ -496,6 +550,70 @@
         }
         function saveData(subject) { if(!currentUser) return; db.ref('users/' + currentUser.uid + '/' + subject).set(document.getElementById('note-' + subject).value).then(() => toast()); }
 
+        // --- SCHEDULE LOGIC ---
+        function saveInitialSetup() {
+            const schedule = {
+                r1: document.getElementById('setup-r1').value,
+                r2: document.getElementById('setup-r2').value,
+                r3: document.getElementById('setup-r3').value,
+                r4: document.getElementById('setup-r4').value,
+                g5: document.getElementById('setup-g5').value,
+                g6: document.getElementById('setup-g6').value,
+                g7: document.getElementById('setup-g7').value,
+                g8: document.getElementById('setup-g8').value
+            };
+            db.ref('users/' + currentUser.uid + '/schedule').set(schedule).then(() => {
+                document.getElementById('setup-overlay').style.display = 'none';
+                renderSchedule(schedule);
+                fillSettingsInputs(schedule);
+                toast("Schedule Saved!");
+            });
+        }
+
+        function saveSettingsSchedule() {
+            const schedule = {
+                r1: document.getElementById('set-r1').value,
+                r2: document.getElementById('set-r2').value,
+                r3: document.getElementById('set-r3').value,
+                r4: document.getElementById('set-r4').value,
+                g5: document.getElementById('set-g5').value,
+                g6: document.getElementById('set-g6').value,
+                g7: document.getElementById('set-g7').value,
+                g8: document.getElementById('set-g8').value
+            };
+            db.ref('users/' + currentUser.uid + '/schedule').set(schedule).then(() => {
+                renderSchedule(schedule);
+                toast("Schedule Updated!");
+            });
+        }
+
+        function renderSchedule(s) {
+            document.getElementById('dash-red-list').innerHTML = `
+                <li><span>R1</span> ${s.r1 || 'Free Period'}</li>
+                <li><span>R2</span> ${s.r2 || 'Free Period'}</li>
+                <li><span>R3</span> ${s.r3 || 'Free Period'}</li>
+                <li><span>R4</span> ${s.r4 || 'Free Period'}</li>
+            `;
+            document.getElementById('dash-green-list').innerHTML = `
+                <li><span>G5</span> ${s.g5 || 'Free Period'}</li>
+                <li><span>G6</span> ${s.g6 || 'Free Period'}</li>
+                <li><span>G7</span> ${s.g7 || 'Free Period'}</li>
+                <li><span>G8</span> ${s.g8 || 'Free Period'}</li>
+            `;
+        }
+
+        function fillSettingsInputs(s) {
+            document.getElementById('set-r1').value = s.r1 || '';
+            document.getElementById('set-r2').value = s.r2 || '';
+            document.getElementById('set-r3').value = s.r3 || '';
+            document.getElementById('set-r4').value = s.r4 || '';
+            document.getElementById('set-g5').value = s.g5 || '';
+            document.getElementById('set-g6').value = s.g6 || '';
+            document.getElementById('set-g7').value = s.g7 || '';
+            document.getElementById('set-g8').value = s.g8 || '';
+        }
+
+        // --- TODO LOGIC ---
         function addTodo() { const txt = document.getElementById('newTodo').value; if(!txt) return; todoArray.push({text: txt, done: false}); updateTodoDB(); document.getElementById('newTodo').value = ''; }
         function toggleTodo(idx) { todoArray[idx].done = !todoArray[idx].done; updateTodoDB(); }
         function removeTodo(idx) { todoArray.splice(idx, 1); updateTodoDB(); }
@@ -662,43 +780,11 @@
         function toggleMode() { document.body.classList.toggle('mode-school'); document.body.classList.toggle('mode-fun'); showSection(document.body.classList.contains('mode-school') ? 'school-home' : 'fun-home'); }
         function toggleTheme() { const b = document.body; b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
         function loadGame(codeId) { const iframe = document.getElementById('game-frame'); iframe.srcdoc = document.getElementById(codeId).value; iframe.onload = () => { iframe.contentWindow.focus(); const container = document.getElementById('game-container'); if(container.classList.contains('fullscreen-mode')) document.getElementById('exit-game-fs').style.display = 'block'; }; }
-        function loadDriveMad() { loadGame('drive-mad-code'); } function loadSnakeGame() { loadGame('snake-code'); } function loadGeoDash() { loadGame('geo-dash-code'); } 
-        
-        // RAGDOLL HIT FIX (USING EMBED)
-        function loadRagdollHit() { 
-            const iframe = document.getElementById('game-frame');
-            iframe.src = "https://www.crazygames.com/embed/ragdoll-hit";
-        }
-        
+        function loadDriveMad() { loadGame('drive-mad-code'); } function loadGeoDash() { loadGame('geo-dash-code'); }
         function toggleFullscreenEl(id) { const el = document.getElementById(id); if(el.classList.contains('fullscreen-mode')) { el.classList.remove('fullscreen-mode'); } else { document.querySelectorAll('.fullscreen-mode').forEach(e => e.classList.remove('fullscreen-mode')); el.classList.add('fullscreen-mode'); } }
-        
-        function enterFullGame() {
-            document.getElementById('game-container').classList.add('fullscreen-mode');
-            document.getElementById('exit-game-fs').style.display = 'block';
-        }
-
-        function exitFullGame() { 
-            document.getElementById('game-container').classList.remove('fullscreen-mode'); 
-            document.getElementById('exit-game-fs').style.display = 'none'; 
-        }
-        
-        document.addEventListener('keydown', e => { 
-            if(e.key === "Escape") { 
-                // Check if any element is in fullscreen
-                const fsElement = document.querySelector('.fullscreen-mode');
-                
-                if (fsElement) {
-                    // PRIORITIZE EXITING FULLSCREEN
-                    fsElement.classList.remove('fullscreen-mode');
-                    if(fsElement.id === 'game-container') {
-                        document.getElementById('exit-game-fs').style.display = 'none';
-                    }
-                } else if (document.body.classList.contains('mode-fun')) {
-                    // IF NOT FULLSCREEN, TOGGLE STEALTH
-                    toggleMode(); 
-                }
-            } 
-        });
+        function enterFullGame() { document.getElementById('game-container').classList.add('fullscreen-mode'); document.getElementById('exit-game-fs').style.display = 'block'; }
+        function exitFullGame() { document.getElementById('game-container').classList.remove('fullscreen-mode'); document.getElementById('exit-game-fs').style.display = 'none'; }
+        document.addEventListener('keydown', e => { if(e.key === "Escape") { const fs = document.querySelector('.fullscreen-mode'); if(fs) { fs.classList.remove('fullscreen-mode'); if(fs.id === 'game-container') document.getElementById('exit-game-fs').style.display = 'none'; } else if(document.body.classList.contains('mode-fun')) { toggleMode(); } } });
     </script>
 </body>
 </html>
