@@ -122,16 +122,6 @@
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
         .login-box { background: var(--card-bg); padding: 40px; border-radius: 24px; text-align: center; width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); }
         #toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s; font-weight: 600; pointer-events: none; z-index: 9999; }
-
-        /* --- INSTAGRAM CLONE STYLES --- */
-        .insta-main-wrapper { max-width: 600px; margin: 0 auto; }
-        .insta-navbar { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
-        .insta-nav-icons { display: flex; align-items: center; gap: 15px; }
-        .insta-nav-icons i { font-size: 1.4rem; color: var(--text-primary); cursor: pointer; }
-        .insta-post-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
-        .insta-post-header { padding: 12px; display: flex; align-items: center; justify-content: space-between; }
-        .insta-post-img { width: 100%; display: block; background: #000; }
-        .insta-post-footer { padding: 12px; }
     </style>
 </head>
 <body class="mode-school" data-theme="light">
@@ -165,9 +155,7 @@
 
         <button class="nav-btn fun-only" onclick="showSection('fun-home')">🎮 Secret Lounge</button>
         <button class="nav-btn fun-only" onclick="showSection('games')">🕹️ Arcade</button>
-        <button class="nav-btn fun-only" onclick="showSection('social-feed')">📸 Social Feed</button>
         <button class="nav-btn fun-only" onclick="showSection('chatterbox')">💬 ChatterBox</button>
-        <button class="nav-btn fun-only" onclick="showSection('music')">🎧 Vibes</button>
 
         <div style="margin-top:auto;">
             <button class="nav-btn" onclick="showSection('settings')">⚙️ Settings</button>
@@ -279,42 +267,12 @@
             <p style="color:var(--text-secondary);">Welcome to the unlocked zone.</p>
         </div>
 
-        <div id="social-feed" class="section">
-            <div class="insta-main-wrapper">
-                <div class="insta-navbar">
-                    <div class="logo" style="font-family: 'Inter', sans-serif; font-weight:700; font-size:1.2rem;">StudyHall Social</div>
-                    <div class="insta-nav-icons">
-                        <i class="fas fa-home" onclick="loadPosts()" title="Refresh Feed"></i>
-                        <i class="far fa-plus-square" onclick="document.getElementById('new-post-area').style.display = 'block'" title="New Post"></i>
-                        <div class="insta-profile-pic" style="width:28px; height:28px; padding:0;">
-                            <div id="nav-user-pic" style="width:100%; height:100%; border-radius:50%; background:#333; color:white; display:flex; justify-content:center; align-items:center; font-size:12px;">U</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="new-post-area" class="insta-post-card" style="padding:20px; display:none;">
-                    <h3 style="margin-bottom:15px;">New Post</h3>
-                    <input type="text" id="post-img-url" placeholder="Image URL (optional)..." style="width:100%; margin-bottom:10px; padding:8px; border:1px solid var(--border); border-radius:4px;">
-                    <textarea id="post-caption-input" placeholder="What's on your mind?" style="width:100%; height:60px; margin-bottom:10px; padding:8px; border:1px solid var(--border); border-radius:4px;"></textarea>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn btn-primary" onclick="createInstaPost()" style="width:100%;">Share</button>
-                        <button class="btn" onclick="document.getElementById('new-post-area').style.display='none'" style="width:100%;">Cancel</button>
-                    </div>
-                </div>
-
-                <div id="feed-container">
-                    <p style="text-align:center; padding:20px; color:var(--text-secondary);">Loading feed...</p>
-                </div>
-            </div>
-        </div>
-
         <div id="games" class="section">
             <h2>Arcade</h2>
             <div class="dashboard-grid">
                 <div class="card" style="text-align:center;"><h3>Geometry Dash</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('geo-dash-code')">Play</button></div>
                 <div class="card" style="text-align:center;"><h3>Drive Mad</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('drive-mad-code')">Play</button></div>
                 <div class="card" style="text-align:center;"><h3>Snake</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('snake-code')">Play</button></div>
-                <div class="card" style="text-align:center;"><h3>Ragdoll Hit</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('ragdoll-hit-code')">Play</button></div>
                 <div class="card" style="text-align:center;"><h3>Breakout</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('breakout-code')">Play</button></div>
                 <div class="card" style="text-align:center;"><h3>Pong</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('pong-code')">Play</button></div>
             </div>
@@ -330,14 +288,6 @@
                 <button class="btn" onclick="toggleFullscreenEl('chatterbox')">⛶ Fullscreen</button>
             </div>
             <iframe src="https://whatever-works123.github.io/Chatter-Box/" style="height:500px;"></iframe>
-        </div>
-
-        <div id="music" class="section">
-            <h2>Study Vibes</h2>
-            <div class="card" style="text-align:center;">
-                <h3>Lofi Radio</h3>
-                <iframe width="100%" height="400" src="https://www.youtube.com/embed/jfKfPfyJRdk" title="Lofi Girl" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px; margin-top:20px;"></iframe>
-            </div>
         </div>
 
         <div id="settings" class="section">
@@ -361,7 +311,6 @@
     <textarea id="drive-mad-code" style="display:none;"><!DOCTYPE html><html lang="en"><head><base href="https://cdn.jsdelivr.net/gh/genizy/dmad-poki@49b5ab6b987f5f3be58f9dae59c92e8fc1aab9b0/"><script>window.assgdd={"ancestorOrigins":{"0":"https://games.poki.com","1":"https://poki.com"},"href":"https://f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com/cc1bc57a-e355-4696-97c2-097bf6188606/index.html?cloudsavegames=y"}</script><meta charset="utf-8"><title>Drive Mad</title><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><link rel="stylesheet" href="webapp/fancade.css"><script src="poki-sdk.js"></script></head><body id="body"><div id="canvas_border" class="emscripten_border"><div id="play_content" class="middle center"><div class="edge"><div class="box"><div class="black"><img src="webapp/cover.jpg" class="cover"><p class="title">Drive Mad</p></div></div></div><div id="progress_or_play"><progress id="progress" class="loading" value="0" max="100"></progress></div></div><canvas class="emscripten" id="canvas" tabindex=-1></canvas></div><script type="text/javascript" src="webapp/source_min.js"></script><script type="text/javascript" src="webapp/index.js"></script></body></html></textarea>
     <textarea id="snake-code" style="display:none;"><!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;color:#fff;font-family:monospace;"><div style="position:absolute;top:10px;">Score: <span id="score">0</span></div><canvas id="c" width="400" height="400" style="border:1px solid #333"></canvas><script>c=document.getElementById('c');x=c.getContext('2d');S=20;p=[{x:10,y:10}];a={x:15,y:15};v={x:0,y:0};sc=0;setInterval(()=>{p.forEach(e=>{x.fillStyle='#000';x.fillRect(e.x*S,e.y*S,S-2,S-2)});p=[{x:p[0].x+v.x,y:p[0].y+v.y},...p.slice(0,sc+1)];if(p[0].x==a.x&&p[0].y==a.y){sc++;document.getElementById('score').innerText=sc;a={x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)}}if(p[0].x<0||p[0].x>19||p[0].y<0||p[0].y>19)location.reload();x.fillStyle='#f00';x.fillRect(a.x*S,a.y*S,S-2,S-2);x.fillStyle='#0f0';p.forEach(e=>x.fillRect(e.x*S,e.y*S,S-2,S-2))},100);document.onkeydown=e=>{k=e.keyCode;v={x:k==37?-1:k==39?1:0,y:k==38?-1:k==40?1:0}}</script></body></html></textarea>
     <textarea id="geo-dash-code" style="display:none;"><!DOCTYPE html><html lang="en-US"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/"><title>Geometry Dash</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1"></head><body style="margin:0;overflow:hidden;background:#000;"><div id="gameContainer" style="width:100vw;height:100vh;"></div><script src="Build/UnityLoader.js"></script><script>var gameInstance=UnityLoader.instantiate("gameContainer","Build/GeometryDashLite.json");</script></body></html></textarea>
-    <textarea id="ragdoll-hit-code" style="display:none;"><!DOCTYPE html><html lang="en"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/ragdoll-hit/"><meta charset="utf-8"><title>Ragdoll Hit</title><script>window.config={loader:'unity-2020',debug:false,maxRatio:24/9,minRatio:9/24,title:'Ragdoll Hit',unityVersion:'2022.3.6f1',unityWebglBuildUrl:'',fileSize:9,cachedDecompressedFileSizes:{'3276aa7c11496bcc48eb6908f112f0c3.js.unityweb':66682,'959bf1c60308f1c34bf072f43c3c17d4.data.unityweb':4377721,'f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb':5105161,'v84.loader.js':114199,},"metadata":{"poki_template_version":1,"background_color":"#4D4D4D","code_filename":"f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb","framework_filename":"3276aa7c11496bcc48eb6908f112f0c3.js.unityweb","loader_filename":"v84.loader.js","use_wasm":"true"}};</script></head><body style="margin:0;overflow:hidden;background:#4D4D4D;"><script src="master-loader.js"></script></body></html></textarea>
     <textarea id="breakout-code" style="display:none;"><!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;"><canvas id="c" width="480" height="320" style="background:#eee;border:2px solid #555"></canvas><script>var c=document.getElementById("c"),ctx=c.getContext("2d");var x=c.width/2,y=c.height-30,dx=2,dy=-2,ballRadius=10,paddleHeight=10,paddleWidth=75,paddleX=(c.width-paddleWidth)/2,rightPressed=false,leftPressed=false,brickRowCount=3,brickColumnCount=5,brickWidth=75,brickHeight=20,brickPadding=10,brickOffsetTop=30,brickOffsetLeft=30,bricks=[];for(var cCol=0;cCol<brickColumnCount;cCol++){bricks[cCol]=[];for(var r=0;r<brickRowCount;r++){bricks[cCol][r]={x:0,y:0,status:1}}}document.addEventListener("keydown",keyDownHandler,false);document.addEventListener("keyup",keyUpHandler,false);function keyDownHandler(e){if(e.key=="Right"||e.key=="ArrowRight"){rightPressed=true}else if(e.key=="Left"||e.key=="ArrowLeft"){leftPressed=true}}function keyUpHandler(e){if(e.key=="Right"||e.key=="ArrowRight"){rightPressed=false}else if(e.key=="Left"||e.key=="ArrowLeft"){leftPressed=false}}function collisionDetection(){for(var cCol=0;cCol<brickColumnCount;cCol++){for(var r=0;r<brickRowCount;r++){var b=bricks[cCol][r];if(b.status==1){if(x>b.x&&x<b.x+brickWidth&&y>b.y&&y<b.y+brickHeight){dy=-dy;b.status=0}}}}}function drawBall(){ctx.beginPath();ctx.arc(x,y,ballRadius,0,Math.PI*2);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}function drawPaddle(){ctx.beginPath();ctx.rect(paddleX,c.height-paddleHeight,paddleWidth,paddleHeight);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}function drawBricks(){for(var cCol=0;cCol<brickColumnCount;cCol++){for(var r=0;r<brickRowCount;r++){if(bricks[cCol][r].status==1){var brickX=(cCol*(brickWidth+brickPadding))+brickOffsetLeft;var brickY=(r*(brickHeight+brickPadding))+brickOffsetTop;bricks[cCol][r].x=brickX;bricks[cCol][r].y=brickY;ctx.beginPath();ctx.rect(brickX,brickY,brickWidth,brickHeight);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}}}}function draw(){ctx.clearRect(0,0,c.width,c.height);drawBricks();drawBall();drawPaddle();collisionDetection();if(x+dx>c.width-ballRadius||x+dx<ballRadius){dx=-dx}if(y+dy<ballRadius){dy=-dy}else if(y+dy>c.height-ballRadius){if(x>paddleX&&x<paddleX+paddleWidth){dy=-dy}else{document.location.reload()}}if(rightPressed&&paddleX<c.width-paddleWidth){paddleX+=7}else if(leftPressed&&paddleX>0){paddleX-=7}x+=dx;y+=dy;requestAnimationFrame(draw)}draw();</script></body></html></textarea>
     <textarea id="pong-code" style="display:none;"><!DOCTYPE html><html><body style="margin:0;background:black;display:flex;justify-content:center;align-items:center;height:100vh;"><canvas id="gameCanvas" width="600" height="400"></canvas><script>var canvas=document.getElementById('gameCanvas');var canvasContext=canvas.getContext('2d');var ballX=50;var ballY=50;var ballSpeedX=10;var ballSpeedY=4;var paddle1Y=250;var paddle2Y=250;var playerScore=0;var computerScore=0;const PADDLE_HEIGHT=100;const PADDLE_THICKNESS=10;function calculateMousePos(evt){var rect=canvas.getBoundingClientRect();var root=document.documentElement;var mouseX=evt.clientX-rect.left-root.scrollLeft;var mouseY=evt.clientY-rect.top-root.scrollTop;return{x:mouseX,y:mouseY}}window.onload=function(){var framesPerSecond=30;setInterval(function(){moveEverything();drawEverything()},1000/framesPerSecond);canvas.addEventListener('mousemove',function(evt){var mousePos=calculateMousePos(evt);paddle1Y=mousePos.y-(PADDLE_HEIGHT/2)})};function ballReset(){if(playerScore>=3||computerScore>=3){playerScore=0;computerScore=0}ballSpeedX=-ballSpeedX;ballX=canvas.width/2;ballY=canvas.height/2}function computerMovement(){var paddle2YCenter=paddle2Y+(PADDLE_HEIGHT/2);if(paddle2YCenter<ballY-35){paddle2Y+=6}else if(paddle2YCenter>ballY+35){paddle2Y-=6}}function moveEverything(){computerMovement();ballX+=ballSpeedX;ballY+=ballSpeedY;if(ballX<0){if(ballY>paddle1Y&&ballY<paddle1Y+PADDLE_HEIGHT){ballSpeedX=-ballSpeedX;var deltaY=ballY-(paddle1Y+PADDLE_HEIGHT/2);ballSpeedY=deltaY*0.35}else{computerScore++;ballReset()}}if(ballX>canvas.width){if(ballY>paddle2Y&&ballY<paddle2Y+PADDLE_HEIGHT){ballSpeedX=-ballSpeedX;var deltaY=ballY-(paddle2Y+PADDLE_HEIGHT/2);ballSpeedY=deltaY*0.35}else{playerScore++;ballReset()}}if(ballY<0){ballSpeedY=-ballSpeedY}if(ballY>canvas.height){ballSpeedY=-ballSpeedY}}function drawEverything(){canvasContext.fillStyle='black';canvasContext.fillRect(0,0,canvas.width,canvas.height);canvasContext.fillStyle='white';canvasContext.fillRect(0,paddle1Y,PADDLE_THICKNESS,PADDLE_HEIGHT);canvasContext.fillRect(canvas.width-PADDLE_THICKNESS,paddle2Y,PADDLE_THICKNESS,PADDLE_HEIGHT);canvasContext.beginPath();canvasContext.arc(ballX,ballY,10,0,Math.PI*2,true);canvasContext.fill();canvasContext.fillText(playerScore,100,100);canvasContext.fillText(computerScore,canvas.width-100,100)}</script></body></html></textarea>
 
@@ -467,51 +416,7 @@
             }
         }
 
-        // --- 5. SOCIAL FEED (FIXED MEMORY LEAK) ---
-        function loadPosts() {
-            const feed = document.getElementById('feed-container');
-            db.ref('posts').off(); // DETACH OLD LISTENER
-            
-            db.ref('posts').limitToLast(10).on('value', snapshot => {
-                feed.innerHTML = '';
-                const posts = [];
-                snapshot.forEach(c => posts.push({ id: c.key, ...c.val() }));
-                
-                if(!posts.length) { feed.innerHTML = '<p style="text-align:center;color:#888;">No posts yet.</p>'; return; }
-
-                posts.reverse().forEach(p => {
-                    const d = document.createElement('div');
-                    d.className = 'insta-post-card';
-                    d.innerHTML = `
-                        <div class="insta-post-header"><strong>${p.username}</strong></div>
-                        ${p.image ? `<img src="${p.image}" class="insta-post-img">` : ''}
-                        <div class="insta-post-footer">
-                            <div class="insta-likes">❤️ ${p.likes || 0} likes</div>
-                            <div class="insta-caption"><b>${p.username}</b> ${p.caption}</div>
-                        </div>`;
-                    feed.appendChild(d);
-                });
-            });
-        }
-
-        function createInstaPost() {
-            const img = document.getElementById('post-img-url').value;
-            const cap = document.getElementById('post-caption-input').value;
-            if(!cap && !img) return;
-            
-            const newPost = db.ref('posts').push();
-            newPost.set({
-                username: currentUser.email.split('@')[0],
-                image: img,
-                caption: cap,
-                likes: 0,
-                timestamp: Date.now()
-            });
-            document.getElementById('new-post-area').style.display = 'none';
-            document.getElementById('post-caption-input').value = '';
-        }
-
-        // --- 6. TO-DO LIST (NEW) ---
+        // --- 5. TO-DO LIST ---
         function addTodo() {
             const input = document.getElementById('newTodo');
             const text = input.value.trim();
@@ -554,7 +459,7 @@
         function deleteTodo(key) { db.ref('users/' + currentUser.uid + '/todos/' + key).remove(); }
 
 
-        // --- 7. GAMES & FULLSCREEN ---
+        // --- 6. GAMES & FULLSCREEN ---
         function loadGame(codeId) {
             const container = document.getElementById('game-container');
             const frame = document.getElementById('game-frame');
@@ -581,7 +486,7 @@
             }
         }
 
-        // --- 8. SYSTEM SETTINGS ---
+        // --- 7. SYSTEM SETTINGS ---
         function toggleTheme() {
             const b = document.body;
             b.dataset.theme = b.dataset.theme === 'light' ? 'dark' : 'light';
@@ -594,7 +499,7 @@
             else showSection('fun-home');
         }
 
-        // --- 9. GLOBAL EVENT LISTENERS (ESCAPE KEY FAIL-SAFE) ---
+        // --- 8. GLOBAL EVENT LISTENERS (ESCAPE KEY FAIL-SAFE) ---
         document.addEventListener('keydown', e => {
             // SAFE CHECK: If typing in a box, IGNORE Escape key
             if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
@@ -609,7 +514,7 @@
             }
         });
 
-        // --- 10. UTILS ---
+        // --- 9. UTILS ---
         function countWords(area, display) {
             const txt = document.getElementById(area).value.trim();
             document.getElementById(display).innerText = txt ? txt.split(/\s+/).length + " words" : "0 words";
