@@ -24,6 +24,8 @@
             --accent-hover: #1d4ed8;
             --border: #e2e8f0;
             --success: #10b981;
+            --red-day: #ef4444;
+            --green-day: #10b981;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             --radius: 16px;
         }
@@ -60,6 +62,7 @@
         .btn-primary { background: var(--accent); color: white; }
         .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-danger { background: #ef4444; color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
         
         input, textarea, select {
             background: var(--bg-color); border: 1px solid var(--border);
@@ -107,6 +110,25 @@
         .todo-item { background: var(--bg-color); padding: 14px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent); }
         .todo-item.done { opacity: 0.6; text-decoration: line-through; border-left-color: var(--success); }
 
+        /* --- SCHEDULE & SETTINGS --- */
+        .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .class-input-group { margin-bottom: 10px; }
+        .class-input-group label { font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+        
+        .schedule-day-card { border-left: 5px solid var(--border); padding-left: 15px; }
+        .schedule-day-card.red { border-left-color: var(--red-day); }
+        .schedule-day-card.green { border-left-color: var(--green-day); }
+        
+        .class-list-item { 
+            padding: 10px; border-bottom: 1px solid var(--border); 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .class-list-item:last-child { border-bottom: none; }
+        .period-badge { 
+            background: var(--bg-color); padding: 2px 8px; 
+            border-radius: 4px; font-size: 0.75rem; font-weight: 700; 
+        }
+
         /* --- MATH & EDITOR --- */
         .calc-wrapper { display: flex; gap: 20px; flex-wrap: wrap; }
         .calc-body { width: 280px; }
@@ -119,21 +141,48 @@
         .fullscreen-mode iframe { width: 100%; height: 100%; border: none; }
         iframe { width: 100%; height: 600px; border: none; border-radius: 12px; background: white; }
         
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        .login-box { background: var(--card-bg); padding: 40px; border-radius: 24px; text-align: center; width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); }
+        /* --- OVERLAYS --- */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .overlay-box { background: var(--card-bg); padding: 40px; border-radius: 24px; text-align: center; width: 500px; max-width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
         #toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s; font-weight: 600; pointer-events: none; z-index: 9999; }
     </style>
 </head>
 <body class="mode-school" data-theme="light">
 
-    <div id="login-overlay">
-        <div class="login-box">
+    <div id="login-overlay" class="overlay">
+        <div class="overlay-box" style="width: 380px;">
             <h1 style="color: var(--accent); margin-bottom:10px;">StudyHall OS</h1>
             <p style="color: var(--text-secondary); margin-bottom:25px;">Enter your workspace</p>
             <input type="email" id="email" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="password" placeholder="Password" style="margin-bottom:20px;">
             <button class="btn btn-primary" onclick="loginUser()" style="width:100%;">Enter Dashboard</button>
             <p id="login-error" style="margin-top:15px; color:#ef4444; font-size:0.9rem;"></p>
+        </div>
+    </div>
+
+    <div id="schedule-overlay" class="overlay" style="display: none;">
+        <div class="overlay-box">
+            <h2 style="margin-bottom:10px;">📅 Setup Your Schedule</h2>
+            <p style="color: var(--text-secondary); margin-bottom:20px;">Enter your classes for Red and Green days.</p>
+            
+            <div class="schedule-grid" style="text-align: left;">
+                <div class="schedule-day-card red">
+                    <h4 style="color:#ef4444; margin-bottom:10px;">Red Day</h4>
+                    <div class="class-input-group"><label>1st Period</label><input type="text" id="setup-c1" placeholder="Class Name"></div>
+                    <div class="class-input-group"><label>2nd Period</label><input type="text" id="setup-c2" placeholder="Class Name"></div>
+                    <div class="class-input-group"><label>3rd Period</label><input type="text" id="setup-c3" placeholder="Class Name"></div>
+                    <div class="class-input-group"><label>4th Period</label><input type="text" id="setup-c4" placeholder="Class Name"></div>
+                </div>
+                <div class="schedule-day-card green">
+                    <h4 style="color:#10b981; margin-bottom:10px;">Green Day</h4>
+                    <div class="class-input-group"><label>5th Period</label><input type="text" id="setup-c5" placeholder="Class Name"></div>
+                    <div class="class-input-group"><label>6th Period</label><input type="text" id="setup-c6" placeholder="Class Name"></div>
+                    <div class="class-input-group"><label>7th Period</label><input type="text" id="setup-c7" placeholder="Class Name"></div>
+                    <div class="class-input-group"><label>8th Period</label><input type="text" id="setup-c8" placeholder="Class Name"></div>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveInitialSchedule()" style="width:100%; margin-top:20px;">Save Schedule</button>
         </div>
     </div>
 
@@ -170,7 +219,21 @@
                 <h1 id="greeting">Welcome Back.</h1>
                 <p style="color:var(--text-secondary);">Your academic dashboard is ready.</p>
             </header>
+            
             <div class="dashboard-grid">
+                <div class="card" style="grid-row: span 2;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3>Today's Schedule</h3>
+                        <div>
+                            <button class="btn btn-outline" style="font-size:0.75rem; color:#ef4444; border-color:#ef4444;" onclick="renderSchedule('red')">Red</button>
+                            <button class="btn btn-outline" style="font-size:0.75rem; color:#10b981; border-color:#10b981;" onclick="renderSchedule('green')">Green</button>
+                        </div>
+                    </div>
+                    <div id="schedule-display-list">
+                        <p style="color:var(--text-secondary); text-align:center; padding:20px;">Loading schedule...</p>
+                    </div>
+                </div>
+
                 <div class="card" style="text-align:center;">
                     <h3>Focus Timer</h3>
                     <div class="timer-circle" id="timer-ui"><span id="timer-display">25:00</span></div>
@@ -179,6 +242,7 @@
                         <button class="btn" onclick="resetTimer()">Reset</button>
                     </div>
                 </div>
+
                 <div class="card">
                     <h3>At a Glance</h3>
                     <ul id="mini-todo-list" style="list-style:none; margin-top:15px; padding-left:0;">
@@ -293,6 +357,29 @@
 
         <div id="settings" class="section">
             <h2>System Settings</h2>
+            
+            <div class="card">
+                <h3>📅 Class Schedule</h3>
+                <p style="color:var(--text-secondary); margin-bottom:15px;">Update your Red Day and Green Day classes.</p>
+                <div class="schedule-grid">
+                    <div>
+                        <h4 style="color:#ef4444; margin-bottom:10px;">Red Day</h4>
+                        <div class="class-input-group"><label>1st Period</label><input type="text" id="set-c1" onchange="updateSchedule()"></div>
+                        <div class="class-input-group"><label>2nd Period</label><input type="text" id="set-c2" onchange="updateSchedule()"></div>
+                        <div class="class-input-group"><label>3rd Period</label><input type="text" id="set-c3" onchange="updateSchedule()"></div>
+                        <div class="class-input-group"><label>4th Period</label><input type="text" id="set-c4" onchange="updateSchedule()"></div>
+                    </div>
+                    <div>
+                        <h4 style="color:#10b981; margin-bottom:10px;">Green Day</h4>
+                        <div class="class-input-group"><label>5th Period</label><input type="text" id="set-c5" onchange="updateSchedule()"></div>
+                        <div class="class-input-group"><label>6th Period</label><input type="text" id="set-c6" onchange="updateSchedule()"></div>
+                        <div class="class-input-group"><label>7th Period</label><input type="text" id="set-c7" onchange="updateSchedule()"></div>
+                        <div class="class-input-group"><label>8th Period</label><input type="text" id="set-c8" onchange="updateSchedule()"></div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="updateSchedule()" style="margin-top:15px;">Save Changes</button>
+            </div>
+
             <div class="dashboard-grid">
                 <div class="card">
                     <h3>🔒 Stealth Mode</h3>
@@ -314,479 +401,10 @@
     <textarea id="geo-dash-code" style="display:none;"><!DOCTYPE html><html lang="en-US"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/"><title>Geometry Dash</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1"></head><body style="margin:0;overflow:hidden;background:#000;"><div id="gameContainer" style="width:100vw;height:100vh;"></div><script src="Build/UnityLoader.js"></script><script>var gameInstance=UnityLoader.instantiate("gameContainer","Build/GeometryDashLite.json");</script></body></html></textarea>
     <textarea id="breakout-code" style="display:none;"><!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;"><canvas id="c" width="480" height="320" style="background:#eee;border:2px solid #555"></canvas><script>var c=document.getElementById("c"),ctx=c.getContext("2d");var x=c.width/2,y=c.height-30,dx=2,dy=-2,ballRadius=10,paddleHeight=10,paddleWidth=75,paddleX=(c.width-paddleWidth)/2,rightPressed=false,leftPressed=false,brickRowCount=3,brickColumnCount=5,brickWidth=75,brickHeight=20,brickPadding=10,brickOffsetTop=30,brickOffsetLeft=30,bricks=[];for(var cCol=0;cCol<brickColumnCount;cCol++){bricks[cCol]=[];for(var r=0;r<brickRowCount;r++){bricks[cCol][r]={x:0,y:0,status:1}}}document.addEventListener("keydown",keyDownHandler,false);document.addEventListener("keyup",keyUpHandler,false);function keyDownHandler(e){if(e.key=="Right"||e.key=="ArrowRight"){rightPressed=true}else if(e.key=="Left"||e.key=="ArrowLeft"){leftPressed=true}}function keyUpHandler(e){if(e.key=="Right"||e.key=="ArrowRight"){rightPressed=false}else if(e.key=="Left"||e.key=="ArrowLeft"){leftPressed=false}}function collisionDetection(){for(var cCol=0;cCol<brickColumnCount;cCol++){for(var r=0;r<brickRowCount;r++){var b=bricks[cCol][r];if(b.status==1){if(x>b.x&&x<b.x+brickWidth&&y>b.y&&y<b.y+brickHeight){dy=-dy;b.status=0}}}}}function drawBall(){ctx.beginPath();ctx.arc(x,y,ballRadius,0,Math.PI*2);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}function drawPaddle(){ctx.beginPath();ctx.rect(paddleX,c.height-paddleHeight,paddleWidth,paddleHeight);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}function drawBricks(){for(var cCol=0;cCol<brickColumnCount;cCol++){for(var r=0;r<brickRowCount;r++){if(bricks[cCol][r].status==1){var brickX=(cCol*(brickWidth+brickPadding))+brickOffsetLeft;var brickY=(r*(brickHeight+brickPadding))+brickOffsetTop;bricks[cCol][r].x=brickX;bricks[cCol][r].y=brickY;ctx.beginPath();ctx.rect(brickX,brickY,brickWidth,brickHeight);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}}}}function draw(){ctx.clearRect(0,0,c.width,c.height);drawBricks();drawBall();drawPaddle();collisionDetection();if(x+dx>c.width-ballRadius||x+dx<ballRadius){dx=-dx}if(y+dy<ballRadius){dy=-dy}else if(y+dy>c.height-ballRadius){if(x>paddleX&&x<paddleX+paddleWidth){dy=-dy}else{document.location.reload()}}if(rightPressed&&paddleX<c.width-paddleWidth){paddleX+=7}else if(leftPressed&&paddleX>0){paddleX-=7}x+=dx;y+=dy;requestAnimationFrame(draw)}draw();</script></body></html></textarea>
     <textarea id="pong-code" style="display:none;"><!DOCTYPE html><html><body style="margin:0;background:black;display:flex;justify-content:center;align-items:center;height:100vh;"><canvas id="gameCanvas" width="600" height="400"></canvas><script>var canvas=document.getElementById('gameCanvas');var canvasContext=canvas.getContext('2d');var ballX=50;var ballY=50;var ballSpeedX=10;var ballSpeedY=4;var paddle1Y=250;var paddle2Y=250;var playerScore=0;var computerScore=0;const PADDLE_HEIGHT=100;const PADDLE_THICKNESS=10;function calculateMousePos(evt){var rect=canvas.getBoundingClientRect();var root=document.documentElement;var mouseX=evt.clientX-rect.left-root.scrollLeft;var mouseY=evt.clientY-rect.top-root.scrollTop;return{x:mouseX,y:mouseY}}window.onload=function(){var framesPerSecond=30;setInterval(function(){moveEverything();drawEverything()},1000/framesPerSecond);canvas.addEventListener('mousemove',function(evt){var mousePos=calculateMousePos(evt);paddle1Y=mousePos.y-(PADDLE_HEIGHT/2)})};function ballReset(){if(playerScore>=3||computerScore>=3){playerScore=0;computerScore=0}ballSpeedX=-ballSpeedX;ballX=canvas.width/2;ballY=canvas.height/2}function computerMovement(){var paddle2YCenter=paddle2Y+(PADDLE_HEIGHT/2);if(paddle2YCenter<ballY-35){paddle2Y+=6}else if(paddle2YCenter>ballY+35){paddle2Y-=6}}function moveEverything(){computerMovement();ballX+=ballSpeedX;ballY+=ballSpeedY;if(ballX<0){if(ballY>paddle1Y&&ballY<paddle1Y+PADDLE_HEIGHT){ballSpeedX=-ballSpeedX;var deltaY=ballY-(paddle1Y+PADDLE_HEIGHT/2);ballSpeedY=deltaY*0.35}else{computerScore++;ballReset()}}if(ballX>canvas.width){if(ballY>paddle2Y&&ballY<paddle2Y+PADDLE_HEIGHT){ballSpeedX=-ballSpeedX;var deltaY=ballY-(paddle2Y+PADDLE_HEIGHT/2);ballSpeedY=deltaY*0.35}else{playerScore++;ballReset()}}if(ballY<0){ballSpeedY=-ballSpeedY}if(ballY>canvas.height){ballSpeedY=-ballSpeedY}}function drawEverything(){canvasContext.fillStyle='black';canvasContext.fillRect(0,0,canvas.width,canvas.height);canvasContext.fillStyle='white';canvasContext.fillRect(0,paddle1Y,PADDLE_THICKNESS,PADDLE_HEIGHT);canvasContext.fillRect(canvas.width-PADDLE_THICKNESS,paddle2Y,PADDLE_THICKNESS,PADDLE_HEIGHT);canvasContext.beginPath();canvasContext.arc(ballX,ballY,10,0,Math.PI*2,true);canvasContext.fill();canvasContext.fillText(playerScore,100,100);canvasContext.fillText(computerScore,canvas.width-100,100)}</script></body></html></textarea>
-    <textarea id="2048-code" style="display:none;">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <meta name="keywords" content="2048 game, 2048 online, puzzle game, classic game, JavaScript game, HTML game">
-  <meta name="description" content="2048 is a classic puzzle game where you combine numbers to create higher ones. Play the classic game and challenge your brain with this HTML and JavaScript game!">
-  <title>2048 Game</title>
-  <style>
-
-      body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          background-color: #f8f8f8;
-          overscroll-behavior: contain;
-      }
-
-      .title {
-          font-size: 68px;
-          font-weight: bold;
-          color: #333;
-          text-align: center;
-          text-shadow: 2px 2px #eee;
-          margin-top: 50px;
-      }
-
-      #game-container {
-          width: 400px;
-          height: 400px;
-          margin: 0 auto;
-          display: flex;
-          flex-wrap: wrap;
-          background-color: #bbada0;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-          border-radius: 5px;
-          overflow: hidden;
-      }
-
-      .grid-item {
-          width: 90px;
-          height: 90px;
-          margin: 5px;
-          background-color: #ccc0b3;
-          border-radius: 5px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-size: 36px;
-          color: #776e65;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-          transition: background-color 0.2s, transform 0.2s;
-      }
-
-      .grid-item-2 {
-          background-color: #eee4da;
-      }
-
-      .grid-item-4 {
-          background-color: #ede0c8;
-      }
-
-      .grid-item-8 {
-          background-color: #f2b179;
-      }
-
-      .grid-item-16 {
-          background-color: #f59563;
-      }
-
-      .grid-item-32 {
-          background-color: #f67c5f;
-      }
-
-      .grid-item-64 {
-          background-color: #f65e3b;
-      }
-
-      .grid-item-128 {
-          background-color: #edcf72;
-          color: #776e65;
-      }
-
-      .grid-item-256 {
-          background-color: #edcc61;
-          color: #776e65;
-      }
-
-      .grid-item-512 {
-          background-color: #edc850;
-          color: #776e65;
-      }
-
-      .grid-item-1024 {
-          background-color: #edc53f;
-          color: #776e65;
-      }
-
-      .grid-item-2048 {
-          background-color: #edc22e;
-          color: #776e65;
-      }
-
-      .grid-item-new {
-          animation: new-tile 0.2s forwards;
-      }
-
-      .game-over {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.8);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-size: 36px;
-          color: #fff;
-          z-index: 9999;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.2s;
-      }
-
-      .game-over.show {
-          opacity: 1;
-          pointer-events: all;
-      }
-
-      .score {
-          font-size: 24px;
-          color: #776e65;
-          text-align: center;
-          margin-bottom: 10px;
-      }
-
-      .score span {
-          font-weight: bold;
-          color: #8f7a66;
-      }
-
-      .restart-button {
-          padding: 10px 20px;
-          background-color: #8f7a66;
-          color: #fff;
-          border-radius: 5px;
-          cursor: pointer;
-          transition: background-color 0.2s;
-      }
-
-      .restart-button:hover {
-          background-color: #776e65;
-      }
-
-      @keyframes new-tile {
-          0% {
-              transform: scale(0.7);
-          }
-          100% {
-              transform: scale(1);
-          }
-      }
-
-      @media (max-width: 480px) {
-          #game-container {
-              width: 300px;
-              height: 300px;
-          }
-
-          .grid-item {
-              width: 65px;
-              height: 65px;
-              font-size: 24px;
-          }
-      }
-  </style>
-</head>
-<body>
-<h1 class="title">2048</h1>
-<div id="game-container"></div>
-<div class="game-over">
-  Game Over
-  <div class="score">Score: <span id="final-score"></span></div>
-  <div class="restart-button" onclick="resetGame()">Restart</div>
-</div>
-<div class="score">Score: <span id="score">0</span></div>
-<script>
-  const gameContainer = document.querySelector('#game-container');
-  const scoreEl = document.querySelector('#score');
-  const gameOverEl = document.querySelector('.game-over');
-  const finalScoreEl = document.querySelector('#final-score');
-  let grid = [];
-  let score = 0;
-
-  function createGrid() {
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        const gridItem = document.createElement('div');
-        gridItem.classList.add('grid-item');
-        gridItem.setAttribute('data-row', i);
-        gridItem.setAttribute('data-col', j);
-        gameContainer.appendChild(gridItem);
-        grid.push(gridItem);
-      }
-    }
-  }
-
-  function addNumber() {
-    const emptyGrids = grid.filter(gridItem => gridItem.innerHTML === '');
-    if (emptyGrids.length === 0) {
-      return;
-    }
-    const randomIndex = Math.floor(Math.random() * emptyGrids.length);
-    const randomGrid = emptyGrids[randomIndex];
-    const randomNumber = Math.random() < 0.9 ? 2 : 4;
-    randomGrid.innerHTML = randomNumber;
-    randomGrid.classList.add(`grid-item-${randomNumber}`);
-    randomGrid.classList.add('grid-item-new');
-  }
-
-  function moveLeft() {
-    let hasMoved = false;
-    for (let i = 0; i < 4; i++) {
-      for (let j = 1; j < 4; j++) {
-        const currentGrid = getGrid(i, j);
-        if (currentGrid.innerHTML === '') {
-          continue;
-        }
-        let k = j - 1;
-        while (k >= 0) {
-          const prevGrid = getGrid(i, k);
-          if (prevGrid.innerHTML !== '') {
-            if (prevGrid.innerHTML === currentGrid.innerHTML) {
-              mergeGrids(currentGrid, prevGrid);
-              hasMoved = true;
-            }
-            break;
-          }
-          k--;
-        }
-        if (k !== j - 1) {
-          moveGrid(currentGrid, getGrid(i, k + 1));
-          hasMoved = true;
-        }
-      }
-    }
-    return hasMoved;
-  }
-
-  function moveRight() {
-    let hasMoved = false;
-    for (let i = 0; i < 4; i++) {
-      for (let j = 2; j >= 0; j--) {
-        const currentGrid = getGrid(i, j);
-        if (currentGrid.innerHTML === '') {
-          continue;
-        }
-        let k = j + 1;
-        while (k <= 3) {
-          const prevGrid = getGrid(i, k);
-          if (prevGrid.innerHTML !== '') {
-            if (prevGrid.innerHTML === currentGrid.innerHTML) {
-              mergeGrids(currentGrid, prevGrid);
-              hasMoved = true;
-            }
-            break;
-          }
-          k++;
-        }
-        if (k !== j + 1) {
-          moveGrid(currentGrid, getGrid(i, k - 1));
-          hasMoved = true;
-        }
-      }
-    }
-    return hasMoved;
-  }
-
-  function moveUp() {
-    let hasMoved = false;
-    for (let i = 1; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        const currentGrid = getGrid(i, j);
-        if (currentGrid.innerHTML === '') {
-          continue;
-        }
-        let k = i - 1;
-        while (k >= 0) {
-          const prevGrid = getGrid(k, j);
-          if (prevGrid.innerHTML !== '') {
-            if (prevGrid.innerHTML === currentGrid.innerHTML) {
-              mergeGrids(currentGrid, prevGrid);
-              hasMoved = true;
-            }
-            break;
-          }
-          k--;
-        }
-        if (k !== i - 1) {
-          moveGrid(currentGrid, getGrid(k + 1, j));
-          hasMoved = true;
-        }
-      }
-    }
-    return hasMoved;
-  }
-
-  function moveDown() {
-    let hasMoved = false;
-    for (let i = 2; i >= 0; i--) {
-      for (let j = 0; j < 4; j++) {
-        const currentGrid = getGrid(i, j);
-        if (currentGrid.innerHTML === '') {
-          continue;
-        }
-        let k = i + 1;
-        while (k <= 3) {
-          const prevGrid = getGrid(k, j);
-          if (prevGrid.innerHTML !== '') {
-            if (prevGrid.innerHTML === currentGrid.innerHTML) {
-              mergeGrids(currentGrid, prevGrid);
-              hasMoved = true;
-            }
-            break;
-          }
-          k++;
-        }
-        if (k !== i + 1) {
-          moveGrid(currentGrid, getGrid(k - 1, j));
-          hasMoved = true;
-        }
-      }
-    }
-    return hasMoved;
-  }
-
-  function moveGrid(current, target) {
-    target.innerHTML = current.innerHTML;
-    target.className = current.className;
-    current.innerHTML = '';
-    current.className = 'grid-item';
-  }
-
-  function mergeGrids(current, target) {
-    const currentValue = parseInt(current.innerHTML);
-    const targetValue = parseInt(target.innerHTML);
-    target.innerHTML = currentValue + targetValue;
-    target.className = `grid-item grid-item-${currentValue + targetValue}`;
-    current.innerHTML = '';
-    current.className = 'grid-item';
-    score += currentValue + targetValue;
-    updateScore();
-  }
-
-  function getGrid(row, col) {
-    return grid.find(gridItem => {
-      return gridItem.getAttribute('data-row') == row && gridItem.getAttribute('data-col') == col;
-    });
-  }
-
-  function updateScore() {
-    scoreEl.innerHTML = `${score}`;
-  }
-
-  function showGameOver() {
-    finalScoreEl.innerHTML = score;
-    gameOverEl.classList.remove('hidden');
-  }
-
-  function isGameOver() {
-    const emptyGrids = grid.filter(gridItem => gridItem.innerHTML === '');
-    if (emptyGrids.length > 0) {
-      return false;
-    }
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        const currentGrid = getGrid(i, j);
-        const rightGrid = getGrid(i, j + 1);
-        const bottomGrid = getGrid(i + 1, j);
-        if (rightGrid && currentGrid.innerHTML === rightGrid.innerHTML) {
-          return false;
-        }
-        if (bottomGrid && currentGrid.innerHTML === bottomGrid.innerHTML) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  function resetGame() {
-    grid.forEach(gridItem => {
-      gridItem.innerHTML = '';
-      gridItem.className = 'grid-item';
-    });
-    score = 0;
-    updateScore();
-    gameOverEl.classList.add('hidden');
-    addNumber();
-    addNumber();
-  }
-
-  document.addEventListener('keydown', e => {
-    let hasMoved = false;
-    if (e.keyCode === 37) {
-      hasMoved = moveLeft();
-    } else if (e.keyCode === 38) {
-      hasMoved = moveUp();
-    } else if (e.keyCode === 39) {
-      hasMoved = moveRight();
-    } else if (e.keyCode === 40) {
-      hasMoved = moveDown();
-    }
-    if (hasMoved) {
-      addNumber();
-      if (isGameOver()) {
-        showGameOver();
-      }
-    }
-  });
-
-  // Swipe controls
-  let xDown = null;
-  let yDown = null;
-
-  document.addEventListener('touchstart', e => {
-    const firstTouch = e.touches[0];
-    xDown = firstTouch.clientX;
-    yDown = firstTouch.clientY;
-  });
-
-  document.addEventListener('touchmove', e => {
-    if (!xDown || !yDown) {
-      return;
-    }
-    const xUp = e.touches[0].clientX;
-    const yUp = e.touches[0].clientY;
-    const xDiff = xDown - xUp;
-    const yDiff = yDown - yUp;
-    let hasMoved;
-    if (Math.abs(xDiff) > Math.abs(yDiff)) {
-      if (xDiff > 0) {
-        hasMoved = moveLeft();
-      } else {
-        hasMoved = moveRight();
-      }
-    } else {
-      if (yDiff > 0) {
-        hasMoved = moveUp();
-      } else {
-        hasMoved = moveDown();
-      }
-    }
-
-    if (hasMoved) {
-      addNumber();
-    }
-    xDown = null;
-    yDown = null;
-  });
-
-  createGrid();
-  addNumber();
-  addNumber();
-
-</script>
-</body>
-</html>
-    </textarea>
+    <textarea id="2048-code" style="display:none;"><!DOCTYPE html><html lang="en"><head><style>body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#f8f8f8}.title{font-size:68px;font-weight:bold;color:#333;text-align:center;text-shadow:2px 2px #eee;margin-top:50px}#game-container{width:400px;height:400px;margin:0 auto;display:flex;flex-wrap:wrap;background-color:#bbada0;box-shadow:0 0 10px rgba(0,0,0,0.3);border-radius:5px;overflow:hidden}.grid-item{width:90px;height:90px;margin:5px;background-color:#ccc0b3;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:36px;color:#776e65;box-shadow:0 0 10px rgba(0,0,0,0.2);transition:background-color 0.2s,transform 0.2s}.grid-item-2{background-color:#eee4da}.grid-item-4{background-color:#ede0c8}.grid-item-8{background-color:#f2b179}.grid-item-16{background-color:#f59563}.grid-item-32{background-color:#f67c5f}.grid-item-64{background-color:#f65e3b}.grid-item-128{background-color:#edcf72;color:#776e65}.grid-item-256{background-color:#edcc61;color:#776e65}.grid-item-512{background-color:#edc850;color:#776e65}.grid-item-1024{background-color:#edc53f;color:#776e65}.grid-item-2048{background-color:#edc22e;color:#776e65}.grid-item-new{animation:new-tile 0.2s forwards}.game-over{position:absolute;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;font-size:36px;color:#fff;z-index:9999;opacity:0;pointer-events:none;transition:opacity 0.2s}.game-over.show{opacity:1;pointer-events:all}.score{font-size:24px;color:#776e65;text-align:center;margin-bottom:10px}.score span{font-weight:bold;color:#8f7a66}.restart-button{padding:10px 20px;background-color:#8f7a66;color:#fff;border-radius:5px;cursor:pointer;transition:background-color 0.2s}.restart-button:hover{background-color:#776e65}@keyframes new-tile{0%{transform:scale(0.7)}100%{transform:scale(1)}}@media (max-width:480px){#game-container{width:300px;height:300px}.grid-item{width:65px;height:65px;font-size:24px}}</style></head><body><h1 class="title">2048</h1><div id="game-container"></div><div class="game-over">Game Over<div class="score">Score: <span id="final-score"></span></div><div class="restart-button" onclick="resetGame()">Restart</div></div><div class="score">Score: <span id="score">0</span></div><script>const gameContainer=document.querySelector('#game-container'),scoreEl=document.querySelector('#score'),gameOverEl=document.querySelector('.game-over'),finalScoreEl=document.querySelector('#final-score');let grid=[],score=0;function createGrid(){for(let i=0;i<4;i++){for(let j=0;j<4;j++){const g=document.createElement('div');g.classList.add('grid-item');g.setAttribute('data-row',i);g.setAttribute('data-col',j);gameContainer.appendChild(g);grid.push(g)}}}function addNumber(){const e=grid.filter(g=>g.innerHTML==='');if(e.length===0)return;const r=e[Math.floor(Math.random()*e.length)],n=Math.random()<0.9?2:4;r.innerHTML=n;r.classList.add(`grid-item-${n}`);r.classList.add('grid-item-new')}function moveLeft(){let h=false;for(let i=0;i<4;i++){for(let j=1;j<4;j++){const c=getGrid(i,j);if(c.innerHTML==='')continue;let k=j-1;while(k>=0){const p=getGrid(i,k);if(p.innerHTML!==''){if(p.innerHTML===c.innerHTML){mergeGrids(c,p);h=true}break}k--}if(k!==j-1){moveGrid(c,getGrid(i,k+1));h=true}}}return h}function moveRight(){let h=false;for(let i=0;i<4;i++){for(let j=2;j>=0;j--){const c=getGrid(i,j);if(c.innerHTML==='')continue;let k=j+1;while(k<=3){const p=getGrid(i,k);if(p.innerHTML!==''){if(p.innerHTML===c.innerHTML){mergeGrids(c,p);h=true}break}k++}if(k!==j+1){moveGrid(c,getGrid(i,k-1));h=true}}}return h}function moveUp(){let h=false;for(let i=1;i<4;i++){for(let j=0;j<4;j++){const c=getGrid(i,j);if(c.innerHTML==='')continue;let k=i-1;while(k>=0){const p=getGrid(k,j);if(p.innerHTML!==''){if(p.innerHTML===c.innerHTML){mergeGrids(c,p);h=true}break}k--}if(k!==i-1){moveGrid(c,getGrid(k+1,j));h=true}}}return h}function moveDown(){let h=false;for(let i=2;i>=0;i--){for(let j=0;j<4;j++){const c=getGrid(i,j);if(c.innerHTML==='')continue;let k=i+1;while(k<=3){const p=getGrid(k,j);if(p.innerHTML!==''){if(p.innerHTML===c.innerHTML){mergeGrids(c,p);h=true}break}k++}if(k!==i+1){moveGrid(c,getGrid(k-1,j));h=true}}}return h}function moveGrid(c,t){t.innerHTML=c.innerHTML;t.className=c.className;c.innerHTML='';c.className='grid-item'}function mergeGrids(c,t){const cv=parseInt(c.innerHTML),tv=parseInt(t.innerHTML);t.innerHTML=cv+tv;t.className=`grid-item grid-item-${cv+tv}`;c.innerHTML='';c.className='grid-item';score+=cv+tv;scoreEl.innerHTML=score}function getGrid(r,c){return grid.find(g=>g.getAttribute('data-row')==r&&g.getAttribute('data-col')==c)}function isGameOver(){const e=grid.filter(g=>g.innerHTML==='');if(e.length>0)return!1;for(let i=0;i<4;i++){for(let j=0;j<4;j++){const c=getGrid(i,j),r=getGrid(i,j+1),b=getGrid(i+1,j);if(r&&c.innerHTML===r.innerHTML)return!1;if(b&&c.innerHTML===b.innerHTML)return!1}}return!0}function resetGame(){grid.forEach(g=>{g.innerHTML='';g.className='grid-item'});score=0;scoreEl.innerHTML='0';gameOverEl.classList.remove('show');addNumber();addNumber()}document.addEventListener('keydown',e=>{let h=!1;if(e.keyCode===37)h=moveLeft();else if(e.keyCode===38)h=moveUp();else if(e.keyCode===39)h=moveRight();else if(e.keyCode===40)h=moveDown();if(h){addNumber();if(isGameOver()){finalScoreEl.innerHTML=score;gameOverEl.classList.add('show')}}});createGrid();addNumber();addNumber();</script></body></html></textarea>
 
     <script>
-        // --- 1. FIREBASE CONFIGURATION (UPDATED WITH YOUR KEYS) ---
+        // --- 1. FIREBASE CONFIGURATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA",
             authDomain: "chatterbox3000-fb3e2.firebaseapp.com",
@@ -797,13 +415,13 @@
             appId: "1:298622361038:web:c1e46432470dbce92a5f9f"
         };
 
-        // Initialize Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
         const auth = firebase.auth();
         const db = firebase.database();
         let currentUser = null;
+        let userSchedule = null;
 
         // --- 2. AUTHENTICATION LOGIC ---
         auth.onAuthStateChanged(user => {
@@ -812,6 +430,7 @@
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('user-display').innerText = user.email.split('@')[0];
                 loadUserData();
+                checkScheduleSetup(); // New Check
             } else {
                 currentUser = null;
                 document.getElementById('login-overlay').style.display = 'flex';
@@ -833,7 +452,92 @@
             location.reload();
         }
 
-        // --- 3. NAVIGATION & SAVING ---
+        // --- 3. SCHEDULE LOGIC (NEW) ---
+        function checkScheduleSetup() {
+            db.ref('users/' + currentUser.uid + '/schedule').once('value', s => {
+                if (!s.exists()) {
+                    // No schedule found? Show popup!
+                    document.getElementById('schedule-overlay').style.display = 'flex';
+                } else {
+                    // Schedule exists, load it
+                    userSchedule = s.val();
+                    populateSettingsInputs(userSchedule);
+                    renderSchedule('red'); // Default view
+                }
+            });
+        }
+
+        function saveInitialSchedule() {
+            const sched = {
+                c1: document.getElementById('setup-c1').value || "Free Period",
+                c2: document.getElementById('setup-c2').value || "Free Period",
+                c3: document.getElementById('setup-c3').value || "Free Period",
+                c4: document.getElementById('setup-c4').value || "Free Period",
+                c5: document.getElementById('setup-c5').value || "Free Period",
+                c6: document.getElementById('setup-c6').value || "Free Period",
+                c7: document.getElementById('setup-c7').value || "Free Period",
+                c8: document.getElementById('setup-c8').value || "Free Period"
+            };
+            
+            db.ref('users/' + currentUser.uid + '/schedule').set(sched).then(() => {
+                document.getElementById('schedule-overlay').style.display = 'none';
+                userSchedule = sched;
+                populateSettingsInputs(sched);
+                renderSchedule('red');
+            });
+        }
+
+        function updateSchedule() {
+            const sched = {
+                c1: document.getElementById('set-c1').value,
+                c2: document.getElementById('set-c2').value,
+                c3: document.getElementById('set-c3').value,
+                c4: document.getElementById('set-c4').value,
+                c5: document.getElementById('set-c5').value,
+                c6: document.getElementById('set-c6').value,
+                c7: document.getElementById('set-c7').value,
+                c8: document.getElementById('set-c8').value
+            };
+            
+            db.ref('users/' + currentUser.uid + '/schedule').set(sched).then(() => {
+                const t = document.getElementById('toast');
+                t.innerText = "Schedule Updated!";
+                t.style.opacity = '1';
+                setTimeout(() => t.style.opacity = '0', 2000);
+                userSchedule = sched;
+                renderSchedule('red'); // Refresh dashboard view
+            });
+        }
+
+        function populateSettingsInputs(data) {
+            for(let i=1; i<=8; i++) {
+                if(document.getElementById('set-c'+i)) {
+                    document.getElementById('set-c'+i).value = data['c'+i];
+                }
+            }
+        }
+
+        function renderSchedule(dayType) {
+            if(!userSchedule) return;
+            const container = document.getElementById('schedule-display-list');
+            container.innerHTML = '';
+
+            let start = dayType === 'red' ? 1 : 5;
+            let end = dayType === 'red' ? 4 : 8;
+            let color = dayType === 'red' ? '#ef4444' : '#10b981';
+
+            for(let i=start; i<=end; i++) {
+                const div = document.createElement('div');
+                div.className = 'class-list-item';
+                div.innerHTML = `
+                    <span style="font-weight:500;">${userSchedule['c'+i]}</span>
+                    <span class="period-badge" style="color:${color}; border:1px solid ${color};">Period ${i}</span>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        // --- 4. NAVIGATION & SAVING ---
         function showSection(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -847,8 +551,8 @@
             const val = document.getElementById('note-' + type).value;
             db.ref('users/' + currentUser.uid + '/notes/' + type).set(val);
             
-            // Show "Saved" toast
             const t = document.getElementById('toast');
+            t.innerText = "Saved automatically";
             t.style.opacity = '1';
             setTimeout(() => t.style.opacity = '0', 2000);
         }
@@ -860,11 +564,10 @@
                     if(s.val()) document.getElementById('note-' + t).value = s.val();
                 });
             });
-            // Initialize To-Do List Listener
             initTodoListener();
         }
 
-        // --- 4. CALCULATOR (FIXED) ---
+        // --- 5. CALCULATOR ---
         function calc(val) {
             const disp = document.getElementById('calcDisplay');
             if (val === 'C') {
@@ -887,7 +590,7 @@
             }
         }
 
-        // --- 5. TO-DO LIST ---
+        // --- 6. TO-DO LIST ---
         function addTodo() {
             const input = document.getElementById('newTodo');
             const text = input.value.trim();
@@ -930,7 +633,7 @@
         function deleteTodo(key) { db.ref('users/' + currentUser.uid + '/todos/' + key).remove(); }
 
 
-        // --- 6. GAMES & FULLSCREEN ---
+        // --- 7. GAMES & FULLSCREEN ---
         function loadGame(codeId) {
             const container = document.getElementById('game-container');
             const frame = document.getElementById('game-frame');
@@ -957,7 +660,7 @@
             }
         }
 
-        // --- 7. SYSTEM SETTINGS ---
+        // --- 8. SYSTEM SETTINGS ---
         function toggleTheme() {
             const b = document.body;
             b.dataset.theme = b.dataset.theme === 'light' ? 'dark' : 'light';
@@ -970,9 +673,8 @@
             else showSection('fun-home');
         }
 
-        // --- 8. GLOBAL EVENT LISTENERS (ESCAPE KEY FAIL-SAFE) ---
+        // --- 9. GLOBAL EVENT LISTENERS ---
         document.addEventListener('keydown', e => {
-            // SAFE CHECK: If typing in a box, IGNORE Escape key
             if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
 
             if (e.key === "Escape") {
@@ -985,7 +687,7 @@
             }
         });
 
-        // --- 9. UTILS ---
+        // --- 10. UTILS ---
         function countWords(area, display) {
             const txt = document.getElementById(area).value.trim();
             document.getElementById(display).innerText = txt ? txt.split(/\s+/).length + " words" : "0 words";
