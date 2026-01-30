@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall Focus v10</title>
+    <title>StudyHall Focus v11 (RPG)</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -26,6 +26,7 @@
             --status-bg: #f1f5f9;
             --danger: #ef4444;
             --success: #22c55e;
+            --gold: #f59e0b;
         }
 
         [data-theme="dark"] {
@@ -50,14 +51,26 @@
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
+            width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
             display: flex; flex-direction: column; padding: 1.5rem 1rem;
             transition: margin-left 0.3s ease; z-index: 100; overflow-y: auto;
         }
-        body.zen-mode .sidebar { margin-left: -240px; }
+        body.zen-mode .sidebar { margin-left: -260px; }
 
-        .logo { font-weight: 700; font-size: 1.2rem; margin-bottom: 2rem; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        .logo { font-weight: 700; font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--accent); display: flex; align-items: center; gap: 10px; }
         
+        /* RPG PLAYER CARD */
+        .player-card {
+            background: var(--bg-color); border: 1px solid var(--border);
+            padding: 12px; border-radius: 12px; margin-bottom: 20px;
+        }
+        .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .player-rank { font-size: 0.8rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; }
+        .player-level { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+        .xp-bar-container { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 5px; }
+        .xp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #a855f7); width: 0%; transition: width 0.5s ease; }
+        .xp-text { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; text-align: right; }
+
         .nav-btn {
             background: none; border: none; width: 100%; text-align: left; padding: 12px;
             margin-bottom: 5px; color: var(--text-secondary); border-radius: 8px;
@@ -79,13 +92,13 @@
         }
         .sub-btn:hover, .sub-btn.active { color: var(--accent); font-weight: 600; }
 
-        /* --- FLOATING ZEN BUTTON (The Fix) --- */
+        /* Floating Zen Button */
         #zen-exit-btn {
             position: fixed; bottom: 20px; left: 20px; z-index: 1000;
             background: var(--accent); color: white; padding: 10px 20px;
             border-radius: 30px; border: none; cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            display: none; /* Hidden normally */
+            display: none;
             animation: popIn 0.3s ease;
         }
         body.zen-mode #zen-exit-btn { display: flex; align-items: center; gap: 8px; }
@@ -167,6 +180,15 @@
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
         .calc-btn { padding: 15px; border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer; background: var(--bg-color); color: var(--text-primary); box-shadow: 0 2px 0 var(--border); }
         .calc-btn.accent { background: var(--accent); color: white; border: none; }
+        
+        /* XP Toast */
+        #xp-toast {
+            position: fixed; top: 20px; right: 20px; background: var(--accent); color: white;
+            padding: 10px 20px; border-radius: 8px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(200%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2000;
+        }
+        #xp-toast.show { transform: translateX(0); }
 
     </style>
 </head>
@@ -175,6 +197,17 @@
     <nav class="sidebar">
         <div class="logo"><i class="fas fa-brain"></i> StudyHall</div>
         
+        <div class="player-card">
+            <div class="player-header">
+                <span class="player-rank" id="player-rank">Novice</span>
+                <span class="player-level" id="player-level">Lvl 1</span>
+            </div>
+            <div class="xp-bar-container">
+                <div class="xp-bar-fill" id="xp-fill"></div>
+            </div>
+            <div class="xp-text" id="xp-text">0 / 1000 XP</div>
+        </div>
+
         <button class="nav-btn active" onclick="showSection('dashboard', this)"><i class="fas fa-columns"></i> Dashboard</button>
         <button class="nav-btn" onclick="toggleNotebookMenu(this)">
             <i class="fas fa-sticky-note"></i> Notebook <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i>
@@ -192,6 +225,8 @@
     <button id="zen-exit-btn" onclick="toggleZenMode()">
         <i class="fas fa-compress-arrows-alt"></i> Exit Zen Mode (Esc)
     </button>
+    
+    <div id="xp-toast"><i class="fas fa-star"></i> +100 XP</div>
 
     <main class="main">
         <div class="header">
@@ -213,6 +248,7 @@
             <div class="dashboard-grid">
                 <div class="card" style="text-align:center;">
                     <h3 style="margin-top:0;"><i class="fas fa-stopwatch"></i> Focus Timer</h3>
+                    <p style="font-size:0.8rem; color:var(--text-secondary);">Finish timer for +500 XP</p>
                     <div style="font-size: 3.5rem; font-weight: 700; margin: 10px 0; font-family: monospace;" id="timer-display">25:00</div>
                     <div style="display:flex; justify-content:center; gap:10px;">
                         <button class="btn btn-primary" onclick="toggleTimer()" id="timer-btn">Start</button>
@@ -370,7 +406,9 @@
             mood: localStorage.getItem('mood') || '',
             isPlaying: false,
             currentStation: 'lofi',
-            activeNoteId: null
+            activeNoteId: null,
+            xp: parseInt(localStorage.getItem('study_xp')) || 0,
+            level: parseInt(localStorage.getItem('study_level')) || 1
         };
 
         // --- 3. UNBLOCKABLE AUDIO SOURCES ---
@@ -417,6 +455,7 @@
             loadSchedule();
             loadTodos();
             renderNotebookMenu();
+            updateXPUI(); // Init RPG UI
             
             const audioEl = document.getElementById('audio-engine');
             if(audioEl) {
@@ -429,7 +468,54 @@
             }
         }
 
-        // --- 4. AUDIO ENGINE ---
+        // --- 4. RPG SYSTEM (GAMIFICATION) ---
+        function addXP(amount) {
+            appState.xp += amount;
+            
+            // Check Level Up (Every 1000 XP)
+            const nextLevelXP = appState.level * 1000;
+            if (appState.xp >= nextLevelXP) {
+                appState.level++;
+                alert("🎉 LEVEL UP! You are now Level " + appState.level);
+            }
+
+            // Save
+            localStorage.setItem('study_xp', appState.xp);
+            localStorage.setItem('study_level', appState.level);
+            
+            // UI Update
+            updateXPUI();
+            showToast("+" + amount + " XP");
+        }
+
+        function updateXPUI() {
+            const nextLevelXP = appState.level * 1000;
+            const prevLevelXP = (appState.level - 1) * 1000;
+            const currentLevelProgress = appState.xp - prevLevelXP;
+            const levelRange = nextLevelXP - prevLevelXP;
+            const percent = (currentLevelProgress / levelRange) * 100;
+
+            document.getElementById('player-level').innerText = "Lvl " + appState.level;
+            document.getElementById('xp-text').innerText = `${appState.xp} / ${nextLevelXP} XP`;
+            document.getElementById('xp-fill').style.width = percent + "%";
+
+            // Rank Logic
+            let rank = "Novice";
+            if(appState.level >= 5) rank = "Apprentice";
+            if(appState.level >= 10) rank = "Scholar";
+            if(appState.level >= 20) rank = "Grandmaster";
+            document.getElementById('player-rank').innerText = rank;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('xp-toast');
+            toast.innerHTML = `<i class="fas fa-star"></i> ${msg}`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+
+        // --- 5. AUDIO ENGINE ---
         const audioEl = document.getElementById('audio-engine');
 
         function changeStation(id) {
@@ -492,7 +578,7 @@
             if(jsNode) jsNode.gain.value = val * 0.15;
         }
 
-        // --- 5. PROCEDURAL AUDIO ---
+        // --- 6. PROCEDURAL AUDIO ---
         function startProceduralAudio(type) {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const bufferSize = 2 * audioCtx.sampleRate;
@@ -530,7 +616,7 @@
         }
         function stopProceduralAudio() { if(audioNode) { audioNode.stop(); audioNode = null; } }
 
-        // --- 6. DATA & SYNC ---
+        // --- 7. DATA & SYNC ---
         function handleNoteInput() {
             const status = document.getElementById('cloud-text');
             const icon = document.querySelector('.cloud-status');
@@ -579,7 +665,7 @@
             }
         }
 
-        // --- 7. UI LOGIC ---
+        // --- 8. UI LOGIC ---
         function setMood(moodClass) {
             document.body.className = ''; document.body.removeAttribute('data-theme');
             if(moodClass) document.body.classList.add(moodClass);
@@ -692,6 +778,7 @@
             tasks.splice(i, 1);
             localStorage.setItem('study_todos', JSON.stringify(tasks));
             loadTodos();
+            addXP(100); // REWARD!
         }
         function calc(val) {
             const d = document.getElementById('calcDisplay');
@@ -717,7 +804,8 @@
                     if(s===0 && m===0) { 
                          clearInterval(tmr); tmr = null;
                          if(btn) { btn.innerText = "Start"; btn.classList.remove('btn-danger'); }
-                         alert("Time's up!");
+                         alert("Time's up! +500 XP");
+                         addXP(500); // REWARD!
                          return;
                     }
                     if(s===0) { m--; s=59; } else s--;
