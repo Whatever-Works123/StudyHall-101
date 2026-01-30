@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall Focus v9</title>
+    <title>StudyHall Focus v10</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,6 +24,8 @@
             --border: #e2e8f0;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             --status-bg: #f1f5f9;
+            --danger: #ef4444;
+            --success: #22c55e;
         }
 
         [data-theme="dark"] {
@@ -76,6 +78,18 @@
             color: var(--text-secondary); cursor: pointer; font-size: 0.9rem;
         }
         .sub-btn:hover, .sub-btn.active { color: var(--accent); font-weight: 600; }
+
+        /* --- FLOATING ZEN BUTTON (The Fix) --- */
+        #zen-exit-btn {
+            position: fixed; bottom: 20px; left: 20px; z-index: 1000;
+            background: var(--accent); color: white; padding: 10px 20px;
+            border-radius: 30px; border: none; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none; /* Hidden normally */
+            animation: popIn 0.3s ease;
+        }
+        body.zen-mode #zen-exit-btn { display: flex; align-items: center; gap: 8px; }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
         /* --- MAIN AREA --- */
         .main { flex: 1; padding: 2rem; overflow-y: auto; position: relative; scroll-behavior: smooth; }
@@ -174,6 +188,10 @@
         <button class="nav-btn" onclick="showSection('settings', this)"><i class="fas fa-cog"></i> Settings</button>
         <button class="nav-btn" onclick="toggleZenMode()"><i class="fas fa-expand-arrows-alt"></i> Zen Mode</button>
     </nav>
+
+    <button id="zen-exit-btn" onclick="toggleZenMode()">
+        <i class="fas fa-compress-arrows-alt"></i> Exit Zen Mode (Esc)
+    </button>
 
     <main class="main">
         <div class="header">
@@ -357,7 +375,6 @@
 
         // --- 3. UNBLOCKABLE AUDIO SOURCES ---
         const stations = {
-            // Using fastly.jsdelivr.net to bypass MIME-type sniffing blocks on school networks
             lofi: "https://fastly.jsdelivr.net/gh/sasi-k/lofi-player/public/music/1.mp3",
             piano: "https://fastly.jsdelivr.net/gh/josephernest/BigSound/master/examples/mp3/02.mp3",
             rain: "generate:rain",
@@ -379,7 +396,6 @@
             const userDisplay = document.getElementById('user-id-display');
             if(userDisplay) {
                 userDisplay.value = userId;
-                // Allow ID Recovery
                 userDisplay.addEventListener('change', (e) => {
                     const newId = e.target.value.trim();
                     if(newId.length > 5 && confirm("Switch to User ID: "+newId+"? This will load that user's notes.")) {
@@ -389,13 +405,19 @@
                 });
             }
 
+            // Keyboard Shortcuts
+            document.addEventListener('keydown', (e) => {
+                if(e.key === 'Escape' && document.body.classList.contains('zen-mode')) {
+                    toggleZenMode();
+                }
+            });
+
             updateClock();
             setInterval(updateClock, 1000);
             loadSchedule();
             loadTodos();
             renderNotebookMenu();
             
-            // Audio Error Listener
             const audioEl = document.getElementById('audio-engine');
             if(audioEl) {
                 audioEl.onerror = function() {
@@ -693,7 +715,6 @@
                     if(!el) return;
                     let [m, s] = el.innerText.split(':').map(Number);
                     if(s===0 && m===0) { 
-                         // TIMER FINISHED LOGIC
                          clearInterval(tmr); tmr = null;
                          if(btn) { btn.innerText = "Start"; btn.classList.remove('btn-danger'); }
                          alert("Time's up!");
