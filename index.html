@@ -3,148 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall v17</title>
+    <title>StudyHall v19</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- THEME VARIABLES (Default = Dark/Cozy) --- */
+        /* --- THEME VARIABLES --- */
         :root {
+            /* DARK (Default) */
             --bg-body: #2C2F36;
             --bg-sidebar: #23262B;
             --bg-card: #343840;
             --bg-input: #1F2226;
             --text-main: #ECEFF4;
             --text-muted: #9CA3AF;
-            --accent: #EBCB8B;        /* Gold */
-            --accent-hover: #D08770;  /* Orange */
-            --success: #A3BE8C;       /* Green */
-            --danger: #BF616A;        /* Red */
-            --radius: 16px;
-            --font: 'Nunito', sans-serif;
-            --paper-bg: #FFF9E5;      /* Notebook Color */
+            --accent: #EBCB8B;       
+            --accent-hover: #D08770; 
+            --success: #A3BE8C;       
+            --danger: #BF616A;        
+            --paper-bg: #FFF9E5;      
             --paper-text: #2C2F36;
+            --radius: 20px;
+            --font: 'Nunito', sans-serif;
+            --shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
 
-        /* Light Mode Overrides */
-       [data-theme="light"] {
-            --bg-body: #F9F5EB;       /* Chill Cream */
-            --bg-sidebar: #FFFBF2;    /* Lighter Cream */
-            --bg-card: #FFFFFF;       /* White */
-            --bg-input: #F0EBE0;      /* Beige Input */
-            
-            --text-main: #5C5446;     /* Warm Coffee Brown */
-            --text-muted: #9C9488;    /* Warm Grey */
-            
-            --accent: #FF9F43;        /* Galactic Orange */
-            --accent-hover: #FF7F00;  /* Deep Orange */
-            
+        [data-theme="light"] {
+            /* LIGHT (Cream & Orange) */
+            --bg-body: #F9F5EB;       
+            --bg-sidebar: #FFFBF2;    
+            --bg-card: #FFFFFF;       
+            --bg-input: #F0EBE0;      
+            --text-main: #5C5446;     
+            --text-muted: #9C9488;    
+            --accent: #FF9F43;        
+            --accent-hover: #FF7F00;  
             --success: #2ECC71;       
             --danger: #FF6B6B;
-            
             --paper-bg: #FFFFFF;
             --paper-text: #5C5446;
-            
-            --shadow: 0 4px 20px rgba(92, 84, 70, 0.08); /* Soft warm shadow */
+            --shadow: 0 4px 20px rgba(92, 84, 70, 0.08); 
         }
 
-        * { box-sizing: border-box; transition: background 0.3s ease, color 0.3s ease; outline: none; }
+        * { box-sizing: border-box; transition: background 0.3s ease, color 0.3s ease, border 0.3s ease; outline: none; }
         body { margin: 0; font-family: var(--font); background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
 
         /* --- SIDEBAR --- */
-        .sidebar {
-            width: 260px; background: var(--bg-sidebar); display: flex; flex-direction: column; 
-            padding: 20px 15px; flex-shrink: 0; border-right: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .app-title {
-            font-size: 1.3rem; font-weight: 800; color: var(--accent); margin-bottom: 30px;
-            display: flex; align-items: center; gap: 10px; padding-left: 10px;
-        }
-
-        .nav-link {
-            display: flex; align-items: center; gap: 15px; padding: 12px 15px; margin-bottom: 8px;
-            border-radius: var(--radius); color: var(--text-muted); cursor: pointer;
-            font-weight: 700; font-size: 1rem; border: none; background: none; width: 100%; text-align: left;
-        }
+        .sidebar { width: 260px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 25px 20px; flex-shrink: 0; border-right: 1px solid rgba(0,0,0,0.05); }
+        .app-title { font-size: 1.4rem; font-weight: 800; color: var(--accent); margin-bottom: 35px; display: flex; align-items: center; gap: 12px; }
+        .nav-link { display: flex; align-items: center; gap: 15px; padding: 14px 15px; margin-bottom: 8px; border-radius: var(--radius); color: var(--text-muted); cursor: pointer; font-weight: 700; font-size: 1rem; border: none; background: none; width: 100%; text-align: left; }
         .nav-link:hover { background: var(--bg-input); color: var(--text-main); transform: translateX(3px); }
-        .nav-link.active { background: var(--bg-card); color: var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .nav-link.active { background: var(--bg-card); color: var(--accent); box-shadow: var(--shadow); }
 
         /* --- USER AREA --- */
         .spacer { flex: 1; }
-        .user-area {
-            background-color: var(--bg-input); padding: 12px; border-radius: var(--radius);
-            display: flex; align-items: center; gap: 10px; margin-top: 10px;
-        }
-
-        .avatar-container { position: relative; width: 42px; height: 42px; cursor: pointer; flex-shrink: 0; }
-        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--bg-card); }
+        .user-area { background-color: var(--bg-input); padding: 12px; border-radius: var(--radius); display: flex; align-items: center; gap: 12px; margin-top: 15px; }
+        .avatar-container { width: 44px; height: 44px; cursor: pointer; flex-shrink: 0; }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--bg-card); background: var(--bg-card); }
         .user-info { flex: 1; overflow: hidden; cursor: pointer; padding: 0 5px; }
         .user-name { font-weight: 800; font-size: 0.95rem; white-space: nowrap; }
-        .user-sub { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
-        .shop-btn {
-            background: var(--bg-card); border: none; color: var(--accent); width: 36px; height: 36px;
-            border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-        }
-        .shop-btn:hover { background: var(--accent); color: var(--bg-body); }
+        .user-sub { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; font-weight: 600; }
+        .shop-btn { background: var(--bg-card); border: none; color: var(--accent); width: 40px; height: 40px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .shop-btn:hover { background: var(--accent); color: white; transform: scale(1.05); }
 
-        /* --- MAIN CONTENT --- */
-        .main { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; }
-        
+        /* --- MAIN --- */
+        .main { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; }
         .header { margin-bottom: 30px; }
-        .header h1 { font-size: 2rem; margin: 0; font-weight: 800; }
-        .header p { color: var(--text-muted); margin: 5px 0 0; }
+        .header h1 { font-size: 2.2rem; margin: 0; font-weight: 800; letter-spacing: -1px; }
+        .header p { color: var(--text-muted); margin: 8px 0 0; font-size: 1.1rem; }
+        .quote-box { font-style: italic; color: var(--accent); font-weight: 600; margin-bottom: 5px; opacity: 0.8; font-size: 0.9rem; }
 
-        .card { background: var(--bg-card); border-radius: var(--radius); padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .card { background: var(--bg-card); border-radius: var(--radius); padding: 30px; margin-bottom: 25px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.02); }
+
+        /* --- DASHBOARD WIDGETS --- */
+        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
+        
+        /* Stats */
+        .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .badge { background: var(--bg-input); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; color: var(--accent); display: inline-flex; align-items: center; gap: 5px; }
+        .xp-track { background: var(--bg-input); height: 14px; border-radius: 10px; overflow: hidden; margin-bottom: 8px; }
+        .xp-fill { background: var(--accent); width: 0%; height: 100%; transition: width 0.5s; }
+
+        /* Pet */
+        .pet-card { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px; position: relative; }
+        .pet-display { font-size: 5rem; transition: transform 0.5s ease; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); }
+        .pet-bubble { position: absolute; top: 10px; right: 20px; background: var(--bg-body); padding: 5px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; opacity: 0; transition: opacity 0.3s; transform: translateY(10px); }
+        .pet-card:hover .pet-bubble { opacity: 1; transform: translateY(0); }
+        .sleeping { animation: breathe 3s infinite ease-in-out; opacity: 0.7; transform: scale(0.95); }
+        .zzz { position: absolute; top: 20px; right: 40%; font-weight: 800; color: var(--text-muted); animation: floatUp 2s infinite; opacity: 0; }
+        .sleeping + .zzz { opacity: 1; }
+
+        @keyframes breathe { 0%, 100% { transform: scale(0.95); } 50% { transform: scale(1.0); } }
+        @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-30px) rotate(10deg); opacity: 0; } }
+
+        /* To-Do List */
+        .todo-input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .todo-input { flex: 1; background: var(--bg-input); border: none; padding: 12px 20px; border-radius: 30px; color: var(--text-main); font-family: var(--font); font-weight: 600; }
+        .btn-add { background: var(--accent); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+        .todo-list { list-style: none; padding: 0; margin: 0; }
+        .todo-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--bg-input); animation: fadeIn 0.3s; }
+        .todo-item:last-child { border-bottom: none; }
+        .todo-text { flex: 1; margin-left: 15px; font-weight: 600; cursor: pointer; }
+        .todo-check { width: 22px; height: 22px; border: 2px solid var(--text-muted); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: transparent; }
+        .todo-item.done .todo-text { text-decoration: line-through; color: var(--text-muted); }
+        .todo-item.done .todo-check { background: var(--success); border-color: var(--success); color: white; }
+        .todo-del { color: var(--danger); cursor: pointer; opacity: 0.5; padding: 5px; }
+        .todo-del:hover { opacity: 1; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Achievements */
+        .badge-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+        .ach-badge { min-width: 60px; height: 60px; background: var(--bg-input); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text-muted); position: relative; border: 2px solid transparent; }
+        .ach-badge.unlocked { background: var(--bg-card); border-color: var(--accent); color: var(--text-main); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .ach-tooltip { position: absolute; bottom: -30px; background: var(--bg-body); padding: 5px 10px; font-size: 0.7rem; border-radius: 5px; width: 120px; text-align: center; opacity: 0; pointer-events: none; transition: 0.2s; z-index: 10; left: 50%; transform: translateX(-50%); white-space: normal; }
+        .ach-badge:hover .ach-tooltip { opacity: 1; bottom: -40px; }
 
         /* --- TIMER --- */
-        .timer-wrapper { text-align: center; padding: 30px 0; }
-        .big-timer { font-size: 5rem; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; line-height: 1; margin: 10px 0; }
-        .timer-status { font-size: 1rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-
-        .btn {
-            padding: 10px 25px; border-radius: 30px; border: none; font-weight: 700; cursor: pointer; font-size: 0.95rem;
-            background: var(--bg-input); color: var(--text-main); display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-primary { background: var(--accent); color: var(--bg-body); }
-        .btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .timer-wrapper { text-align: center; padding: 40px 0; }
+        .big-timer { font-size: 6rem; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; line-height: 1; margin: 20px 0; letter-spacing: -2px; }
+        .timer-status { font-size: 1.1rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+        .btn-group { display: flex; justify-content: center; gap: 15px; margin-top: 30px; }
+        .btn { padding: 12px 30px; border-radius: 30px; border: none; font-weight: 700; cursor: pointer; font-size: 1rem; background: var(--bg-input); color: var(--text-main); display: inline-flex; align-items: center; gap: 10px; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { transform: translateY(-3px); background: var(--accent-hover); }
         .btn-danger { background: var(--danger); color: white; }
-        .btn-group { display: flex; justify-content: center; gap: 15px; margin-top: 25px; }
-
-        /* Mode Switcher */
-        .mode-switch { background: var(--bg-input); display: inline-flex; padding: 5px; border-radius: 30px; margin-bottom: 20px; }
-        .mode-btn { background: none; border: none; color: var(--text-muted); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 700; }
-        .mode-btn.active { background: var(--bg-card); color: var(--text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
         /* --- NOTES --- */
-        #notepad {
-            width: 100%; height: 75vh; background: var(--paper-bg); color: var(--paper-text);
-            padding: 30px; border-radius: var(--radius); font-family: 'Courier New', Courier, monospace;
-            line-height: 1.6; border: 1px solid rgba(0,0,0,0.1); font-size: 1.1rem; resize: none;
-        }
+        #notepad { width: 100%; height: 70vh; background: var(--paper-bg); color: var(--paper-text); padding: 40px; border-radius: var(--radius); font-family: 'Courier New', Courier, monospace; line-height: 1.8; border: none; font-size: 1.15rem; resize: none; box-shadow: var(--shadow); margin-bottom: 15px; }
+        .note-controls { display: flex; justify-content: flex-end; gap: 10px; }
 
         /* --- SHOP GRID --- */
-        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
-        .shop-item {
-            background: var(--bg-input); border-radius: var(--radius); padding: 20px; text-align: center;
-            cursor: pointer; border: 2px solid transparent;
-        }
-        .shop-item:hover { transform: translateY(-3px); border-color: var(--accent); }
-        .shop-item.owned { opacity: 0.7; border-color: var(--success); }
-        .shop-item.equipped { opacity: 1; border-color: var(--accent); box-shadow: 0 0 15px rgba(235, 203, 139, 0.2); }
+        .shop-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
+        .shop-item { background: var(--bg-input); border-radius: var(--radius); padding: 25px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: 0.2s; position: relative; }
+        .shop-item:hover { transform: translateY(-5px); border-color: var(--accent); background: var(--bg-card); }
+        .shop-item.owned { opacity: 0.8; border-color: var(--success); }
+        .shop-item.equipped { opacity: 1; border-color: var(--accent); box-shadow: 0 0 15px rgba(255, 159, 67, 0.2); background: var(--bg-card); }
+        .item-type { position: absolute; top: 10px; right: 10px; font-size: 0.7rem; opacity: 0.5; font-weight: 700; }
 
         /* --- UTILS --- */
         .hidden { display: none !important; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .stat-box { background: var(--bg-input); padding: 20px; border-radius: var(--radius); text-align: center; }
-        .stat-num { font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: block; }
-        .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+        .stat-box { background: var(--bg-card); padding: 25px; border-radius: var(--radius); text-align: center; box-shadow: var(--shadow); }
+        .stat-num { font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: block; margin-bottom: 5px; }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
 
-        /* Avatar Effects */
+        /* Avatar Effects & Themes */
         .fx-fire { box-shadow: 0 0 15px #BF616A; border-color: #BF616A !important; }
         .fx-neon { box-shadow: 0 0 15px #A3BE8C; border-color: #A3BE8C !important; }
-        .fx-gold { border-color: var(--accent) !important; box-shadow: 0 0 15px var(--accent); }
+        .fx-gold { border-color: #FFD700 !important; box-shadow: 0 0 15px #FFD700; }
         .fx-rainbow { border: 3px solid transparent !important; background: linear-gradient(var(--bg-card), var(--bg-card)) padding-box, linear-gradient(45deg, red, orange, yellow, green, blue, violet) border-box; }
 
     </style>
@@ -153,14 +162,11 @@
 
     <nav class="sidebar">
         <div class="app-title"><i class="fas fa-shapes"></i> StudyHall</div>
-
         <button class="nav-link active" onclick="showPage('home', this)"><i class="fas fa-home"></i> Home</button>
         <button class="nav-link" onclick="showPage('notes', this)"><i class="fas fa-pencil-alt"></i> Study Notes</button>
         <button class="nav-link" onclick="showPage('focus', this)"><i class="fas fa-clock"></i> Focus</button>
         <button class="nav-link" onclick="showPage('tools', this)"><i class="fas fa-calculator"></i> Tools</button>
-        
         <div class="spacer"></div>
-
         <div class="user-area">
             <div class="avatar-container" onclick="document.getElementById('file-input').click()" title="Change Avatar">
                 <img src="" id="user-avatar" class="avatar-img">
@@ -172,79 +178,88 @@
             <button class="shop-btn" onclick="showPage('shop', null)"><i class="fas fa-store"></i></button>
         </div>
     </nav>
-
     <input type="file" id="file-input" accept="image/*" onchange="uploadAvatar(this)" style="display:none;">
 
     <main class="main">
         <div class="header">
+            <div class="quote-box" id="daily-quote">"Focus is the key to success."</div>
             <h1 id="page-title">Home</h1>
-            <p id="page-desc">Welcome back to your study space.</p>
+            <p id="page-desc">Your cozy productivity corner.</p>
         </div>
 
         <div id="home" class="page">
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                    <h2>Current Progress</h2>
-                    <span style="font-weight:700; color:var(--accent);" id="lvl-display">Level 1</span>
-                </div>
-                <div style="background:var(--bg-input); height:12px; border-radius:10px; overflow:hidden; margin-bottom:10px;">
-                    <div id="xp-bar" style="background:var(--accent); width:0%; height:100%; transition:width 0.5s;"></div>
-                </div>
-                <div style="text-align:right; font-size:0.9rem; color:var(--text-muted);" id="xp-text">0 / 1000 XP</div>
-            </div>
-
-            <div class="stat-grid">
-                <div class="stat-box">
-                    <span class="stat-num" id="stat-coins">0</span>
-                    <span class="stat-label">Total Coins</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-num" id="stat-sessions">0</span>
-                    <span class="stat-label">Sessions Completed</span>
-                </div>
-            </div>
             
-            <div class="card" style="text-align:center; padding:40px;">
-                <p style="color:var(--text-muted); margin-bottom:20px;">Ready to start studying?</p>
-                <button class="btn btn-primary" onclick="showPage('focus', document.querySelectorAll('.nav-link')[2])">Go to Focus Timer</button>
+            <div class="grid-2">
+                <div>
+                    <div class="card">
+                        <div class="progress-header">
+                            <div>
+                                <span class="badge" id="lvl-display">Lvl 1</span>
+                                <span class="badge" style="color:var(--text-muted);"><i class="fas fa-fire"></i> <span id="streak-display">0</span> Day Streak</span>
+                            </div>
+                            <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted);" id="xp-text">0/1000 XP</span>
+                        </div>
+                        <div class="xp-track"><div id="xp-bar" class="xp-fill"></div></div>
+                        
+                        <p style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:10px; margin-top:20px;">ACHIEVEMENTS</p>
+                        <div class="badge-row" id="achievement-row"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-top:0;">Task Checklist</h3>
+                        <div class="todo-input-group">
+                            <input type="text" id="todo-input" class="todo-input" placeholder="Add a new task..." onkeypress="if(event.key==='Enter') addTask()">
+                            <button class="btn-add" onclick="addTask()"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <ul class="todo-list" id="todo-list"></ul>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card pet-card">
+                        <div class="pet-bubble" id="pet-msg">I'm ready to study!</div>
+                        <div class="pet-display" id="pet-display">🐶</div>
+                        <div class="zzz">Zzz...</div>
+                    </div>
+                    <div class="stat-box" style="margin-bottom:20px;">
+                        <span class="stat-num" id="stat-coins">0</span>
+                        <span class="stat-label">Coins</span>
+                    </div>
+                     <div class="stat-box">
+                        <span class="stat-num" id="stat-sessions">0</span>
+                        <span class="stat-label">Sessions</span>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="notes" class="page hidden">
             <div style="position:relative;">
                 <textarea id="notepad" placeholder="Type your study notes here..." oninput="handleNoteInput()"></textarea>
-                <div id="save-indicator" style="position:absolute; bottom:15px; right:20px; color:var(--success); font-weight:700; opacity:0; transition:opacity 0.5s;">
-                    <i class="fas fa-check"></i> Saved
+                <div class="note-controls">
+                    <span id="save-indicator" style="color:var(--success); font-weight:700; opacity:0; margin-right:auto; align-self:center;"><i class="fas fa-check"></i> Saved</span>
+                    <button class="btn" onclick="exportNotes()"><i class="fas fa-download"></i> Download .txt</button>
                 </div>
             </div>
         </div>
 
         <div id="focus" class="page hidden">
             <div class="card timer-wrapper">
-                <div class="mode-switch">
-                    <button class="mode-btn active" id="btn-mode-timer" onclick="setMode('timer')">Timer</button>
-                    <button class="mode-btn" id="btn-mode-stopwatch" onclick="setMode('stopwatch')">Stopwatch</button>
-                </div>
-
                 <div class="timer-status" id="timer-status-text">25 Min Session</div>
                 <div class="big-timer" id="timer-display">25:00</div>
-
                 <div class="btn-group">
                     <button class="btn" id="btn-less" onclick="adjustTime(-5)">-5m</button>
-                    
-                    <button class="btn btn-primary" id="btn-toggle" onclick="toggleTimer()">Start</button>
-                    
+                    <button class="btn btn-primary" id="btn-toggle" onclick="toggleTimer()">Start Focus</button>
                     <button class="btn" id="btn-more" onclick="adjustTime(5)">+5m</button>
-                    
                     <button class="btn btn-danger hidden" id="btn-reset" onclick="resetTimer()">Reset</button>
                 </div>
             </div>
         </div>
 
         <div id="tools" class="page hidden">
-            <div class="card" style="max-width:320px; margin:0 auto;">
-                <input id="calc-screen" readonly style="width:100%; background:var(--bg-input); border:none; color:var(--text-main); padding:20px; font-size:1.5rem; text-align:right; border-radius:10px; margin-bottom:15px;">
-                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;">
+            <div class="card" style="max-width:340px; margin:0 auto; padding:25px;">
+                <input id="calc-screen" readonly style="width:100%; background:var(--bg-input); border:none; color:var(--text-main); padding:20px; font-size:1.8rem; text-align:right; border-radius:15px; margin-bottom:20px;">
+                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
                     <button class="btn" onclick="c('7')">7</button> <button class="btn" onclick="c('8')">8</button> <button class="btn" onclick="c('9')">9</button> <button class="btn btn-primary" onclick="c('/')">÷</button>
                     <button class="btn" onclick="c('4')">4</button> <button class="btn" onclick="c('5')">5</button> <button class="btn" onclick="c('6')">6</button> <button class="btn btn-primary" onclick="c('*')">×</button>
                     <button class="btn" onclick="c('1')">1</button> <button class="btn" onclick="c('2')">2</button> <button class="btn" onclick="c('3')">3</button> <button class="btn btn-primary" onclick="c('-')">-</button>
@@ -254,319 +269,387 @@
         </div>
 
         <div id="shop" class="page hidden">
+            <div class="shop-tabs">
+                <button class="btn btn-primary" onclick="renderShop('all')">All</button>
+            </div>
             <div class="shop-grid" id="shop-container"></div>
         </div>
 
         <div id="settings" class="page hidden">
             <div class="card">
                 <h3>Appearance</h3>
-                <button class="btn" onclick="toggleTheme()" id="theme-btn">Switch to Light Mode</button>
+                <button class="btn" onclick="toggleTheme()" id="theme-btn">Switch Theme</button>
             </div>
             <div class="card">
                 <h3>Data</h3>
-                <button class="btn btn-danger" onclick="resetData()">Factory Reset All Data</button>
+                <button class="btn btn-danger" onclick="resetData()">Factory Reset App</button>
             </div>
         </div>
 
     </main>
 
     <script>
-        // --- STATE ---
+        // --- DATA & STATE ---
+        const quotes = [
+            "Believe you can and you're halfway there.",
+            "It always seems impossible until it's done.",
+            "Don't watch the clock; do what it does. Keep going.",
+            "The secret of getting ahead is getting started.",
+            "Small progress is still progress.",
+            "Your future needs you. Your past doesn't."
+        ];
+
+        const shopItems = [
+            // Effects
+            { id: 'fx_gold', name: 'Gold Glow', cost: 500, type: 'effect', class: 'fx-gold', icon: 'fa-star' },
+            { id: 'fx_fire', name: 'Ember Aura', cost: 1200, type: 'effect', class: 'fx-fire', icon: 'fa-fire' },
+            { id: 'fx_neon', name: 'Nature Vibe', cost: 1500, type: 'effect', class: 'fx-neon', icon: 'fa-leaf' },
+            { id: 'fx_rainbow', name: 'Prism', cost: 3000, type: 'effect', class: 'fx-rainbow', icon: 'fa-gem' },
+            // Pets
+            { id: 'pet_dog', name: 'Puppy', cost: 0, type: 'pet', char: '🐶' },
+            { id: 'pet_cat', name: 'Kitty', cost: 800, type: 'pet', char: '🐱' },
+            { id: 'pet_fox', name: 'Fox', cost: 1500, type: 'pet', char: '🦊' },
+            { id: 'pet_robot', name: 'Bot', cost: 2500, type: 'pet', char: '🤖' },
+            { id: 'pet_bunny', name: 'Bunny', cost: 1000, type: 'pet', char: '🐰' }
+        ];
+
+        const achievements = [
+            { id: 'first_session', name: 'First Steps', icon: 'fa-shoe-prints', req: (s) => s.sessions >= 1, desc: 'Complete 1 session' },
+            { id: 'rich', name: 'Savings', icon: 'fa-wallet', req: (s) => s.coins >= 1000, desc: 'Have 1000 Coins' },
+            { id: 'streak_3', name: 'On Fire', icon: 'fa-fire', req: (s) => s.streak >= 3, desc: '3 Day Streak' },
+            { id: 'tasks_5', name: 'Doer', icon: 'fa-check-double', req: (s) => s.tasksCompleted >= 5, desc: 'Complete 5 Tasks' }
+        ];
+
         const state = {
-            xp: parseInt(localStorage.getItem('sh17_xp')) || 0,
-            lvl: parseInt(localStorage.getItem('sh17_lvl')) || 1,
-            coins: parseInt(localStorage.getItem('sh17_coins')) || 0,
-            sessions: parseInt(localStorage.getItem('sh17_sessions')) || 0,
-            inventory: JSON.parse(localStorage.getItem('sh17_inv')) || [],
-            equipped: localStorage.getItem('sh17_eq') || '',
-            avatar: localStorage.getItem('sh17_av') || '',
-            theme: localStorage.getItem('sh17_theme') || 'dark',
+            xp: parseInt(localStorage.getItem('sh19_xp')) || 0,
+            lvl: parseInt(localStorage.getItem('sh19_lvl')) || 1,
+            coins: parseInt(localStorage.getItem('sh19_coins')) || 0,
+            sessions: parseInt(localStorage.getItem('sh19_sessions')) || 0,
+            tasksCompleted: parseInt(localStorage.getItem('sh19_tasks_c')) || 0,
+            streak: parseInt(localStorage.getItem('sh19_streak')) || 1,
+            lastLogin: localStorage.getItem('sh19_last_login') || '',
             
-            // Timer Vars
-            mode: 'timer',
-            timerDuration: 25, // minutes
-            elapsed: 0,        // seconds (for stopwatch)
+            inventory: JSON.parse(localStorage.getItem('sh19_inv')) || ['pet_dog'],
+            equippedEffect: localStorage.getItem('sh19_fx') || '',
+            equippedPet: localStorage.getItem('sh19_pet') || 'pet_dog',
+            avatar: localStorage.getItem('sh19_av') || '',
+            theme: localStorage.getItem('sh19_theme') || 'dark',
+            
+            todos: JSON.parse(localStorage.getItem('sh19_todos')) || [],
+            unlockedAch: JSON.parse(localStorage.getItem('sh19_ach')) || [],
+
+            // Timer
+            timerDuration: 25,
             running: false
         };
 
-        const shopItems = [
-            { id: 'fx_gold', name: 'Golden Glow', cost: 500, class: 'fx-gold' },
-            { id: 'fx_fire', name: 'Ember Aura', cost: 1200, class: 'fx-fire' },
-            { id: 'fx_neon', name: 'Nature Vibe', cost: 1500, class: 'fx-neon' },
-            { id: 'fx_rainbow', name: 'Prism', cost: 3000, class: 'fx-rainbow' }
-        ];
-
-        let interval = null;
-        let saveTimeout = null;
+        let timerInt;
+        let saveTimeout;
 
         // --- INIT ---
         function init() {
-            // Apply Theme
+            // Theme
             document.body.setAttribute('data-theme', state.theme);
             document.getElementById('theme-btn').innerText = state.theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode";
-
-            // Apply Data
-            updateUI();
+            
+            // Random Quote
+            document.getElementById('daily-quote').innerText = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
+            
+            // Streak Logic
+            checkStreak();
             
             // Load Notes
-            const savedNote = localStorage.getItem('sh17_notes');
+            const savedNote = localStorage.getItem('sh19_notes');
             if(savedNote) document.getElementById('notepad').value = savedNote;
-
-            // Load Avatar
-            const av = document.getElementById('user-avatar');
-            av.src = state.avatar ? state.avatar : "https://ui-avatars.com/api/?name=Student&background=EBCB8B&color=2C2F36";
             
+            // Avatar
+            const bgCol = state.theme === 'dark' ? 'EBCB8B' : 'FF9F43';
+            const txtCol = state.theme === 'dark' ? '2C2F36' : 'FFFFFF';
+            if(!state.avatar) document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=Student&background=${bgCol}&color=${txtCol}`;
+            else document.getElementById('user-avatar').src = state.avatar;
+
+            updateUI();
+            renderTodos();
             renderShop();
+        }
+
+        function checkStreak() {
+            const today = new Date().toDateString();
+            if(state.lastLogin !== today) {
+                // Check if yesterday
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if(state.lastLogin === yesterday.toDateString()) {
+                    state.streak++;
+                } else if (state.lastLogin !== '') {
+                    state.streak = 1; // Broken streak
+                }
+                state.lastLogin = today;
+                saveData();
+            }
         }
 
         // --- NAVIGATION ---
         function showPage(id, btn) {
-            // Hide all pages
             document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
-            // Show target
             document.getElementById(id).classList.remove('hidden');
-            
-            // Update Sidebar Active State
             if(btn) {
                 document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
                 btn.classList.add('active');
             }
-
-            // Update Header Text
-            const titles = {
-                'home': 'Home Dashboard', 'notes': 'Study Notes', 'focus': 'Focus Timer',
-                'tools': 'Tools', 'shop': 'Marketplace', 'settings': 'Settings'
-            };
+            const titles = { 'home': 'Home', 'notes': 'Study Notes', 'focus': 'Focus Timer', 'tools': 'Tools', 'shop': 'Marketplace', 'settings': 'Settings' };
             document.getElementById('page-title').innerText = titles[id];
-            
-            if(id === 'home') updateUI(); // Refresh stats when hitting home
+            if(id === 'home') updateUI();
         }
 
-        // --- TIMER LOGIC ---
-        function setMode(m) {
-            state.mode = m;
-            resetTimer(); // Reset whenever switching modes
-            
-            document.getElementById('btn-mode-timer').className = m === 'timer' ? 'mode-btn active' : 'mode-btn';
-            document.getElementById('btn-mode-stopwatch').className = m === 'stopwatch' ? 'mode-btn active' : 'mode-btn';
-            
-            // Show/Hide time adjusters (-5m, +5m) based on mode
-            const display = m === 'timer' ? 'inline-flex' : 'none';
-            document.getElementById('btn-less').style.display = display;
-            document.getElementById('btn-more').style.display = display;
-            
-            if(m === 'stopwatch') {
-                document.getElementById('timer-display').innerText = "00:00";
-                document.getElementById('timer-status-text').innerText = "Counting Up...";
-            } else {
-                updateTimerDisplay();
+        // --- UI UPDATES ---
+        function updateUI() {
+            // Stats
+            document.getElementById('lvl-display').innerText = "Lvl " + state.lvl;
+            document.getElementById('xp-text').innerText = `${state.xp} / ${state.lvl * 1000} XP`;
+            document.getElementById('xp-bar').style.width = `${(state.xp / (state.lvl*1000)) * 100}%`;
+            document.getElementById('stat-coins').innerText = state.coins;
+            document.getElementById('coin-display').innerText = state.coins;
+            document.getElementById('stat-sessions').innerText = state.sessions;
+            document.getElementById('streak-display').innerText = state.streak;
+
+            // Avatar & Pet
+            document.getElementById('user-avatar').className = `avatar-img ${state.equippedEffect}`;
+            const petObj = shopItems.find(i => i.id === state.equippedPet) || shopItems[4];
+            document.getElementById('pet-display').innerText = petObj.char;
+
+            // Achievements
+            checkAchievements();
+            renderAchievements();
+        }
+
+        // --- TODO LIST ---
+        function addTask() {
+            const input = document.getElementById('todo-input');
+            if(input.value.trim() === '') return;
+            state.todos.push({ text: input.value, done: false });
+            input.value = '';
+            saveData(); renderTodos();
+        }
+
+        function toggleTask(i) {
+            state.todos[i].done = !state.todos[i].done;
+            if(state.todos[i].done) {
+                // Reward
+                state.coins += 50;
+                state.tasksCompleted++;
+                alert("+50 Coins!");
+                updateUI();
             }
+            saveData(); renderTodos();
         }
 
+        function deleteTask(i) {
+            state.todos.splice(i, 1);
+            saveData(); renderTodos();
+        }
+
+        function renderTodos() {
+            const list = document.getElementById('todo-list');
+            list.innerHTML = '';
+            state.todos.forEach((task, i) => {
+                list.innerHTML += `
+                <li class="todo-item ${task.done ? 'done' : ''}">
+                    <div class="todo-check" onclick="toggleTask(${i})"><i class="fas fa-check"></i></div>
+                    <span class="todo-text" onclick="toggleTask(${i})">${task.text}</span>
+                    <i class="fas fa-trash todo-del" onclick="deleteTask(${i})"></i>
+                </li>`;
+            });
+        }
+
+        // --- TIMER ---
         function adjustTime(val) {
             if(state.running) return;
             state.timerDuration += val;
             if(state.timerDuration < 5) state.timerDuration = 5;
-            updateTimerDisplay();
-        }
-
-        function updateTimerDisplay() {
             document.getElementById('timer-display').innerText = `${state.timerDuration}:00`;
             document.getElementById('timer-status-text').innerText = `${state.timerDuration} Min Session`;
         }
 
         function toggleTimer() {
             const btn = document.getElementById('btn-toggle');
-            const resetBtn = document.getElementById('btn-reset');
+            const pet = document.getElementById('pet-display');
+            const petMsg = document.getElementById('pet-msg');
 
             if(state.running) {
-                // PAUSE
-                clearInterval(interval);
+                // Pause
+                clearInterval(timerInt);
                 state.running = false;
                 btn.innerText = "Resume";
-                btn.classList.remove('btn-danger'); 
-                btn.classList.add('btn-primary');
-                // Show Reset Button
-                resetBtn.classList.remove('hidden');
+                btn.className = "btn btn-primary";
+                document.getElementById('btn-reset').classList.remove('hidden');
+                pet.classList.remove('sleeping');
+                petMsg.innerText = "Welcome back!";
             } else {
-                // START
+                // Start
                 state.running = true;
                 btn.innerText = "Pause";
-                btn.classList.remove('btn-primary');
-                btn.classList.add('btn'); // Neutral color for pause
-                // Hide Reset Button while running
-                resetBtn.classList.add('hidden');
-                
-                interval = setInterval(tick, 1000);
+                btn.className = "btn"; 
+                document.getElementById('btn-reset').classList.add('hidden');
+                pet.classList.add('sleeping');
+                petMsg.innerText = "Zzz...";
+                timerInt = setInterval(tick, 1000);
             }
         }
 
         function resetTimer() {
-            clearInterval(interval);
+            clearInterval(timerInt);
             state.running = false;
-            state.elapsed = 0;
-            
-            const btn = document.getElementById('btn-toggle');
-            btn.innerText = "Start";
-            btn.className = "btn btn-primary";
+            document.getElementById('btn-toggle').innerText = "Start Focus";
+            document.getElementById('btn-toggle').className = "btn btn-primary";
             document.getElementById('btn-reset').classList.add('hidden');
-            
-            if(state.mode === 'timer') updateTimerDisplay();
-            else document.getElementById('timer-display').innerText = "00:00";
+            document.getElementById('timer-display').innerText = `${state.timerDuration}:00`;
+            document.getElementById('pet-display').classList.remove('sleeping');
         }
 
         function tick() {
             const display = document.getElementById('timer-display');
-            
-            if(state.mode === 'timer') {
-                // Countdown
-                let [m, s] = display.innerText.split(':').map(Number);
-                if(m === 0 && s === 0) {
-                    finishSession(state.timerDuration * 20); // Reward based on planned time
-                    return;
-                }
-                if(s === 0) { m--; s = 59; } else { s--; }
-                display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
-            } else {
-                // Stopwatch
-                state.elapsed++;
-                let m = Math.floor(state.elapsed / 60);
-                let s = state.elapsed % 60;
-                display.innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+            let [m, s] = display.innerText.split(':').map(Number);
+            if(m === 0 && s === 0) {
+                resetTimer();
+                alert(`Session Complete! +${state.timerDuration * 20} XP & Coins`);
+                state.sessions++;
+                state.xp += (state.timerDuration * 20);
+                state.coins += (state.timerDuration * 20);
+                if(state.xp >= state.lvl * 1000) { state.lvl++; alert("Level Up!"); }
+                saveData(); updateUI();
+                return;
             }
+            if(s === 0) { m--; s = 59; } else { s--; }
+            display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
         }
 
-        function finishSession(xpReward) {
-            resetTimer();
-            alert(`Session Complete! +${xpReward} XP & Coins`);
-            state.sessions++;
-            addRewards(xpReward, xpReward);
-        }
-
-        // --- RPG & DATA ---
-        function addRewards(xp, coins) {
-            state.xp += xp;
-            state.coins += coins;
-            if(state.xp >= state.lvl * 1000) {
-                state.lvl++;
-                alert("Level Up!");
-            }
-            saveData();
-            updateUI();
-        }
-
-        function updateUI() {
-            // Home Stats
-            document.getElementById('lvl-display').innerText = "Level " + state.lvl;
-            document.getElementById('xp-text').innerText = `${state.xp} / ${state.lvl * 1000} XP`;
-            document.getElementById('xp-bar').style.width = `${(state.xp / (state.lvl*1000)) * 100}%`;
-            document.getElementById('stat-coins').innerText = state.coins;
-            document.getElementById('stat-sessions').innerText = state.sessions;
-            
-            // Sidebar
-            document.getElementById('coin-display').innerText = state.coins;
-            
-            // Avatar Effect
-            document.getElementById('user-avatar').className = `avatar-img ${state.equipped}`;
-        }
-
-        // --- NOTES ---
+        // --- NOTES EXPORT ---
         function handleNoteInput() {
-            const val = document.getElementById('notepad').value;
-            localStorage.setItem('sh17_notes', val);
-            
-            // Show "Saved" indicator
+            localStorage.setItem('sh19_notes', document.getElementById('notepad').value);
             const ind = document.getElementById('save-indicator');
             ind.style.opacity = '1';
             clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => { ind.style.opacity = '0'; }, 2000);
+            saveTimeout = setTimeout(() => ind.style.opacity = '0', 2000);
         }
 
-        // --- SHOP & AVATAR ---
-        function uploadAvatar(input) {
-            if(input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    state.avatar = e.target.result;
-                    document.getElementById('user-avatar').src = state.avatar;
+        function exportNotes() {
+            const text = document.getElementById('notepad').value;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'StudyHall_Notes.txt';
+            a.click();
+        }
+
+        // --- ACHIEVEMENTS ---
+        function checkAchievements() {
+            achievements.forEach(a => {
+                if(!state.unlockedAch.includes(a.id) && a.req(state)) {
+                    state.unlockedAch.push(a.id);
+                    alert(`ACHIEVEMENT UNLOCKED: ${a.name}`);
                     saveData();
                 }
-                reader.readAsDataURL(input.files[0]);
-            }
+            });
         }
 
+        function renderAchievements() {
+            const row = document.getElementById('achievement-row');
+            row.innerHTML = '';
+            achievements.forEach(a => {
+                const unlocked = state.unlockedAch.includes(a.id);
+                row.innerHTML += `
+                <div class="ach-badge ${unlocked ? 'unlocked' : ''}">
+                    <i class="fas ${a.icon}"></i>
+                    <div class="ach-tooltip"><b>${a.name}</b><br>${a.desc}</div>
+                </div>`;
+            });
+        }
+
+        // --- SHOP & MISC ---
         function renderShop() {
             const container = document.getElementById('shop-container');
             container.innerHTML = '';
             shopItems.forEach(item => {
                 const owned = state.inventory.includes(item.id);
-                const equipped = state.equipped === item.id;
+                const equipped = (item.type === 'pet' ? state.equippedPet : state.equippedEffect) === item.id;
                 
+                let displayHTML = item.type === 'pet' 
+                    ? `<div style="font-size:3rem; margin-bottom:10px;">${item.char}</div>`
+                    : `<div style="font-size:2rem; margin-bottom:10px; color:var(--accent);"><i class="fas ${item.icon}"></i></div>`;
+
                 container.innerHTML += `
-                <div class="shop-item ${owned?'owned':''} ${equipped?'equipped':''}" onclick="buyItem('${item.id}', ${item.cost})">
-                    <div style="font-size:2rem; margin-bottom:10px; color:var(--accent);"><i class="fas fa-magic"></i></div>
-                    <div style="font-weight:700; margin-bottom:5px;">${item.name}</div>
-                    <div style="font-size:0.8rem; color:var(--text-muted);">
+                <div class="shop-item ${owned?'owned':''} ${equipped?'equipped':''}" onclick="buyItem('${item.id}', ${item.cost}, '${item.type}')">
+                    <span class="item-type">${item.type.toUpperCase()}</span>
+                    ${displayHTML}
+                    <div style="font-weight:700;">${item.name}</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">
                         ${owned ? (equipped ? 'EQUIPPED' : 'OWNED') : item.cost + ' Coins'}
                     </div>
                 </div>`;
             });
         }
 
-        function buyItem(id, cost) {
+        function buyItem(id, cost, type) {
             if(state.inventory.includes(id)) {
-                // Toggle equip
-                state.equipped = (state.equipped === id) ? '' : id;
+                if(type === 'pet') state.equippedPet = id;
+                else state.equippedEffect = (state.equippedEffect === id) ? '' : id;
             } else {
-                // Buy
                 if(state.coins >= cost) {
-                    if(confirm("Buy " + id + "?")) {
+                    if(confirm(`Buy ${id} for ${cost}?`)) {
                         state.coins -= cost;
                         state.inventory.push(id);
-                        state.equipped = id;
+                        if(type === 'pet') state.equippedPet = id;
+                        else state.equippedEffect = id;
                     }
-                } else {
-                    alert("Not enough coins.");
-                }
+                } else alert("Not enough coins.");
             }
             saveData(); updateUI(); renderShop();
         }
 
-        // --- SETTINGS & UTILS ---
         function toggleTheme() {
             state.theme = state.theme === 'dark' ? 'light' : 'dark';
             document.body.setAttribute('data-theme', state.theme);
             document.getElementById('theme-btn').innerText = state.theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode";
+            // Update Avatar colors dynamically
+            const bgCol = state.theme === 'dark' ? 'EBCB8B' : 'FF9F43';
+            const txtCol = state.theme === 'dark' ? '2C2F36' : 'FFFFFF';
+            if(state.avatar.includes('ui-avatars')) {
+                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=Student&background=${bgCol}&color=${txtCol}`;
+            }
             saveData();
         }
 
         function saveData() {
-            localStorage.setItem('sh17_xp', state.xp);
-            localStorage.setItem('sh17_lvl', state.lvl);
-            localStorage.setItem('sh17_coins', state.coins);
-            localStorage.setItem('sh17_sessions', state.sessions);
-            localStorage.setItem('sh17_inv', JSON.stringify(state.inventory));
-            localStorage.setItem('sh17_eq', state.equipped);
-            localStorage.setItem('sh17_av', state.avatar);
-            localStorage.setItem('sh17_theme', state.theme);
+            localStorage.setItem('sh19_xp', state.xp);
+            localStorage.setItem('sh19_lvl', state.lvl);
+            localStorage.setItem('sh19_coins', state.coins);
+            localStorage.setItem('sh19_sessions', state.sessions);
+            localStorage.setItem('sh19_tasks_c', state.tasksCompleted);
+            localStorage.setItem('sh19_streak', state.streak);
+            localStorage.setItem('sh19_last_login', state.lastLogin);
+            localStorage.setItem('sh19_inv', JSON.stringify(state.inventory));
+            localStorage.setItem('sh19_todos', JSON.stringify(state.todos));
+            localStorage.setItem('sh19_ach', JSON.stringify(state.unlockedAch));
+            localStorage.setItem('sh19_fx', state.equippedEffect);
+            localStorage.setItem('sh19_pet', state.equippedPet);
+            localStorage.setItem('sh19_av', state.avatar);
+            localStorage.setItem('sh19_theme', state.theme);
         }
 
         function resetData() {
-            if(confirm("This will delete all progress, notes, and coins. Are you sure?")) {
-                localStorage.clear();
-                location.reload();
+            if(confirm("Factory Reset? This cannot be undone.")) { localStorage.clear(); location.reload(); }
+        }
+        function uploadAvatar(inp) {
+            if(inp.files && inp.files[0]) {
+                const r = new FileReader();
+                r.onload = e => { state.avatar = e.target.result; document.getElementById('user-avatar').src=state.avatar; saveData(); };
+                r.readAsDataURL(inp.files[0]);
             }
         }
+        function c(v) { const s = document.getElementById('calc-screen'); if(v==='C') s.value=''; else if(v==='=') try{s.value=eval(s.value)}catch{} else s.value+=v; }
 
-        // Calculator
-        function c(v) {
-            const s = document.getElementById('calc-screen');
-            if(v==='C') s.value='';
-            else if(v==='=') try { s.value=eval(s.value); } catch{}
-            else s.value+=v;
-        }
-
-        // Start
         window.onload = init;
     </script>
 </body>
