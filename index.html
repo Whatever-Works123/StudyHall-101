@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall v21</title>
+    <title>StudyHall v22</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -133,6 +133,8 @@
             </div>
 
             <div id="register-form" class="hidden">
+                <input type="text" id="reg-name" class="auth-input" placeholder="Choose a Username">
+                
                 <input type="email" id="reg-email" class="auth-input" placeholder="Email">
                 <input type="password" id="reg-pass" class="auth-input" placeholder="Password">
                 <button class="btn btn-primary btn-full" onclick="register()">Sign Up</button>
@@ -159,7 +161,7 @@
                     <img src="" id="user-avatar" class="avatar-img">
                 </div>
                 <div class="user-info">
-                    <div class="user-name">Student</div>
+                    <div class="user-name" id="sidebar-name">Student</div>
                     <div class="user-coins"><i class="fas fa-coins"></i> <span id="coin-display">0</span></div>
                 </div>
             </div>
@@ -272,15 +274,17 @@
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
                 document.getElementById('app-screen').style.display = 'flex';
-                document.getElementById('uid-display').innerText = user.email;
+                document.getElementById('uid-display').innerText = window.state.username || user.email;
 
                 // Load Data
                 onValue(dbRef, (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
                         window.state = { ...window.state, ...data };
+                        // Backwards compatibility
                         if(!window.state.inventory) window.state.inventory = ['pet_dog'];
                         if(!window.state.todos) window.state.todos = [];
+                        if(!window.state.username) window.state.username = "Student";
                         
                         // Render
                         window.renderShop();
@@ -289,7 +293,7 @@
                         document.body.setAttribute('data-theme', window.state.theme || 'light');
                         document.getElementById('notepad').value = window.state.notes || '';
                     } else {
-                        window.saveData(); // Save defaults for new user
+                        // Data might not be there instantly on creation, wait for register func to set it
                     }
                 });
                 window.init();
@@ -304,10 +308,25 @@
 
         // AUTH FUNCTIONS
         window.register = async () => {
+            const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-pass').value;
+
+            if(!name) {
+                document.getElementById('auth-error').innerText = "Please enter a username.";
+                return;
+            }
+
             try {
-                await createUserWithEmailAndPassword(auth, email, pass);
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                // Create initial DB state immediately
+                const newUserState = {
+                    username: name,
+                    xp: 0, lvl: 1, coins: 0, streak: 1, lastLogin: new Date().toDateString(),
+                    inventory: ['pet_dog'], equippedPet: 'pet_dog', 
+                    theme: 'light', todos: [], notes: ''
+                };
+                await set(ref(db, 'users/' + cred.user.uid), newUserState);
             } catch (e) { document.getElementById('auth-error').innerText = e.message; }
         };
 
@@ -328,6 +347,7 @@
 
     <script>
         window.state = {
+            username: 'Student',
             xp: 0, lvl: 1, coins: 0, streak: 1, lastLogin: '',
             inventory: ['pet_dog'], equippedPet: 'pet_dog', 
             theme: 'light', todos: [], notes: ''
@@ -358,7 +378,8 @@
             
             // Set Avatar
             const bg = window.state.theme === 'light' ? 'E5E7EB' : '374151';
-            if(!window.state.avatar) document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=St&background=${bg}&color=9CA3AF`;
+            const nameParam = window.state.username || 'St';
+            if(!window.state.avatar) document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${nameParam}&background=${bg}&color=9CA3AF`;
             else document.getElementById('user-avatar').src = window.state.avatar;
         }
 
@@ -381,11 +402,17 @@
                 document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
                 btn.classList.add('active');
             }
-            const t = {'home':'Dashboard','notes':'Notes','focus':'Focus Timer','shop':'Market','settings':'Settings'};
-            document.getElementById('page-title').innerText = t[id];
+            const t = {'home':`Hello, ${window.state.username}`,'notes':'Notes','focus':'Focus Timer','shop':'Market','settings':'Settings'};
+            document.getElementById('page-title').innerText = t[id] || t['home'];
         }
 
         window.updateUI = function() {
+            // Update Name in Sidebar
+            document.getElementById('sidebar-name').innerText = window.state.username;
+            if(document.getElementById('page-title').innerText.includes('Hello')) {
+                document.getElementById('page-title').innerText = `Hello, ${window.state.username}`;
+            }
+
             document.getElementById('lvl-display').innerText = "LVL " + window.state.lvl;
             document.getElementById('xp-text').innerText = `${window.state.xp} / ${window.state.lvl * 500}`;
             document.getElementById('xp-bar').style.width = `${(window.state.xp / (window.state.lvl*500)) * 100}%`;
@@ -491,7 +518,12 @@
         window.toggleTheme = () => {
             window.state.theme = window.state.theme === 'light' ? 'dark' : 'light';
             document.body.setAttribute('data-theme', window.state.theme);
-            window.saveData(); window.updateUI(); window.init();
+            const bg = window.state.theme === 'light' ? 'E5E7EB' : '374151';
+            const nameParam = window.state.username || 'St';
+            if(window.state.avatar.includes('ui-avatars')) {
+                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${nameParam}&background=${bg}&color=9CA3AF`;
+            }
+            window.saveData(); window.updateUI();
         }
         window.uploadAvatar = (inp) => {
             const r = new FileReader();
