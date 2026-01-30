@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall Focus</title>
+    <title>StudyHall Focus v9</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,8 +24,6 @@
             --border: #e2e8f0;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             --status-bg: #f1f5f9;
-            --danger: #ef4444;
-            --success: #22c55e;
         }
 
         [data-theme="dark"] {
@@ -217,7 +215,7 @@
         <div id="radio-room" class="section">
             <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
                 <h3><i class="fas fa-broadcast-tower"></i> Radio Room</h3>
-                <p style="color:var(--text-secondary); margin-bottom: 30px;">Unblockable Streams (GitHub) & Audio Generators.</p>
+                <p style="color:var(--text-secondary); margin-bottom: 30px;">Unblockable Streams (CDN) & Audio Generators.</p>
                 
                 <div class="radio-container">
                     <div class="record-player" id="record-player">
@@ -255,7 +253,7 @@
 
         <div id="notebook-view" class="section">
             <textarea id="current-note" oninput="handleNoteInput()" placeholder="Start typing your notes here..."></textarea>
-            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">* Notes are automatically synced to Firebase.</p>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">* Notes are automatically synced to Cloud.</p>
         </div>
 
         <div id="todos" class="section">
@@ -309,14 +307,14 @@
                     </div>
                 </div>
                 <div style="margin-top: 20px;">
-                    <span style="font-weight: 500;">Your Cloud ID</span>
-                    <p style="font-size:0.8rem; color:var(--text-secondary);">Use this ID to access notes on other devices.</p>
-                    <input type="text" id="user-id-display" readonly style="width:100%; padding:10px; background:var(--bg-color); border:1px solid var(--border); border-radius:6px; color:var(--text-primary);">
+                    <span style="font-weight: 500;">Your Cloud ID (Recovery)</span>
+                    <p style="font-size:0.8rem; color:var(--text-secondary);">If you lose your notes, paste your old ID here to recover them.</p>
+                    <input type="text" id="user-id-display" style="width:100%; padding:10px; background:var(--bg-color); border:1px solid var(--border); border-radius:6px; color:var(--text-primary); font-family:monospace;">
                 </div>
                 <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
                     <span style="font-weight: 500;">Data</span>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Clear all notes and schedule data?</p>
-                    <button class="btn btn-danger" onclick="clearData()">Reset App Data</button>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Clear all local notes and schedule data?</p>
+                    <button class="btn btn-danger" onclick="clearData()">Reset Local Data</button>
                 </div>
             </div>
         </div>
@@ -359,8 +357,9 @@
 
         // --- 3. UNBLOCKABLE AUDIO SOURCES ---
         const stations = {
-            lofi: "https://raw.githubusercontent.com/sasi-k/lofi-player/master/public/music/1.mp3",
-            piano: "https://raw.githubusercontent.com/josephernest/BigSound/master/examples/mp3/02.mp3",
+            // Using fastly.jsdelivr.net to bypass MIME-type sniffing blocks on school networks
+            lofi: "https://fastly.jsdelivr.net/gh/sasi-k/lofi-player/public/music/1.mp3",
+            piano: "https://fastly.jsdelivr.net/gh/josephernest/BigSound/master/examples/mp3/02.mp3",
             rain: "generate:rain",
             noise: "generate:brown"
         };
@@ -378,7 +377,17 @@
                 localStorage.setItem('study_user_id', userId);
             }
             const userDisplay = document.getElementById('user-id-display');
-            if(userDisplay) userDisplay.value = userId;
+            if(userDisplay) {
+                userDisplay.value = userId;
+                // Allow ID Recovery
+                userDisplay.addEventListener('change', (e) => {
+                    const newId = e.target.value.trim();
+                    if(newId.length > 5 && confirm("Switch to User ID: "+newId+"? This will load that user's notes.")) {
+                        localStorage.setItem('study_user_id', newId);
+                        location.reload();
+                    }
+                });
+            }
 
             updateClock();
             setInterval(updateClock, 1000);
@@ -443,12 +452,12 @@
                 status.innerText = "⚡ Generating " + type + " (Local)";
                 status.style.color = "var(--accent)";
             } else {
-                status.innerText = "⌛ Buffering from GitHub...";
+                status.innerText = "⌛ Buffering...";
                 status.style.color = "var(--text-secondary)";
                 audioEl.src = source;
                 audioEl.volume = document.querySelector('input[type=range]').value;
                 audioEl.play().then(_ => {
-                    status.innerText = "✅ Playing (GitHub Source)";
+                    status.innerText = "✅ Playing (Unblocked)";
                     status.style.color = "var(--success)";
                 }).catch(error => {
                     status.innerText = "⚠️ Network Blocked. Try 'Brown Noise'.";
@@ -683,7 +692,14 @@
                     const el = document.getElementById('timer-display');
                     if(!el) return;
                     let [m, s] = el.innerText.split(':').map(Number);
-                    if(s===0) { if(m===0) { clearInterval(tmr); return; } m--; s=59; } else s--;
+                    if(s===0 && m===0) { 
+                         // TIMER FINISHED LOGIC
+                         clearInterval(tmr); tmr = null;
+                         if(btn) { btn.innerText = "Start"; btn.classList.remove('btn-danger'); }
+                         alert("Time's up!");
+                         return;
+                    }
+                    if(s===0) { m--; s=59; } else s--;
                     el.innerText = `${m}:${s<10?'0'+s:s}`;
                 }, 1000);
             }
@@ -696,7 +712,7 @@
             if(btn) btn.innerText="Start"; 
             if(btn) btn.classList.remove('btn-danger'); 
         }
-        function clearData() { if(confirm("Delete all notes and todos?")) { localStorage.clear(); location.reload(); } }
+        function clearData() { if(confirm("Delete all notes?")) { localStorage.clear(); location.reload(); } }
 
         window.onload = init;
     </script>
