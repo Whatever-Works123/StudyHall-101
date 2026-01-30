@@ -3,2109 +3,668 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall 101</title>
+    <title>StudyHall OS Ultimate</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
     <style>
-        /* --- CSS VARIABLES --- */
+        /* =========================================
+           1. CORE VARIABLES (StudyHall Theme)
+           ========================================= */
         :root {
-            --bg-color: #f1f5f9;
-            --sidebar-bg: rgba(255, 255, 255, 0.95);
+            --bg-color: #f8fafc;
+            --sidebar-bg: #ffffff;
             --card-bg: #ffffff;
             --text-primary: #0f172a;
             --text-secondary: #64748b;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
+            --accent: #4f46e5; /* Indigo */
+            --accent-hover: #4338ca;
             --border: #e2e8f0;
+            --danger: #ef4444;
             --success: #10b981;
-            --red-day: #ef4444;
-            --green-day: #10b981;
+            --radius: 12px;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            --radius: 16px;
+            --font-main: 'Inter', sans-serif;
         }
 
-        [data-theme="dark"] {
-            --bg-color: #000000;
-            --sidebar-bg: #121212;
-            --card-bg: #121212;
-            --text-primary: #f8fafc;
-            --text-secondary: #a8a29e;
-            --accent: #6366f1;
-            --border: #262626;
-            --shadow: none;
-        }
-
-        body.mode-school .fun-only { display: none !important; }
-        body.mode-fun .school-only { display: none !important; }
-        
+        /* Fun Mode Variables (Neon/Dark Theme) */
         body.mode-fun {
-            --bg-color: #000000;
-            --sidebar-bg: #000000;
-            --card-bg: #121212;
-            --text-primary: #f5f5f5;
-            --text-secondary: #a3a3a3;
-            --accent: #a855f7;
-            --border: #333333;
+            --bg-color: #0f172a;
+            --sidebar-bg: #1e293b;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #d946ef; /* Fuchsia */
+            --accent-hover: #c026d3;
+            --border: #334155;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { display: flex; height: 100vh; background-color: var(--bg-color); color: var(--text-primary); transition: background 0.3s; overflow: hidden; }
+        /* =========================================
+           2. GLOBAL RESET & LAYOUT
+           ========================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-main); }
         
-        /* --- UI COMPONENTS --- */
-        .btn { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 0.9rem; }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
-        
-        input, textarea, select {
-            background: var(--bg-color); border: 1px solid var(--border);
-            color: var(--text-primary); padding: 12px; border-radius: 8px;
-            outline: none; transition: 0.2s; width: 100%; font-size: 0.95rem;
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        input:focus, textarea:focus { border-color: var(--accent); }
 
-        /* --- SIDEBAR --- */
+        /* =========================================
+           3. SIDEBAR NAVIGATION
+           ========================================= */
         .sidebar {
-            width: 250px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 24px; transition: 0.3s; z-index: 100;
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            transition: 0.3s ease;
+            z-index: 50;
         }
-        .logo { font-size: 1.5rem; font-weight: 800; margin-bottom: 35px; color: var(--accent); display: flex; align-items: center; gap: 10px; }
-        .nav-btn {
-            background: none; border: none; color: var(--text-secondary);
-            padding: 12px 14px; text-align: left; cursor: pointer; border-radius: 10px;
-            margin-bottom: 4px; font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.2s;
-        }
-        .nav-btn:hover { background: var(--bg-color); color: var(--text-primary); }
-        .nav-btn.active { background: var(--accent); color: white; font-weight: 600; }
 
-        /* --- MAIN CONTENT --- */
-        .main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
-        .section { display: none; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-width: 1100px; margin: 0 auto; }
+        .brand {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            color: var(--text-secondary);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover { background-color: var(--bg-color); color: var(--text-primary); }
+        .nav-item.active { background-color: var(--accent); color: white; }
+        .nav-item i { width: 20px; text-align: center; }
+
+        .sidebar-footer { margin-top: auto; border-top: 1px solid var(--border); padding-top: 20px; }
+
+        /* =========================================
+           4. MAIN CONTENT AREA
+           ========================================= */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .section { display: none; animation: fadeIn 0.3s ease; }
         .section.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        header { margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        h1 { font-size: 1.8rem; font-weight: 700; }
+        h2 { font-size: 1.4rem; margin-bottom: 20px; }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
+
+        /* =========================================
+           5. DASHBOARD WIDGETS
+           ========================================= */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
         .card {
-            background: var(--card-bg); border-radius: var(--radius);
-            padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transition: 0.3s;
+        }
+
+        /* Timer Widget */
+        .timer-display {
+            font-size: 3.5rem;
+            font-weight: 800;
+            text-align: center;
+            color: var(--accent);
+            margin: 20px 0;
+            font-variant-numeric: tabular-nums;
+        }
+        .timer-controls { display: flex; justify-content: center; gap: 10px; }
+
+        /* =========================================
+           6. KANBAN BOARD (Tasks)
+           ========================================= */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            height: 60vh;
+        }
+        .kanban-col {
+            background: var(--bg-color);
+            padding: 16px;
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
             border: 1px solid var(--border);
         }
+        .kanban-header { font-weight: 700; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        .task-card {
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            border-left: 4px solid var(--accent);
+            font-size: 0.9rem;
+        }
+        .task-card:hover { transform: translateY(-2px); }
 
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .timer-circle {
-            width: 140px; height: 140px; border-radius: 50%;
-            border: 6px solid var(--border); border-top-color: var(--accent);
+        /* =========================================
+           7. MATH LAB (Calculator)
+           ========================================= */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+        .calc-display {
+            grid-column: span 4;
+            background: var(--bg-color);
+            padding: 20px;
+            text-align: right;
+            font-size: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+        .calc-btn {
+            padding: 15px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+        .calc-btn:hover { background: var(--bg-color); }
+        .calc-btn.op { background: var(--accent); color: white; border: none; }
+
+        /* =========================================
+           8. CHATTER BOX 3000 (Specific Styling)
+           ========================================= */
+        /* We scope this under .chatter-wrapper to protect its unique look */
+        .chatter-wrapper {
+            display: flex;
+            height: 75vh;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        
+        .cb-sidebar {
+            width: 280px;
+            background: #f1f5f9;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cb-header {
+            padding: 20px;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 700;
+            color: #4f46e5;
+        }
+        
+        .cb-contact {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .cb-contact:hover, .cb-contact.active { background: #e0e7ff; }
+        
+        .cb-avatar {
+            width: 40px; height: 40px;
+            background: #cbd5e1;
+            border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 2.2rem; font-weight: 700; margin: 0 auto 20px auto;
-            background: var(--bg-color); color: var(--text-primary);
+            font-weight: bold; color: #475569;
         }
-
-        /* --- TO-DO LIST --- */
-        .todo-item { background: var(--bg-color); padding: 14px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent); }
-        .todo-item.done { opacity: 0.6; text-decoration: line-through; border-left-color: var(--success); }
-
-        /* --- SCHEDULE & SETTINGS --- */
-        .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .class-input-group { margin-bottom: 10px; }
-        .class-input-group label { font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 4px; }
         
-        .schedule-day-card { border-left: 5px solid var(--border); padding-left: 15px; }
-        .schedule-day-card.red { border-left-color: var(--red-day); }
-        .schedule-day-card.green { border-left-color: var(--green-day); }
+        .cb-main { flex: 1; display: flex; flex-direction: column; background: #fff; }
         
-        .class-list-item { 
-            padding: 10px; border-bottom: 1px solid var(--border); 
-            display: flex; justify-content: space-between; align-items: center;
+        .cb-messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
-        .class-list-item:last-child { border-bottom: none; }
-        .period-badge { 
-            background: var(--bg-color); padding: 2px 8px; 
-            border-radius: 4px; font-size: 0.75rem; font-weight: 700; 
-        }
-
-        /* --- MATH & EDITOR --- */
-        .calc-wrapper { display: flex; gap: 20px; flex-wrap: wrap; }
-        .calc-body { width: 280px; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .calc-btn { padding: 15px; border-radius: 8px; font-size: 1.1rem; background: var(--bg-color); border: 1px solid var(--border); cursor: pointer; color: var(--text-primary); }
-        textarea.notes-area { height: 500px; line-height: 1.6; font-size: 1.05rem; background: var(--card-bg); border: 1px solid var(--border); padding: 30px; resize: vertical; }
-
-        /* --- FULLSCREEN GAMES --- */
-        .fullscreen-mode { position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 99999; padding: 0; margin: 0; display: flex; flex-direction: column; }
-        .fullscreen-mode iframe { width: 100%; height: 100%; border: none; }
-        iframe { width: 100%; height: 600px; border: none; border-radius: 12px; background: white; }
         
-        /* --- OVERLAYS --- */
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        .overlay-box { background: var(--card-bg); padding: 40px; border-radius: 24px; text-align: center; width: 500px; max-width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
-        #toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; opacity: 0; transition: 0.3s; font-weight: 600; pointer-events: none; z-index: 9999; }
+        .msg {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+        }
+        
+        .msg.received {
+            background: #e2e8f0;
+            color: #1e293b;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .msg.sent {
+            background: #4f46e5;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .cb-input-area {
+            padding: 20px;
+            background: #fff;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .cb-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 25px;
+            outline: none;
+        }
+        
+        .cb-send {
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cb-send:hover { transform: scale(1.05); }
+
     </style>
 </head>
-<body class="mode-school" data-theme="light">
-
-    <div id="login-overlay" class="overlay">
-        <div class="overlay-box" style="width: 380px;">
-            <h1 style="color: var(--accent); margin-bottom:10px;">StudyHall OS</h1>
-            <p style="color: var(--text-secondary); margin-bottom:25px;">Enter your workspace</p>
-            <input type="email" id="email" placeholder="Email" style="margin-bottom:10px;">
-            <input type="password" id="password" placeholder="Password" style="margin-bottom:20px;">
-            <button class="btn btn-primary" onclick="loginUser()" style="width:100%;">Enter Dashboard</button>
-            <p id="login-error" style="margin-top:15px; color:#ef4444; font-size:0.9rem;"></p>
-        </div>
-    </div>
-
-    <div id="schedule-overlay" class="overlay" style="display: none;">
-        <div class="overlay-box">
-            <h2 style="margin-bottom:10px;">📅 Setup Your Schedule</h2>
-            <p style="color: var(--text-secondary); margin-bottom:20px;">Enter your classes for Red and Green days.</p>
-            
-            <div class="schedule-grid" style="text-align: left;">
-                <div class="schedule-day-card red">
-                    <h4 style="color:#ef4444; margin-bottom:10px;">Red Day</h4>
-                    <div class="class-input-group"><label>1st Period</label><input type="text" id="setup-c1" placeholder="Class Name"></div>
-                    <div class="class-input-group"><label>2nd Period</label><input type="text" id="setup-c2" placeholder="Class Name"></div>
-                    <div class="class-input-group"><label>3rd Period</label><input type="text" id="setup-c3" placeholder="Class Name"></div>
-                    <div class="class-input-group"><label>4th Period</label><input type="text" id="setup-c4" placeholder="Class Name"></div>
-                </div>
-                <div class="schedule-day-card green">
-                    <h4 style="color:#10b981; margin-bottom:10px;">Green Day</h4>
-                    <div class="class-input-group"><label>5th Period</label><input type="text" id="setup-c5" placeholder="Class Name"></div>
-                    <div class="class-input-group"><label>6th Period</label><input type="text" id="setup-c6" placeholder="Class Name"></div>
-                    <div class="class-input-group"><label>7th Period</label><input type="text" id="setup-c7" placeholder="Class Name"></div>
-                    <div class="class-input-group"><label>8th Period</label><input type="text" id="setup-c8" placeholder="Class Name"></div>
-                </div>
-            </div>
-            
-            <button class="btn btn-primary" onclick="saveInitialSchedule()" style="width:100%; margin-top:20px;">Save Schedule</button>
-        </div>
-    </div>
-
-    <div id="toast">Saved automatically</div>
+<body>
 
     <nav class="sidebar">
-        <div class="logo">📘 StudyHall</div>
-        <div style="margin-bottom: 25px; padding: 15px; background: var(--bg-color); border-radius: 12px;">
-            <div id="user-display" style="font-weight:700; font-size:0.95rem;">Guest</div>
-            <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;">Student Mode</div>
+        <div class="brand">
+            <i class="fa-solid fa-graduation-cap"></i> StudyHall OS
         </div>
         
-        <button class="nav-btn school-only active" onclick="showSection('school-home')">🏠 Dashboard</button>
-        <button class="nav-btn school-only" onclick="showSection('todo')">✅ Tasks</button>
-        <button class="nav-btn school-only" onclick="showSection('math')">📐 Math Lab</button>
-        <button class="nav-btn school-only" onclick="showSection('science')">🧬 Science Lab</button>
-        <button class="nav-btn school-only" onclick="showSection('ela')">✍️ ELA Writer</button>
-        <button class="nav-btn school-only" onclick="showSection('history')">📜 History</button>
+        <div class="nav-item active" onclick="nav('dashboard', this)">
+            <i class="fa-solid fa-house"></i> Dashboard
+        </div>
+        <div class="nav-item" onclick="nav('kanban', this)">
+            <i class="fa-solid fa-list-check"></i> Tasks
+        </div>
+        <div class="nav-item" onclick="nav('math', this)">
+            <i class="fa-solid fa-calculator"></i> Math Lab
+        </div>
+        <div class="nav-item" onclick="nav('science', this)">
+            <i class="fa-solid fa-flask"></i> Science
+        </div>
+        <div class="nav-item" onclick="nav('chatter', this)">
+            <i class="fa-solid fa-comments"></i> Chatter Box
+        </div>
 
-        <button class="nav-btn fun-only" onclick="showSection('fun-home')">🎮 Secret Lounge</button>
-        <button class="nav-btn fun-only" onclick="showSection('games')">🕹️ Arcade</button>
-        <button class="nav-btn fun-only" onclick="showSection('chatterbox')">💬 ChatterBox</button>
-
-        <div style="margin-top:auto;">
-            <button class="nav-btn" onclick="showSection('settings')">⚙️ Settings</button>
-            <button class="nav-btn" onclick="logoutUser()" style="color:#ef4444;">🚪 Logout</button>
+        <div class="sidebar-footer">
+            <div class="nav-item" onclick="toggleMode()">
+                <i class="fa-solid fa-gamepad"></i> Fun Mode
+            </div>
+            <div class="nav-item" style="color: var(--danger);">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </div>
         </div>
     </nav>
 
     <main class="main-content">
-        
-        <div id="school-home" class="section active">
-            <header style="margin-bottom:35px;">
-                <h1 id="greeting">Welcome Back.</h1>
-                <p style="color:var(--text-secondary);">Your academic dashboard is ready.</p>
+
+        <section id="dashboard" class="section active">
+            <header>
+                <h1>Welcome Back, Student.</h1>
+                <p>Today is a great day to learn.</p>
+            </header>
+
+            <div class="grid-container">
+                <div class="card" style="text-align: center;">
+                    <h3><i class="fa-regular fa-clock"></i> Focus Timer</h3>
+                    <div class="timer-display" id="timer">25:00</div>
+                    <div class="timer-controls">
+                        <button class="btn btn-primary" onclick="startTimer()">Start</button>
+                        <button class="btn btn-outline" onclick="pauseTimer()">Pause</button>
+                        <button class="btn btn-outline" onclick="resetTimer()">Reset</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fa-solid fa-chart-simple"></i> Quick Stats</h3>
+                    <div style="margin-top: 20px;">
+                        <p>Tasks Completed: <strong>12</strong></p>
+                        <div style="width:100%; height:8px; background:#e2e8f0; border-radius:4px; margin: 8px 0 20px 0;">
+                            <div style="width:70%; height:100%; background:var(--accent); border-radius:4px;"></div>
+                        </div>
+                        <p>Study Hours: <strong>4.5 hrs</strong></p>
+                        <div style="width:100%; height:8px; background:#e2e8f0; border-radius:4px; margin: 8px 0;">
+                            <div style="width:40%; height:100%; background:var(--success); border-radius:4px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fa-solid fa-pencil"></i> Scratchpad</h3>
+                    <textarea style="width:100%; height:150px; border:1px solid var(--border); border-radius:8px; padding:10px; margin-top:10px; background:var(--bg-color); color:var(--text-primary);" placeholder="Type a quick note here..."></textarea>
+                </div>
+            </div>
+        </section>
+
+        <section id="kanban" class="section">
+            <header>
+                <h1>Task Management</h1>
+                <button class="btn btn-primary" onclick="addTaskPrompt()">+ New Task</button>
             </header>
             
-            <div class="dashboard-grid">
-                <div class="card" style="grid-row: span 2;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h3>Today's Schedule</h3>
+            <div class="kanban-board">
+                <div class="kanban-col" id="col-todo">
+                    <div class="kanban-header">To Do <span style="background:#e2e8f0; padding:2px 8px; border-radius:10px; font-size:0.8rem;">3</span></div>
+                    <div class="task-card" onclick="moveTask(this)">Read Chapter 4 History</div>
+                    <div class="task-card" onclick="moveTask(this)">Math Worksheet #12</div>
+                    <div class="task-card" onclick="moveTask(this)">Email Professor</div>
+                </div>
+                <div class="kanban-col" id="col-doing">
+                    <div class="kanban-header">In Progress <span style="background:#e2e8f0; padding:2px 8px; border-radius:10px; font-size:0.8rem;">1</span></div>
+                    <div class="task-card" onclick="moveTask(this)">Biology Lab Report</div>
+                </div>
+                <div class="kanban-col" id="col-done">
+                    <div class="kanban-header">Done <span style="background:#e2e8f0; padding:2px 8px; border-radius:10px; font-size:0.8rem;">5</span></div>
+                    <div class="task-card" style="opacity:0.6; text-decoration:line-through;" onclick="moveTask(this)">Register for classes</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="math" class="section">
+            <header><h1>Math Laboratory</h1></header>
+            <div class="card" style="max-width: 500px; margin: 0 auto;">
+                <div class="calc-display" id="calc-screen">0</div>
+                <div class="calc-grid">
+                    <button class="calc-btn" onclick="calcInput('C')">C</button>
+                    <button class="calc-btn" onclick="calcInput('(')">(</button>
+                    <button class="calc-btn" onclick="calcInput(')')">)</button>
+                    <button class="calc-btn op" onclick="calcInput('/')">÷</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('7')">7</button>
+                    <button class="calc-btn" onclick="calcInput('8')">8</button>
+                    <button class="calc-btn" onclick="calcInput('9')">9</button>
+                    <button class="calc-btn op" onclick="calcInput('*')">×</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('4')">4</button>
+                    <button class="calc-btn" onclick="calcInput('5')">5</button>
+                    <button class="calc-btn" onclick="calcInput('6')">6</button>
+                    <button class="calc-btn op" onclick="calcInput('-')">-</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('1')">1</button>
+                    <button class="calc-btn" onclick="calcInput('2')">2</button>
+                    <button class="calc-btn" onclick="calcInput('3')">3</button>
+                    <button class="calc-btn op" onclick="calcInput('+')">+</button>
+                    
+                    <button class="calc-btn" style="grid-column: span 2;" onclick="calcInput('0')">0</button>
+                    <button class="calc-btn" onclick="calcInput('.')">.</button>
+                    <button class="calc-btn op" onclick="calcInput('=')">=</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="science" class="section">
+            <header><h1>Science Unit Converter</h1></header>
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                    <div>
+                        <label>Value</label>
+                        <input type="number" id="convert-input" placeholder="0" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; margin-top:5px;">
+                    </div>
+                    <div>
+                        <label>Result</label>
+                        <input type="text" id="convert-result" readonly style="width:100%; padding:10px; background:var(--bg-color); border:1px solid var(--border); border-radius:8px; margin-top:5px;">
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button class="btn btn-primary" onclick="convert('c2f')">Celsius to Fahrenheit</button>
+                    <button class="btn btn-primary" onclick="convert('f2c')">Fahrenheit to Celsius</button>
+                    <button class="btn btn-outline" onclick="convert('km2mi')">Km to Miles</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="chatter" class="section">
+            <div class="chatter-wrapper">
+                <div class="cb-sidebar">
+                    <div class="cb-header">Chatter Box 3000</div>
+                    <div class="cb-contact active">
+                        <div class="cb-avatar" style="background: #4f46e5; color: white;">GC</div>
                         <div>
-                            <button class="btn btn-outline" style="font-size:0.75rem; color:#ef4444; border-color:#ef4444;" onclick="renderSchedule('red')">Red</button>
-                            <button class="btn btn-outline" style="font-size:0.75rem; color:#10b981; border-color:#10b981;" onclick="renderSchedule('green')">Green</button>
+                            <div style="font-weight:600; font-size:0.9rem;">General Chat</div>
+                            <div style="font-size:0.75rem; color:#64748b;">Online now</div>
                         </div>
                     </div>
-                    <div id="schedule-display-list">
-                        <p style="color:var(--text-secondary); text-align:center; padding:20px;">Loading schedule...</p>
-                    </div>
-                </div>
-
-                <div class="card" style="text-align:center;">
-                    <h3>Focus Timer</h3>
-                    <div class="timer-circle" id="timer-ui"><span id="timer-display">25:00</span></div>
-                    <div style="margin-top:20px;">
-                        <button class="btn btn-primary" onclick="toggleTimer()">Start / Pause</button>
-                        <button class="btn" onclick="resetTimer()">Reset</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>At a Glance</h3>
-                    <ul id="mini-todo-list" style="list-style:none; margin-top:15px; padding-left:0;">
-                        <li style="color:var(--text-secondary);">No pending tasks.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="todo" class="section">
-            <div class="card">
-                <h2>Assignment Tracker</h2>
-                <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <input type="text" id="newTodo" placeholder="Add a new task...">
-                    <button class="btn btn-primary" onclick="addTodo()">Add</button>
-                </div>
-                <div id="todoList"></div>
-            </div>
-        </div>
-
-        <div id="math" class="section">
-            <h2>Mathematics Laboratory</h2>
-            <div class="calc-wrapper">
-                <div class="card calc-body">
-                    <input type="text" id="calcDisplay" readonly style="margin-bottom:15px; text-align:right; font-size:1.5rem; font-family:monospace; font-weight:600;">
-                    <div class="calc-grid">
-                        <button class="calc-btn" onclick="calc('sin(')">sin</button>
-                        <button class="calc-btn" onclick="calc('cos(')">cos</button>
-                        <button class="calc-btn" onclick="calc('tan(')">tan</button>
-                        <button class="calc-btn" onclick="calc('C')" style="background:#fee2e2; color:#ef4444;">AC</button>
-                        <button class="calc-btn" onclick="calc('sqrt(')">√</button>
-                        <button class="calc-btn" onclick="calc('pow(')">^</button>
-                        <button class="calc-btn" onclick="calc('(')">(</button>
-                        <button class="calc-btn" onclick="calc(')')">)</button>
-                        <button class="calc-btn" onclick="calc('7')">7</button>
-                        <button class="calc-btn" onclick="calc('8')">8</button>
-                        <button class="calc-btn" onclick="calc('9')">9</button>
-                        <button class="calc-btn op" onclick="calc('/')">÷</button>
-                        <button class="calc-btn" onclick="calc('4')">4</button>
-                        <button class="calc-btn" onclick="calc('5')">5</button>
-                        <button class="calc-btn" onclick="calc('6')">6</button>
-                        <button class="calc-btn op" onclick="calc('*')">×</button>
-                        <button class="calc-btn" onclick="calc('1')">1</button>
-                        <button class="calc-btn" onclick="calc('2')">2</button>
-                        <button class="calc-btn" onclick="calc('3')">3</button>
-                        <button class="calc-btn op" onclick="calc('-')">-</button>
-                        <button class="calc-btn" onclick="calc('0')">0</button>
-                        <button class="calc-btn" onclick="calc('.')">.</button>
-                        <button class="calc-btn" onclick="calc('PI')">π</button>
-                        <button class="calc-btn op" onclick="calc('=')">=</button>
-                    </div>
-                </div>
-                <div class="card" style="flex:1;">
-                    <h3>Notes & Formulas</h3>
-                    <textarea id="note-math" class="notes-area" oninput="saveData('math')" placeholder="Write your formulas here..."></textarea>
-                </div>
-            </div>
-        </div>
-
-        <div id="science" class="section">
-            <h2>Science Laboratory</h2>
-            <div class="card">
-                <h3>Lab Report</h3>
-                <textarea id="note-science" class="notes-area" oninput="saveData('science')" placeholder="Draft your lab report here..."></textarea>
-            </div>
-        </div>
-
-        <div id="ela" class="section">
-            <h2>Writing Studio</h2>
-            <div class="card">
-                <textarea id="note-ela" class="notes-area" oninput="saveData('ela'); countWords('note-ela', 'ela-count')" placeholder="Start your essay..."></textarea>
-                <div style="text-align:right; margin-top:8px; font-size:0.85rem; color:var(--text-secondary);" id="ela-count">0 words</div>
-            </div>
-        </div>
-
-        <div id="history" class="section">
-            <h2>History Archives</h2>
-            <div class="card">
-                <textarea id="note-history" class="notes-area" oninput="saveData('history'); countWords('note-history', 'hist-count')" placeholder="Record historical events..."></textarea>
-                <div style="text-align:right; margin-top:8px; font-size:0.85rem; color:var(--text-secondary);" id="hist-count">0 words</div>
-            </div>
-        </div>
-
-        <div id="fun-home" class="section">
-            <h2>Secret Lounge</h2>
-            <p style="color:var(--text-secondary);">Welcome to the unlocked zone.</p>
-        </div>
-
-        <div id="games" class="section">
-            <h2>Arcade</h2>
-            <div class="dashboard-grid">
-                <div class="card" style="text-align:center;"><h3>Geometry Dash</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('geo-dash-code')">Play</button></div>
-                <div class="card" style="text-align:center;"><h3>Drive Mad</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('drive-mad-code')">Play</button></div>
-                <div class="card" style="text-align:center;"><h3>Snake</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('snake-code')">Play</button></div>
-                <div class="card" style="text-align:center;"><h3>Breakout</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('breakout-code')">Play</button></div>
-                <div class="card" style="text-align:center;"><h3>Pong</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('pong-code')">Play</button></div>
-                <div class="card" style="text-align:center;"><h3>2048</h3><button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="loadGame('2048-code')">Play</button></div>
-            </div>
-            <div id="game-container" class="card" style="padding:0; overflow:hidden; margin-top:20px;">
-                <button class="btn btn-danger" style="position:absolute; top:10px; right:10px; z-index:100; display:none;" id="exit-game-fs" onclick="exitFullGame()">Exit Fullscreen</button>
-                <iframe id="game-frame" src=""></iframe>
-            </div>
-        </div>
-
-                <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-            <meta name="apple-mobile-web-app-capable" content="yes">
-            <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-            <title>Chatter Box 3000</title>
-            <style>
-                /* --- 1. Global Reset & Variables --- */
-                * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-                
-                :root { 
-                    --bg: #f0f2f5; --side: #ffffff; --text: #1c1e21; --accent: #0084ff; 
-                    --border: #e4e6eb; --card: #ffffff; --subtext: #65676b; --danger: #ff3b30;
-                    --input-bg: #ffffff; --msg-received: #e4e6eb; --shadow: rgba(0,0,0,0.05); --msg-fs: 15px;
-                }
-        
-                body.dark-mode {
-                    --bg: #121212; --side: #1e1e1e; --text: #ffffff; --border: #2f2f2f;     
-                    --card: #1e1e1e; --subtext: #bbbbbb; --danger: #ff6b6b; --input-bg: #2d2d2d;   
-                    --msg-received: #2d2d2d; --shadow: rgba(0,0,0,0.3);
-                }
-        
-                .sidebar, .content-container, .list-item, .chat-header, .chat-msgs, input, textarea, .modal-box, .action-menu, .emoji-picker, #context-menu {
-                    transition: background-color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), color 0.4s ease, border-color 0.4s ease;
-                }
-        
-                .content-container, .chat-msgs, .user-select-list, .modal-box, #edit-members-list, .emoji-picker {
-                    -webkit-overflow-scrolling: touch; 
-                }
-        
-                body { 
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-                    margin: 0; display: flex; height: 100vh; height: 100dvh; 
-                    background: var(--bg); color: var(--text); overflow: hidden; overscroll-behavior-y: none;
-                }
-        
-                input, textarea { 
-                    width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); 
-                    border-radius: 12px; background: var(--bg); font-size: 16px; color: var(--text);
-                    appearance: none; -webkit-appearance: none;
-                }
-                body.dark-mode input, body.dark-mode textarea {
-                    background-color: var(--input-bg) !important; color: white !important; border: 1px solid #444;
-                }
-        
-                .sidebar { 
-                    width: 280px; background: var(--side); border-right: 1px solid var(--border); display: none; 
-                    flex-direction: column; padding: 20px; flex-shrink: 0; z-index: 50; 
-                }
-                .app-title { font-size: 26px; font-weight: 800; color: #FF8C42; margin-bottom: 30px; font-style: italic; letter-spacing: -1px; }
-                
-                .menu-item { 
-                    display: flex; align-items: center; gap: 15px; padding: 12px 15px; border-radius: 10px; 
-                    cursor: pointer; margin-bottom: 8px; font-weight: 600; color: var(--subtext); transition: 0.2s; position: relative; 
-                }
-                .menu-item:hover { background: rgba(0,0,0,0.05); }
-                .menu-item.active { background: rgba(0,0,0,0.05); color: var(--accent); } 
-                
-                .notif-dot { display: none; width: 10px; height: 10px; background: #ff3b30; border-radius: 50%; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); }
-        
-                .main-viewport { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; padding: 20px; position: relative; }
-                .content-container { 
-                    width: 100%; max-width: 600px; background: var(--card); border-radius: 16px; box-shadow: 0 4px 20px var(--shadow); 
-                    height: 85vh; overflow-y: auto; position: relative;
-                }
-                .content-container::-webkit-scrollbar { display: none; }
-                .content-container { -ms-overflow-style: none; scrollbar-width: none; }
-        
-                /* --- LIST & CARD STYLING --- */
-                .list-item { 
-                    display: flex; align-items: center; padding: 12px 15px; cursor: pointer; border: 1px solid transparent; 
-                    margin: 5px 10px; border-radius: 12px; background: var(--card); transition: all 0.2s ease; 
-                    box-shadow: 0 1px 3px var(--shadow);
-                }
-                .list-item:hover { background: var(--bg); transform: translateY(-1px); box-shadow: 0 4px 8px var(--shadow); }
-                .list-item:active { transform: scale(0.98); background: var(--border); } 
-                
-                .list-item-content { 
-                    margin-left: 15px; flex: 1; display: flex; flex-direction: column; overflow: hidden; 
-                }
-                .list-item-content b { font-size: 16px; margin-bottom: 3px; }
-                .list-item-content span { 
-                    font-size: 13px; color: var(--subtext); 
-                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-                }
-                .list-item.unread { border-left: 4px solid var(--accent); background: var(--msg-received); }
-                
-                .user-select-list { 
-                    flex:1; overflow-y:auto; margin:10px 0; border:1px solid var(--border); border-radius:12px; min-height: 150px; padding: 5px;
-                }
-                .user-check-item { 
-                    display:flex; align-items:center; padding:10px; border-radius: 8px; cursor:pointer; transition: background 0.2s; margin-bottom: 2px;
-                }
-                .user-check-item:hover { background: var(--bg); }
-                .user-check-item input[type="checkbox"] { 
-                    width: 20px; height: 20px; margin: 0 15px 0 0; cursor: pointer; border-radius: 4px; accent-color: var(--accent);
-                }
-                .user-check-item span { font-weight: 500; font-size: 15px; }
-        
-                .avatar { 
-                    width: 50px; height: 50px; border-radius: 50%; background-size: cover; background-position: center; 
-                    background-color: var(--border); display: flex; align-items: center; justify-content: center; 
-                    color: var(--subtext); font-weight: bold; font-size: 20px; flex-shrink: 0; border: 2px solid transparent; position: relative; 
-                }
-                .online-dot { width: 13px; height: 13px; background-color: #31a24c; border: 2px solid var(--card); border-radius: 50%; position: absolute; bottom: -2px; right: -2px; z-index: 10; }
-        
-                #chat-window { 
-                    position: fixed; top: 0; right: -100%; bottom: 0; width: 100%; max-width: 450px; 
-                    background: var(--card); border-left: 1px solid var(--border); transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-                    z-index: 1000; display: flex; flex-direction: column; box-shadow: -5px 0 20px var(--shadow); 
-                }
-                #chat-window.open { right: 0; }
-                
-                .chat-header { 
-                    padding: 15px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--card); 
-                    padding-top: max(15px, env(safe-area-inset-top));
-                }
-                .chat-msgs { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
-                
-                .msg-bubble { 
-                    padding: 10px 16px; border-radius: 20px; max-width: 75%; font-size: var(--msg-fs); line-height: 1.4; word-wrap: break-word; 
-                    position: relative; user-select: text; cursor: context-menu; 
-                }
-                .msg-time { font-size: 10px; opacity: 0.7; margin-top: 4px; display: block; text-align: right; }
-                .sys-msg { text-align: center; font-size: 12px; color: var(--subtext); margin: 10px 0; font-style: italic; }
-        
-                #context-menu {
-                    position: fixed; z-index: 10000; background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-                    box-shadow: 0 4px 12px var(--shadow); display: none; flex-direction: column; width: 150px; overflow: hidden; animation: fadeIn 0.1s ease;
-                }
-                .ctx-item { padding: 10px 15px; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text); }
-                .ctx-item:hover { background: var(--bg); }
-                .ctx-item.danger { color: var(--danger); }
-                .ctx-item.danger:hover { background: #ffe5e5; }
-        
-                .action-menu {
-                    position: absolute; left: 15px; width: 200px; background: var(--card); border-radius: 12px; box-shadow: 0 5px 20px var(--shadow);
-                    display: none; flex-direction: column; overflow: hidden; z-index: 1100; border: 1px solid var(--border);
-                    bottom: calc(80px + env(safe-area-inset-bottom));
-                }
-                .action-menu.active { display: flex; animation: menuPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-                .action-item { padding: 12px 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 15px; color: var(--text); transition: background 0.2s; border-bottom: 1px solid var(--border); }
-                .action-item:last-child { border-bottom: none; }
-                .action-item:hover { background: var(--bg); }
-                .action-icon { width: 30px; height: 30px; background: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-                
-                .emoji-picker {
-                    position: absolute; left: 15px; width: 300px; height: 250px; background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-                    box-shadow: 0 5px 20px var(--shadow); display: none; grid-template-columns: repeat(6, 1fr); overflow-y: auto; padding: 10px; gap: 5px; z-index: 1100;
-                    bottom: calc(80px + env(safe-area-inset-bottom));
-                }
-                .emoji-picker.active { display: grid; animation: menuPop 0.2s ease-out; }
-                .emoji-btn { font-size: 24px; cursor: pointer; text-align: center; padding: 5px; border-radius: 5px; transition: background 0.2s; }
-                .emoji-btn:hover { background: var(--bg); }
-        
-                @keyframes menuPop { from { transform: scale(0.9); opacity: 0; transform-origin: bottom left; } to { transform: scale(1); opacity: 1; transform-origin: bottom left; } }
-        
-                .typing-indicator {
-                    padding: 12px 16px; background: var(--msg-received); border-radius: 20px; width: fit-content; margin: 5px 0 5px 10px; display: flex; align-items: center; gap: 5px; align-self: flex-start;
-                }
-                .typing-dot { width: 7px; height: 7px; background: #90949c; border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; }
-                .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-                .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-                @keyframes typingBounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
-        
-                #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-                .auth-box { background: var(--card); padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 10px 40px var(--shadow); text-align: center; }
-                .btn { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%; font-size: 16px; transition: 0.2s; }
-                .btn:active { transform: scale(0.98); }
-                .toggle-auth { margin-top: 15px; color: var(--accent); cursor: pointer; font-size: 14px; }
-                
-                .modal-overlay { position: fixed; inset:0; background:rgba(0,0,0,0.5); z-index: 1500; display:none; justify-content:center; align-items:center; }
-                .modal-box { background:white; width:90%; max-width:400px; padding:20px; border-radius:16px; display:flex; flex-direction:column; max-height: 85vh; overflow-y: auto; }
-                .member-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-                .kick-btn { background: #ffe5e5; color: red; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; margin-left: auto; display: flex; align-items: center; justify-content: center; }
-                
-                .settings-card { background: var(--card); padding: 15px; border-radius: 12px; box-shadow: 0 1px 2px var(--shadow); margin-bottom: 15px; }
-                .settings-header { font-size: 12px; font-weight: bold; color: var(--subtext); text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px 5px; }
-                .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
-                .color-options { display: flex; gap: 10px; }
-                .color-btn { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
-                .color-btn:hover { transform: scale(1.1); }
-                .color-btn.selected { border-color: var(--text); transform: scale(1.2); }
-        
-                .page { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-                @media (max-width: 768px) {
-                    .sidebar { 
-                        position: fixed; bottom: 0; left: 0; width: 100%; 
-                        height: calc(65px + env(safe-area-inset-bottom)); 
-                        padding-bottom: env(safe-area-inset-bottom);
-                        flex-direction: row; justify-content: space-around; padding-left: 0; padding-right: 0;
-                        border-right: none; border-top: 1px solid var(--border);
-                        display: flex !important; 
-                    }
-                    .app-title, #logout-btn { display: none; }
-                    .menu-item { flex-direction: column; gap: 2px; padding: 8px; margin: 0; background: transparent !important; font-size: 10px; justify-content: center; flex: 1; }
-                    .main-viewport { padding: 0; margin-left: 0; align-items: flex-start; }
-                    .content-container { border-radius: 0; box-shadow: none; height: 100vh; height: 100dvh; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
-                    #chat-window { max-width: 100%; }
-                    #mobile-logout-btn { display: block !important; margin-top: 40px; background: #ff3b30; color: white; }
-                }
-                #mobile-logout-btn { display: none; }
-            </style>
-        </head>
-        <body>
-        
-            <div id="context-menu">
-                <div class="ctx-item danger" id="ctx-delete-btn">🗑️ Delete Message</div>
-                <div class="ctx-item" onclick="document.getElementById('context-menu').style.display='none'">❌ Cancel</div>
-            </div>
-        
-            <div id="group-modal" class="modal-overlay">
-                <div class="modal-box">
-                    <h3 style="margin-top:0;">Create New Group</h3>
-                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                        <div id="group-pic-preview" class="avatar" style="width:60px; height:60px; cursor:pointer; background:#eee; font-size:24px;" onclick="document.getElementById('group-file-input').click()">📷</div>
-                        <input type="file" id="group-file-input" style="display:none;" accept="image/*">
-                        <input type="text" id="new-group-name" placeholder="Group Name" style="flex:1; margin:0;">
-                    </div>
-                    
-                    <p style="font-size:12px; color:gray; margin:0 0 5px 0;">Select Members:</p>
-                    <input type="text" id="group-search" placeholder="Search friends..." style="margin-bottom:10px; padding:10px; font-size:14px;">
-                    
-                    <div class="user-select-list" id="group-user-list"></div>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn" style="background:#ccc; color:#333;" onclick="closeGroupModal()">Cancel</button>
-                        <button class="btn" onclick="createNewGroup()">Create</button>
-                    </div>
-                </div>
-            </div>
-        
-            <div id="edit-group-modal" class="modal-overlay">
-                <div class="modal-box" style="height:auto; max-height:85vh;">
-                    <div id="edit-main-view">
-                        <h3 style="margin-top:0;">Group Settings</h3>
-                        <div style="text-align:center; margin-bottom:20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
-                            <div id="edit-group-pic-preview" class="avatar" style="width:80px; height:80px; margin:0 auto 10px; cursor:pointer; font-size:30px;" onclick="document.getElementById('edit-group-file-input').click()"></div>
-                            <input type="file" id="edit-group-file-input" style="display:none;" accept="image/*">
-                            <input type="text" id="edit-group-name" style="text-align:center; font-weight:bold; margin-bottom:5px;">
-                            
-                            <div id="admin-options" style="display:none; margin: 10px 0; font-size: 14px; color: var(--subtext);">
-                                <label style="display:flex; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
-                                    <input type="checkbox" id="edit-announcement-toggle"> Announcement Mode (Admins Only)
-                                </label>
-                            </div>
-        
-                            <button class="btn" style="padding: 8px; font-size: 12px; width: auto;" onclick="saveGroupEdit()">Update Info</button>
+                    <div class="cb-contact">
+                        <div class="cb-avatar">SG</div>
+                        <div>
+                            <div style="font-weight:600; font-size:0.9rem;">Study Group A</div>
+                            <div style="font-size:0.75rem; color:#64748b;">2 new messages</div>
                         </div>
-                        <h4 style="margin:0 0 10px 0;">Members</h4>
-                        <div id="edit-members-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; padding: 5px;"></div>
-                        <button class="btn" id="add-member-btn" style="background: var(--bg); color: var(--accent); border: 1px solid var(--border); margin-bottom: 10px;" onclick="showAddMemberView()">+ Add Member</button>
-                        <button class="btn" style="background:var(--danger); margin-top:10px;" onclick="leaveCurrentGroup()">Leave Group</button>
-                        <button class="btn" style="background:transparent; color:#555; margin-top:5px;" onclick="document.getElementById('edit-group-modal').style.display='none'">Close</button>
                     </div>
-                    <div id="edit-add-view" style="display:none;">
-                        <h3 style="margin-top:0;">Add People</h3>
-                        <div class="user-select-list" id="add-member-list"></div>
-                        <div style="display:flex; gap:10px;">
-                            <button class="btn" style="background:#ccc; color:#333;" onclick="hideAddMemberView()">Back</button>
-                            <button class="btn" onclick="confirmAddMembers()">Add Selected</button>
+                    <div class="cb-contact">
+                        <div class="cb-avatar">T</div>
+                        <div>
+                            <div style="font-weight:600; font-size:0.9rem;">Tutor: Mr. Smith</div>
+                            <div style="font-size:0.75rem; color:#64748b;">Offline</div>
                         </div>
                     </div>
                 </div>
-            </div>
-        
-            <div id="auth-screen">
-                <div class="auth-box">
-                    <h1 style="color:#FF8C42; font-style:italic; margin-top:0;">Chatter Box 3000</h1>
-                    <h2 id="auth-title">Log In</h2>
-                    <p style="color:var(--subtext); margin-bottom:20px;">Welcome back!</p>
-                    <input type="text" id="signup-name" placeholder="Your Name" style="display:none;">
-                    <input type="email" id="email" placeholder="Email Address">
-                    <input type="password" id="password" placeholder="Password">
-                    <button class="btn" id="auth-btn">Log In</button>
-                    <div class="toggle-auth" id="toggle-auth-btn">Need an account? Sign Up</div>
-                    <p id="auth-error" style="color:red; font-size:13px; margin-top:10px; display:none;"></p>
-                </div>
-            </div>
-        
-            <div id="side-menu" class="sidebar">
-                <div class="app-title">Chatter Box 3000</div>
-                
-                <div class="menu-item active" onclick="nav('home-page', this)">
-                    <span style="font-size:24px">🏠</span> <span class="label">Home</span>
-                    <div id="home-dot" class="notif-dot"></div>
-                </div>
-                
-                <div class="menu-item" onclick="nav('news-page', this)">
-                    <span style="font-size:24px">📢</span> <span class="label">News</span>
-                    <div id="news-dot" class="notif-dot"></div>
-                </div>
-                
-                <div class="menu-item" onclick="nav('search-page', this)">
-                    <span style="font-size:24px">🔍</span> <span class="label">Search</span>
-                </div>
-                <div class="menu-item" onclick="nav('profile-page', this)">
-                    <span style="font-size:24px">👤</span> <span class="label">Profile</span>
-                </div>
-                <div class="menu-item" onclick="nav('settings-page', this)">
-                    <span style="font-size:24px">⚙️</span> <span class="label">Settings</span>
-                </div>
-                <button class="btn" id="logout-btn" style="margin-top:auto; background:#ff3b30; color:white;">Logout</button>
-            </div>
-        
-            <div class="main-viewport">
-                <div class="content-container">
-                    <div id="home-page" class="page" style="display:block;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin:20px;">
-                            <h2 style="margin:0;">Messages</h2>
-                            <button onclick="openGroupModal()" style="background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:20px; font-weight:bold; cursor:pointer;">+ New Group</button>
-                        </div>
-                        <div id="inbox-list"></div>
-                    </div>
-        
-                    <div id="news-page" class="page">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin:20px;">
-                            <h2 style="margin:0;">Announcements</h2>
-                            <button id="create-news-btn" style="display:none; background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:20px; font-weight:bold; cursor:pointer;" onclick="createNewsChannel()">+ New Channel</button>
-                        </div>
-                        <div id="news-list" style="padding-bottom:50px;"></div>
-                        <div id="news-empty" style="text-align:center; color:var(--subtext); margin-top:50px; display:none;">No announcements yet.</div>
-                    </div>
-        
-                    <div id="search-page" class="page">
-                        <h2 style="margin:20px;">Search Users</h2>
-                        <div style="padding:0 20px;"><input type="text" id="s-query" placeholder="Type a name..."></div>
-                        <div id="s-results" style="margin-top:10px;"></div>
-                    </div>
-        
-                   <div id="profile-page" class="page">
-                        <div id="profile-view">
-                            <div style="text-align:center; margin-top:40px; padding: 20px; background: var(--card); border-radius: 16px; box-shadow: 0 4px 20px var(--shadow); margin: 20px;">
-                                <div id="p-pfp" class="avatar" style="width:120px; height:120px; margin: 0 auto 20px; font-size:40px; border: 4px solid var(--bg);"></div>
-                                <h2 id="p-name" style="margin: 0 0 10px 0; font-size: 28px;">Loading...</h2>
-                                <p id="p-bio" style="color:var(--subtext); font-size: 16px; line-height: 1.5; max-width: 400px; margin: 0 auto 20px;">...</p>
-                                <button class="btn" style="width: auto; padding: 10px 30px;" onclick="toggleProfileEdit(true)">Edit Profile</button>
-                            </div>
-                        </div>
-        
-                        <div id="profile-edit" style="display:none; padding: 20px; background: var(--card); border-radius: 16px; box-shadow: 0 4px 20px var(--shadow); margin: 20px;">
-                            <h2 style="margin:0 0 20px 0; text-align:center;">Edit Profile</h2>
-                            <div style="text-align:center; margin-bottom:20px;">
-                                <div id="settings-pfp-preview" class="avatar" style="width:100px; height:100px; margin:0 auto 10px; border: 3px solid var(--bg);"></div>
-                                <div id="admin-badge" style="display:none; background:linear-gradient(135deg, #FFD700, #FFA500); color:#000; padding:8px 16px; border-radius:20px; font-weight:bold; font-size:12px; margin:10px auto; width:fit-content; box-shadow:0 2px 8px rgba(255,215,0,0.4);">
-                                    ★ ADMIN ACCESS ★
-                                </div>
-                                <label for="settings-pfp-input" style="color:var(--accent); cursor:pointer; font-weight:600; font-size:14px;">Change Photo</label>
-                                <input type="file" id="settings-pfp-input" accept="image/*" style="display:none;">
-                                <p style="font-size:11px; color:var(--subtext);">Max size: 5MB</p>
-                            </div>
-                            <div>
-                                <label style="font-weight:600; font-size:13px; margin-left:5px;">Display Name</label>
-                                <input type="text" id="settings-name-input">
-                                <label style="font-weight:600; font-size:13px; margin-left:5px;">Bio</label>
-                                <input type="text" id="settings-bio-input">
-                                <div style="display:flex; gap:10px; margin-top:20px;">
-                                    <button class="btn" style="background:var(--border); color:var(--text);" onclick="toggleProfileEdit(false)">Cancel</button>
-                                    <button class="btn" id="save-profile-btn">Save Changes</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-        
-                    <div id="settings-page" class="page">
-                        <h2 style="margin:20px;">Settings</h2>
-                        <div style="padding:0 20px;">
-                            
-                            <div class="settings-header">App Settings</div>
-                            <div class="settings-card">
-                                <div class="setting-row">
-                                    <span style="font-weight:600;">Dark Mode</span>
-                                    <input type="checkbox" id="dark-mode-toggle" style="width:20px; height:20px; margin:0; cursor:pointer;">
-                                </div>
-                            </div>
-        
-                            <div class="settings-header">Appearance</div>
-                            <div class="settings-card">
-                                <div class="setting-row" style="margin-bottom: 10px;">
-                                    <span style="font-weight:600;">Accent Color</span>
-                                    <div class="color-options">
-                                        <div class="color-btn" data-col="#0084ff" style="background:#0084ff" title="Blue"></div>
-                                        <div class="color-btn" data-col="#00b894" style="background:#00b894" title="Emerald"></div>
-                                        <div class="color-btn" data-col="#6c5ce7" style="background:#6c5ce7" title="Purple"></div>
-                                        <div class="color-btn" data-col="#e17055" style="background:#e17055" title="Orange"></div>
-                                        <div class="color-btn" data-col="#e84393" style="background:#e84393" title="Pink"></div>
-                                    </div>
-                                </div>
-                            </div>
-        
-                            <button class="btn" id="mobile-logout-btn" onclick="document.getElementById('logout-btn').click()">Logout</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        
-            <div id="chat-window">
-                <div class="chat-header">
-                    <button id="close-chat-btn" style="background:none; border:none; font-size:24px; color:var(--accent); padding:0 10px; cursor:pointer;">&larr;</button>
-                    <div id="chat-pfp" class="avatar" style="width:35px; height:35px;"></div>
-                    <div style="display:flex; flex-direction:column; justify-content:center; flex:1;">
-                        <b id="chat-user-name" style="line-height:1.1;">User</b>
-                        <span id="chat-subtext" style="font-size:11px; color:gray;"></span>
-                    </div>
-                    <button id="chat-settings-btn" onclick="openEditGroupModal()" style="display:none; background:none; border:none; font-size:20px; cursor:pointer;">⚙️</button>
-                </div>
-                
-                <div id="chat-msgs" class="chat-msgs"></div>
-        
-                <div id="action-menu" class="action-menu">
-                    <div class="action-item" onclick="triggerPhotoUpload()">
-                        <div class="action-icon">📷</div>
-                        <span>Photo / Video</span>
-                    </div>
-                    <div class="action-item" onclick="toggleEmojiPicker()">
-                        <div class="action-icon">😀</div>
-                        <span>Emoji</span>
-                    </div>
-                    <div class="action-item" onclick="alert('Document upload coming soon!')">
-                        <div class="action-icon">📄</div>
-                        <span>Document</span>
-                    </div>
-                    <div class="action-item" onclick="alert('Location sharing coming soon!')">
-                        <div class="action-icon">📍</div>
-                        <span>Location</span>
-                    </div>
-                </div>
-                
-                <div id="emoji-picker" class="emoji-picker"></div>
-        
-                <div id="chat-input-area" style="padding:10px; display:flex; gap:10px; align-items:center; background:var(--card); border-top:1px solid var(--border); padding-bottom: calc(10px + env(safe-area-inset-bottom));">
-                    <button id="cam-btn" style="width:40px; height:40px; border-radius:50%; border:none; background:var(--bg); color:var(--accent); font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition: transform 0.2s;">+</button>
-                    <input type="file" id="chat-file-input" accept="image/*" style="display:none;">
-                    <input type="text" id="chat-input" placeholder="Message..." style="flex:1; margin:0; border-radius:20px;">
-                    <button class="btn" id="send-btn" style="width:auto; border-radius:20px; padding:0 20px;">&uarr;</button>
-                </div>
-            </div>
-        
-            <script type="module">
-                import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-                import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-                import { getDatabase, ref, set, push, onValue, get, update, serverTimestamp, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        
-                const config = { 
-                    apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA",
-                    authDomain: "chatterbox3000-fb3e2.firebaseapp.com",
-                    databaseURL: "https://chatterbox3000-fb3e2-default-rtdb.firebaseio.com",
-                    projectId: "chatterbox3000-fb3e2",
-                    storageBucket: "chatterbox3000-fb3e2.firebasestorage.app",
-                    messagingSenderId: "298622361038",
-                    appId: "1:298622361038:web:c1e46432470dbce92a5f9f"
-                };
-                
-                let app, auth, db;
-                try {
-                    app = initializeApp(config);
-                    auth = getAuth(app);
-                    db = getDatabase(app);
-                } catch(e) {
-                    console.error("Firebase Init Error:", e);
-                    alert("Error connecting to database. Check console.");
-                }
-        
-                let usersCache = {}; 
-                let myChats = [];
-                let activeChatId = null;
-                let isCurrentChatGroup = false;
-                let msgUnsub = null;
-                let usersUnsub = null;
-                let typingUnsub = null;
-                let typingTimeout = null;
-                let isPeerTyping = false;
-                let isCurrentUserAdmin = false;
-                let isSignup = false;
-                let selectedMsgIdForDelete = null;
-        
-                const actionMenu = document.getElementById('action-menu');
-                const camBtn = document.getElementById('cam-btn');
-                const emojiPicker = document.getElementById('emoji-picker');
-                const chatInput = document.getElementById('chat-input');
-                
-                camBtn.onclick = (e) => {
-                    e.stopPropagation(); 
-                    emojiPicker.style.display = 'none';
-                    emojiPicker.classList.remove('active');
-                    actionMenu.classList.toggle('active');
-                    if (actionMenu.classList.contains('active')) {
-                        camBtn.style.transform = "rotate(45deg)";
-                    } else {
-                        camBtn.style.transform = "rotate(0deg)";
-                    }
-                };
-        
-                window.triggerPhotoUpload = function() {
-                    document.getElementById('chat-file-input').click();
-                    closeActionMenu();
-                };
-        
-                const emojiList = [
-                    "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇",
-                    "🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
-                    "😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩",
-                    "🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣",
-                    "😖","😫","😩","🥺","😢","😭","😤","😠","😡","🤬",
-                    "🤯","😳","🥵","🥶","😱","😨","😰","😥","😓","🤗",
-                    "🤔","🤭","🤫","🤥","😶","😐","😑","😬","🙄","😯",
-                    "😦","😧","😮","😲","🥱","😴","🤤","😪","😵","🤐",
-                    "🥴","🤢","🤮","🤧","😷","🤒","🤒","🤕","🤑","🤠","😈",
-                    "👿","👹","👺","🤡","💩","👻","💀","☠️","👽","👾",
-                    "🤖","🎃","😺","😸","😹","😻","😼","😼","😼","😽","🙀","😿",
-                    "😾","👋","🤚","🖐","✋","🖖","👌","🤏","✌️","🤞",
-                    "🤟","🤘","🤙","👈","👉","👆","👇","👍","👎","✊",
-                    "👊","🤛","🤜","👏","🙌","👐","🤲","🤝","🙏",
-                    "💪","🦾","🖕","✍️","🦶","🦵","👂","🦻","👃","🧠",
-                    "🦷","🦴","👀","👁","👅","👄","👶","🧒","👦","👧",
-                    "🧑","👨","👩","🧔","🧔‍♂️","🧔‍♀️","👨‍🦱","👩‍🦱","👨‍🦰","👩‍🦰",
-                    "👨‍🦳","👩‍🦳","👨‍🦲","👩‍🦲","👴","👵","🙍","🙎","🙅","🙆",
-                    "💁","🙋","🙇","🤦","🤷","👮","🕵️","💂","👷","🤴",
-                    "👸","👳","👲","🧕","🤵","👰","🤰","🤱","👼","🎅",
-                    "🤶","🦸","🦹","🧙","🧚","🧛","🧜","🧝","🧞","🧟",
-                    "💃","🕺","👯","🧘","🏃","🚶","🧍","🧎","🏋️","🚴",
-                    "🚵","🤸","🤼","🤽","🤾","🧗","🏊","🏄","🛀","🛌",
-                    "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐻‍❄️","🐨",
-                    "🐯","🦁","🐮","🐷","🐸","🐵","🙈","🙉","🙊","🐔",
-                    "🐧","🐦","🐤","🐣","🐥","🦆","🦅","🦉","🦇","🐺",
-                    "🐗","🐴","🦄","🐝","🪲","🐞","🦋","🐌","🐛","🪱",
-                    "🐢","🐍","🦎","🐙","🦑","🦐","🦀","🐡","🐠","🐟",
-                    "🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦍","🦧",
-                    "🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍒",
-                    "🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🥦","🥬",
-                    "🥒","🌶️","🫑","🌽","🥕","🫒","🧄","🧅","🥔","🍠"
-                ];
-                
-                emojiList.forEach(emoji => {
-                    const span = document.createElement('div');
-                    span.className = 'emoji-btn';
-                    span.textContent = emoji;
-                    span.onclick = () => {
-                        chatInput.value += emoji;
-                        chatInput.focus();
-                    };
-                    emojiPicker.appendChild(span);
-                });
-        
-                window.toggleEmojiPicker = function() {
-                    closeActionMenu(); 
-                    if (emojiPicker.style.display === 'grid') {
-                        emojiPicker.style.display = 'none';
-                        emojiPicker.classList.remove('active');
-                    } else {
-                        emojiPicker.style.display = 'grid';
-                        emojiPicker.classList.add('active');
-                    }
-                };
-        
-                function closeActionMenu() {
-                    actionMenu.classList.remove('active');
-                    camBtn.style.transform = "rotate(0deg)";
-                }
-        
-                document.addEventListener('click', (e) => {
-                    const ctxMenu = document.getElementById('context-menu');
-                    if (ctxMenu.style.display === 'flex') {
-                        ctxMenu.style.display = 'none';
-                    }
-        
-                    if (!actionMenu.contains(e.target) && e.target !== camBtn) {
-                        closeActionMenu();
-                    }
-                    if (emojiPicker.style.display === 'grid' && 
-                        !emojiPicker.contains(e.target) && 
-                        !actionMenu.contains(e.target)) {
-                        emojiPicker.style.display = 'none';
-                        emojiPicker.classList.remove('active');
-                    }
-                });
-                
-                chatInput.addEventListener('focus', () => {
-                    closeActionMenu();
-                    emojiPicker.style.display = 'none';
-                });
-        
-                document.getElementById('toggle-auth-btn').onclick = () => {
-                    isSignup = !isSignup;
-                    const title = document.getElementById('auth-title');
-                    const btn = document.getElementById('auth-btn');
-                    const toggle = document.getElementById('toggle-auth-btn');
-                    const nameField = document.getElementById('signup-name');
-                    const errBox = document.getElementById('auth-error');
-        
-                    errBox.style.display = 'none'; 
-                    title.innerText = isSignup ? "Create Account" : "Log In";
-                    btn.innerText = isSignup ? "Sign Up" : "Log In";
-                    toggle.innerText = isSignup ? "Have an account? Log In" : "Need an account? Sign Up";
-                    nameField.style.display = isSignup ? 'block' : 'none';
-                };
-        
-                const authBtn = document.getElementById('auth-btn');
-                authBtn.onclick = () => {
-                    const e = document.getElementById('email').value;
-                    const p = document.getElementById('password').value;
-                    const n = document.getElementById('signup-name').value;
-                    
-                    showError(""); 
-                    
-                    if(!e || !p) { showError("Please fill all fields"); return; }
-                    if(isSignup && !n) { showError("Please enter your name"); return; }
-                    
-                    authBtn.disabled = true;
-                    authBtn.innerText = "Processing...";
-        
-                    if(isSignup) {
-                        createUserWithEmailAndPassword(auth, e, p).then(res => {
-                            const isAdmin = e === 'eaton.garrett@icloud.com';
-                            set(ref(db, 'users/' + res.user.uid), { name: n, pfp: "", bio: "New to Chatter Box 3000", isOnline: true, isAdmin: isAdmin, email: e });
-                        }).catch(err => showError(err.message));
-                    } else {
-                        signInWithEmailAndPassword(auth, e, p).catch(err => showError("Login Failed: " + err.message));
-                    }
-                };
-        
-                function showError(msg) {
-                    const errBox = document.getElementById('auth-error');
-                    errBox.innerText = msg;
-                    errBox.style.display = msg ? 'block' : 'none';
-                    authBtn.disabled = false;
-                    authBtn.innerText = isSignup ? "Sign Up" : "Log In";
-                }
-        
-                onAuthStateChanged(auth, u => { 
-                    const authBtn = document.getElementById('auth-btn');
-                    authBtn.disabled = false;
-                    authBtn.innerText = isSignup ? "Sign Up" : "Log In";
-                    if(u) { 
-                        document.getElementById('auth-screen').style.display = 'none'; 
-                        document.getElementById('side-menu').style.display = 'flex'; 
-                        initApp(u); 
-                    } else {
-                        document.getElementById('auth-screen').style.display = 'flex';
-                        document.getElementById('side-menu').style.display = 'none';
-                    }
-                });
-        
-                document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
-        
-                function initApp(user) {
-                    get(ref(db, 'users/' + user.uid)).then(snap => {
-                        const userData = snap.val();
-                        if(userData) {
-                            isCurrentUserAdmin = userData.isAdmin || false;
-                            if(user.email === 'eaton.garrett@icloud.com') {
-                                isCurrentUserAdmin = true;
-                                if(!userData.isAdmin) {
-                                    update(ref(db, 'users/' + user.uid), { isAdmin: true, email: user.email });
-                                }
-                            }
-                        }
-                    });
-                
-                    onValue(ref(db, ".info/connected"), (snap) => {
-                        if (snap.val() === true) {
-                            onDisconnect(ref(db, `users/${user.uid}/isOnline`)).set(false);
-                            set(ref(db, `users/${user.uid}/isOnline`), true);
-                        }
-                    });
-        
-                    if(usersUnsub) usersUnsub();
-                    usersUnsub = onValue(ref(db, 'users'), snap => {
-                        usersCache = snap.val() || {};
-                        const me = usersCache[user.uid];
-                        if(me) {
-                           if(isCurrentUserAdmin) {
-                               document.getElementById('admin-badge').style.display = 'block';
-                               const btn = document.getElementById('create-news-btn');
-                               if(btn) btn.style.display = 'block';
-                           }
-                           document.getElementById('p-name').innerText = me.name || "User";
-                           document.getElementById('p-bio').innerText = me.bio || "No bio yet.";
-                           setAvatar(document.getElementById('p-pfp'), me.pfp, me.name, false);
-                        }
-                        if(activeChatId && !isCurrentChatGroup) {
-                            const peerId = activeChatId.replace(user.uid, '').replace('_', '');
-                            const peer = usersCache[peerId];
-                            if(peer) {
-                                document.getElementById('chat-user-name').innerText = peer.name;
-                                document.getElementById('chat-subtext').innerText = peer.isOnline ? "Online" : "";
-                                setAvatar(document.getElementById('chat-pfp'), peer.pfp, peer.name, false);
-                            }
-                        }
-                        renderInbox();
-                        renderNews();
-                    });
-        
-                    onValue(ref(db, `users/${user.uid}/chats`), snap => {
-                        myChats = [];
-                        snap.forEach(c => { 
-                            const chatVal = c.val();
-                            const chatKey = c.key;
-                            myChats.push({ id: chatKey, ...chatVal }); 
-                            
-                            if(activeChatId === chatKey && isCurrentChatGroup) {
-                                 document.getElementById('chat-user-name').innerText = chatVal.groupName || "Unnamed Group";
-                                 const pfpEl = document.getElementById('chat-pfp');
-                                 if(chatVal.groupPic) {
-                                     setAvatar(pfpEl, chatVal.groupPic, chatVal.groupName, false);
-                                 } else {
-                                     pfpEl.style.backgroundImage = 'none'; pfpEl.textContent = "👥"; pfpEl.style.backgroundColor = 'var(--border)';
-                                 }
-                            }
-                        });
-                        myChats.sort((a, b) => (b.lastTime || 0) - (a.lastTime || 0));
-                        
-                        const unreadHome = myChats.some(c => c.unread && !c.isAnnouncement);
-                        const unreadNews = myChats.some(c => c.unread && c.isAnnouncement);
-                        document.getElementById('home-dot').style.display = unreadHome ? "block" : "none";
-                        document.getElementById('news-dot').style.display = unreadNews ? "block" : "none";
-        
-                        renderInbox();
-                        renderNews();
-                    });
-                }
-        
-                function renderInbox() {
-                    const list = document.getElementById('inbox-list');
-                    list.innerHTML = "";
-                    const homeChats = myChats.filter(c => !c.isAnnouncement);
-                    if(homeChats.length === 0) { list.innerHTML = `<div style="text-align:center; padding:40px; color:#999;">No messages yet.<br>Start a chat or create a group!</div>`; return; }
-                    homeChats.forEach(chat => createChatListItem(chat, list));
-                }
-        
-                function renderNews() {
-                    const list = document.getElementById('news-list');
-                    const empty = document.getElementById('news-empty');
-                    list.innerHTML = "";
-                    const newsChats = myChats.filter(c => c.isAnnouncement);
-                    if(newsChats.length === 0) { 
-                        empty.style.display = 'block';
-                        return; 
-                    }
-                    empty.style.display = 'none';
-                    newsChats.forEach(chat => createChatListItem(chat, list));
-                }
-        
-                function createChatListItem(chat, container) {
-                    let name, pfp, isOnline = false, isGroup = false;
-                    if (chat.isGroup) {
-                        name = chat.groupName || "Unnamed Group"; pfp = chat.groupPic || ""; isGroup = true;
-                    } else {
-                        const u = usersCache[chat.id]; if(!u) return; 
-                        name = u.name; pfp = u.pfp; isOnline = u.isOnline; isGroup = false;
-                    }
-                    const item = document.createElement('div');
-                    item.className = `list-item ${chat.unread ? 'unread' : ''}`;
-                    item.innerHTML = `
-                        <div class="avatar"></div>
-                        <div class="list-item-content"><b></b><span></span></div>
-                        ${chat.unread ? `<div style="width:8px; height:8px; background:var(--accent); border-radius:50%; margin-right:5px;"></div>` : ''}`;
-                    item.querySelector('b').textContent = name;
-                    item.querySelector('span').textContent = chat.lastMsg || (isGroup ? 'Group Chat' : 'Tap to chat');
-                    const avEl = item.querySelector('.avatar');
-                    if(isGroup) {
-                        if(pfp) { setAvatar(avEl, pfp, name, false); } 
-                        else { avEl.textContent = "👥"; avEl.style.background = "var(--border)"; avEl.style.fontSize = "24px"; }
-                    } else { setAvatar(avEl, pfp, name, isOnline); }
-                    item.addEventListener('click', () => openChat(chat.id, name, pfp, isGroup));
-                    container.appendChild(item);
-                }
-        
-                // --- NEW: RENDER SEARCH LIST FUNCTION ---
-                // This renders ALL users initially so we can filter them locally
-                function renderSearchList() {
-                    const list = document.getElementById('s-results');
-                    const query = document.getElementById('s-query').value.toLowerCase();
-                    list.innerHTML = "";
-                    
-                    Object.keys(usersCache).forEach(uid => {
-                        if(uid === auth.currentUser.uid) return;
-                        const u = usersCache[uid];
-                        const safeName = (u.name || "User").toLowerCase();
-                        
-                        const item = document.createElement('div');
-                        item.className = 'list-item';
-                        item.setAttribute('data-name', safeName);
-                        // Re-using the nice styling from the chat list
-                        item.innerHTML = `
-                            <div class="avatar"></div>
-                            <div class="list-item-content">
-                                <b>${u.name || "User"}</b>
-                                <span>${u.bio || "No bio available"}</span>
-                            </div>
-                        `;
-                        setAvatar(item.querySelector('.avatar'), u.pfp, u.name, u.isOnline);
-                        
-                        item.onclick = () => {
-                            openChat(uid, u.name, u.pfp, false);
-                            document.getElementById('s-query').value = "";
-                        };
-                        
-                        // If there is already a query in the box, hide mismatching items immediately
-                        if(query && !safeName.includes(query)) {
-                            item.style.display = 'none';
-                        }
-                        
-                        list.appendChild(item);
-                    });
-                }
-        
-                // --- NEW: UPDATED SEARCH INPUT LISTENER ---
-                document.getElementById('s-query').addEventListener('input', (e) => {
-                    const term = e.target.value.toLowerCase();
-                    const items = document.querySelectorAll('#s-results .list-item');
-                    
-                    items.forEach(item => {
-                        const name = item.getAttribute('data-name');
-                        if (name && name.includes(term)) {
-                            item.style.display = 'flex';
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
-                });
-        
-                function openChat(targetId, name, pfp, isGroup) {
-                    if (msgUnsub) { msgUnsub(); msgUnsub = null; }
-                    isCurrentChatGroup = isGroup;
-                    
-                    if (isGroup) { 
-                        activeChatId = targetId; 
-                        document.getElementById('chat-settings-btn').style.display = 'block'; 
-                    } else { 
-                        activeChatId = [auth.currentUser.uid, targetId].sort().join('_'); 
-                        document.getElementById('chat-settings-btn').style.display = 'none'; 
-                    }
-        
-                    document.getElementById('chat-window').classList.add('open');
-        
-                    const currentChatObj = myChats.find(c => c.id === activeChatId) || {};
-                    const isAnnouncement = currentChatObj.isAnnouncement === true;
-                    const inputArea = document.getElementById('chat-input-area');
-        
-                    if (isAnnouncement && !isCurrentUserAdmin) {
-                        inputArea.style.display = 'none';
-                    } else {
-                        inputArea.style.display = 'flex';
-                    }
-        
-                    document.getElementById('chat-user-name').innerText = name || "User";
-                    const headerPfp = document.getElementById('chat-pfp');
-                    
-                    if (isGroup) {
-                        if (pfp) { setAvatar(headerPfp, pfp, name, false); }
-                        else { headerPfp.style.backgroundImage = 'none'; headerPfp.textContent = "👥"; headerPfp.style.backgroundColor = 'var(--border)'; }
-                    } else {
-                        const isOnline = usersCache[targetId]?.isOnline || false;
-                        setAvatar(headerPfp, pfp, name, isOnline);
-                    }
-        
-                    msgUnsub = onValue(ref(db, 'messages/' + activeChatId), snap => {
-                        const box = document.getElementById('chat-msgs'); 
-                        
-                        const isAtBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 100;
-                        
-                        box.innerHTML = "";
-                        snap.forEach(m => {
-                            const d = m.val();
-                            const msgId = m.key;
-        
-                            if(d.isSystem) {
-                                const sys = document.createElement('div');
-                                sys.className = 'sys-msg'; sys.innerText = d.text; box.appendChild(sys);
-                                return;
-                            }
-        
-                            const isMe = d.sender === auth.currentUser.uid;
-                            const time = d.time ? new Date(d.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                            
-                            let senderName = "";
-                            let nameColor = "var(--subtext)";
-        
-                            if (isAnnouncement) {
-                                senderName = "📢 Announcement";
-                                nameColor = "#ff3b30";
-                            } 
-                            else if(isGroup && !isMe) { 
-                                senderName = usersCache[d.sender] ? usersCache[d.sender].name : "Unknown";
-                                nameColor = "var(--accent)";
-                            }
-        
-                            let imgHtml = "";
-                            if(d.image) {
-                                imgHtml = `<img src="${d.image}" style="max-width:200px; width:100%; border-radius:10px; margin-bottom:5px; display:block; cursor:pointer;" onclick="window.open(this.src)">`;
-                            }
-        
-                            const msgDiv = document.createElement('div');
-                            msgDiv.className = 'msg-bubble';
-                            msgDiv.style.alignSelf = isMe ? 'flex-end' : 'flex-start';
-                            msgDiv.style.background = isMe ? 'var(--accent)' : 'var(--msg-received)';
-                            msgDiv.style.color = isMe ? 'white' : 'var(--text)';
-                            
-                            const showName = (isAnnouncement || (isGroup && !isMe));
-        
-                            msgDiv.oncontextmenu = (e) => {
-                                e.preventDefault();
-                                selectedMsgIdForDelete = msgId;
-                                const menu = document.getElementById('context-menu');
-                                menu.style.display = 'flex';
-                                
-                                let x = e.pageX;
-                                let y = e.pageY;
-                                if (x + 150 > window.innerWidth) x -= 150;
-                                if (y + 100 > window.innerHeight) y -= 100;
-        
-                                menu.style.left = x + 'px';
-                                menu.style.top = y + 'px';
-                            };
-        
-                            msgDiv.innerHTML = `
-                                ${showName ? `<div style="font-size:10px; font-weight:bold; margin-bottom:2px; color:${nameColor};">${escapeHtml(senderName)}</div>` : ''}
-                                ${imgHtml}
-                                <div class="msg-text"></div>
-                                <span class="msg-time" style="color:${isMe?'rgba(255,255,255,0.7)':'var(--subtext)'}">${time}</span>`;
-                            
-                            msgDiv.querySelector('.msg-text').textContent = d.text;
-                            box.appendChild(msgDiv);
-                        });
-                        
-                        renderTypingBubble();
-                        
-                        if(isAtBottom || snap.size > 0) {
-                            box.scrollTop = box.scrollHeight;
-                        }
-                    });
-                    
-                    if(typingUnsub) typingUnsub();
-                    typingUnsub = onValue(ref(db, `typing/${activeChatId}`), snap => {
-                        isPeerTyping = false;
-                        if(snap.exists()) {
-                            snap.forEach(child => {
-                                if(child.key !== auth.currentUser.uid) {
-                                    isPeerTyping = true;
-                                }
-                            });
-                        }
-                        renderTypingBubble();
-                    });
-        
-                    if(!isGroup) {
-                            const peerId = activeChatId.split('_').find(id => id !== auth.currentUser.uid);
-                            update(ref(db, `users/${auth.currentUser.uid}/chats/${peerId}`), { unread: false });
-                    } else {
-                            update(ref(db, `users/${auth.currentUser.uid}/chats/${activeChatId}`), { unread: false });
-                    }
-                }
-                
-                function renderTypingBubble() {
-                    const box = document.getElementById('chat-msgs');
-                    const existing = document.getElementById('typing-bubble');
-                    
-                    if(!isPeerTyping) {
-                        if(existing) existing.remove();
-                        return;
-                    }
-                    
-                    if(!existing) {
-                        const bubble = document.createElement('div');
-                        bubble.id = 'typing-bubble';
-                        bubble.className = 'typing-indicator';
-                        bubble.innerHTML = `<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>`;
-                        box.appendChild(bubble);
-                        box.scrollTop = box.scrollHeight;
-                    } else {
-                        box.appendChild(existing);
-                    }
-                }
-        
-                document.getElementById('send-btn').onclick = () => sendMsg();
-                
-                document.getElementById('chat-input').addEventListener('input', () => {
-                     if(!activeChatId) return;
-                     set(ref(db, `typing/${activeChatId}/${auth.currentUser.uid}`), true);
-                     onDisconnect(ref(db, `typing/${activeChatId}/${auth.currentUser.uid}`)).remove();
-                     if(typingTimeout) clearTimeout(typingTimeout);
-                     typingTimeout = setTimeout(() => {
-                         remove(ref(db, `typing/${activeChatId}/${auth.currentUser.uid}`));
-                     }, 3000);
-                });
-        
-                document.getElementById('chat-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
-        
-                document.getElementById('chat-file-input').addEventListener('change', async (e) => {
-                    const file = e.target.files[0];
-                    if(file) {
-                        if(file.size > 5000000) return alert("File too big (Max 5MB)");
-                        try {
-                            const base64 = await fileToBase64(file);
-                            sendMsg(base64);
-                        } catch (err) { alert('Upload failed'); } 
-                        e.target.value = ""; 
-                    }
-                });
-        
-                function sendMsg(imgData = null) {
-                    const input = document.getElementById('chat-input');
-                    const txt = input.value.trim();
-                    if((!txt && !imgData) || !activeChatId) return;
-                    
-                    if(typingTimeout) clearTimeout(typingTimeout);
-                    remove(ref(db, `typing/${activeChatId}/${auth.currentUser.uid}`));
-        
-                    const now = Date.now();
-                    const msgData = { sender: auth.currentUser.uid, text: txt, time: now };
-                    if(imgData) msgData.image = imgData;
-        
-                    push(ref(db, 'messages/' + activeChatId), msgData);
-                    
-                    const previewText = imgData ? "📷 Photo" : txt;
-                    const updateData = { lastMsg: previewText, lastTime: now, unread: true };
-                    const myUpdate = { lastMsg: previewText, lastTime: now, unread: false };
-        
-                    if(isCurrentChatGroup) {
-                        const chatObj = myChats.find(c => c.id === activeChatId) || {};
-                        const isAnnounce = chatObj.isAnnouncement === true;
-                        
-                        if(isAnnounce) { updateData.isAnnouncement = true; myUpdate.isAnnouncement = true; }
-        
-                        Promise.all(Object.keys(usersCache).map(async uid => {
-                            try {
-                                const snap = await get(ref(db, `users/${uid}/chats/${activeChatId}`));
-                                if(snap.exists()) {
-                                    await update(ref(db, `users/${uid}/chats/${activeChatId}`), uid === auth.currentUser.uid ? myUpdate : updateData);
-                                }
-                            } catch (err) { console.error("Update failed for", uid, err); }
-                        }));
-                    } else {
-                        const otherId = activeChatId.split('_').find(id => id !== auth.currentUser.uid);
-                        update(ref(db, `users/${auth.currentUser.uid}/chats/${otherId}`), myUpdate);
-                        update(ref(db, `users/${otherId}/chats/${auth.currentUser.uid}`), updateData);
-                    }
-                    input.value = "";
-                    emojiPicker.style.display = 'none'; 
-                }
-        
-                document.getElementById('close-chat-btn').addEventListener('click', () => {
-                     document.getElementById('chat-window').classList.remove('open');
-                     if(msgUnsub) msgUnsub();
-                     if(typingUnsub) typingUnsub();
-                     if(activeChatId) remove(ref(db, `typing/${activeChatId}/${auth.currentUser.uid}`));
-                     activeChatId = null;
-                });
-        
-                document.getElementById('ctx-delete-btn').addEventListener('click', () => {
-                    const menu = document.getElementById('context-menu');
-                    menu.style.display = 'none';
-        
-                    if(selectedMsgIdForDelete && activeChatId) {
-                        if(confirm("Are you sure you want to delete this message?")) {
-                            remove(ref(db, `messages/${activeChatId}/${selectedMsgIdForDelete}`))
-                            .catch(error => alert("Could not delete: " + error.message));
-                        }
-                    }
-                    selectedMsgIdForDelete = null;
-                });
-        
-                function escapeHtml(text) {
-                    if (!text) return "";
-                    const div = document.createElement('div');
-                    div.textContent = text;
-                    return div.innerHTML;
-                }
-                
-                function setAvatar(el, url, name, isOnline) {
-                    el.innerHTML = ""; el.style.backgroundImage = url ? `url(${url})` : "none";
-                    if(!url) { el.textContent = name ? name[0].toUpperCase() : "?"; el.style.backgroundColor = "var(--border)"; }
-                    if(isOnline) { const dot = document.createElement('div'); dot.className = "online-dot"; el.appendChild(dot); }
-                }
-                
-                function fileToBase64(file) {
-                    return new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(file);
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = error => reject(error);
-                    });
-                }
-                
-                window.nav = function(pageId, btn) {
-                    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-                    document.getElementById(pageId).style.display = 'block';
-                    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-                    if(btn) btn.classList.add('active');
-                    
-                    // --- NEW: Trigger search list render when navigating to search page ---
-                    if(pageId === 'search-page') {
-                        renderSearchList();
-                        document.getElementById('s-query').value = ""; // Clear search box
-                        document.getElementById('s-query').focus();
-                    }
-        
-                    if(pageId === 'profile-page') toggleProfileEdit(false);
-                    document.getElementById('chat-window').classList.remove('open');
-                    activeChatId = null;
-                }
-        
-                window.toggleProfileEdit = function(show) {
-                    document.getElementById('profile-view').style.display = show ? 'none' : 'block';
-                    document.getElementById('profile-edit').style.display = show ? 'block' : 'none';
-                    if(show) {
-                         const me = usersCache[auth.currentUser.uid];
-                         if(me) {
-                             document.getElementById('settings-name-input').value = me.name || "";
-                             document.getElementById('settings-bio-input').value = me.bio || "";
-                             setAvatar(document.getElementById('settings-pfp-preview'), me.pfp, me.name, false);
-                         }
-                    }
-                }
-        
-                const themeToggle = document.getElementById('dark-mode-toggle');
-                const storedTheme = localStorage.getItem('theme');
-                if (storedTheme === 'dark') {
-                    document.body.classList.add('dark-mode');
-                    themeToggle.checked = true;
-                }
-                themeToggle.addEventListener('change', () => {
-                    if(themeToggle.checked) {
-                        document.body.classList.add('dark-mode');
-                        localStorage.setItem('theme', 'dark');
-                    } else {
-                        document.body.classList.remove('dark-mode');
-                        localStorage.setItem('theme', 'light');
-                    }
-                });
-        
-                const savedColor = localStorage.getItem('accentColor') || '#0084ff';
-                document.documentElement.style.setProperty('--accent', savedColor);
-                const colorBtns = document.querySelectorAll('.color-btn');
-                colorBtns.forEach(btn => {
-                    const c = btn.getAttribute('data-col');
-                    if(c === savedColor) btn.classList.add('selected');
-                    btn.onclick = () => {
-                        colorBtns.forEach(b => b.classList.remove('selected'));
-                        btn.classList.add('selected');
-                        document.documentElement.style.setProperty('--accent', c);
-                        localStorage.setItem('accentColor', c);
-                    };
-                });
-                
-                document.getElementById('settings-pfp-input').addEventListener('change', async (e) => {
-                    const file = e.target.files[0];
-                    if(file) {
-                        if(file.size > 5000000) return alert("File too big");
-                        const base64 = await fileToBase64(file);
-                        setAvatar(document.getElementById('settings-pfp-preview'), base64, "", false);
-                    }
-                });
-                
-                document.getElementById('save-profile-btn').addEventListener('click', async () => {
-                     const name = document.getElementById('settings-name-input').value;
-                     const bio = document.getElementById('settings-bio-input').value;
-                     const pfpInput = document.getElementById('settings-pfp-input');
-                     let pfp = usersCache[auth.currentUser.uid]?.pfp || '';
-                     if(pfpInput.files[0]) pfp = await fileToBase64(pfpInput.files[0]);
-                     
-                     update(ref(db, 'users/' + auth.currentUser.uid), { name, bio, pfp }).then(() => {
-                         alert("Profile Saved!");
-                         toggleProfileEdit(false);
-                     });
-                });
-        
-                window.openGroupModal = function() {
-                    document.getElementById('group-modal').style.display = 'flex';
-                    const list = document.getElementById('group-user-list');
-                    const searchInput = document.getElementById('group-search');
-                    
-                    list.innerHTML = "";
-                    searchInput.value = "";
-        
-                    Object.keys(usersCache).forEach(uid => {
-                        if(uid === auth.currentUser.uid) return;
-                        const u = usersCache[uid];
-                        
-                        const safeName = (u.name || "User").toLowerCase(); 
-                        const displayName = u.name || "User";
-        
-                        const item = document.createElement('div');
-                        item.className = 'user-check-item';
-                        item.setAttribute('data-name', safeName);
-                        
-                        item.innerHTML = `
-                            <input type="checkbox" value="${uid}">
-                            <div class="avatar" style="width:30px; height:30px; margin-right:10px; font-size:12px;"></div>
-                            <span>${displayName}</span>
-                        `;
-                        
-                        setAvatar(item.querySelector('.avatar'), u.pfp, u.name, false);
-        
-                        list.appendChild(item);
-                    });
-        
-                    searchInput.oninput = (e) => {
-                        const term = e.target.value.toLowerCase();
-                        const items = list.getElementsByClassName('user-check-item');
-                        
-                        Array.from(items).forEach(item => {
-                            const name = item.getAttribute('data-name');
-                            if (name && name.includes(term)) {
-                                item.style.display = 'flex';
-                            } else {
-                                item.style.display = 'none';
-                            }
-                        });
-                    };
-                }
-                window.closeGroupModal = function() { document.getElementById('group-modal').style.display = 'none'; }
-                
-                window.createNewGroup = async function() {
-                    const name = document.getElementById('new-group-name').value.trim();
-                    if(name.length > 50) return alert('Name too long');
-                    if(!name) return alert("Enter group name");
-                    const checks = document.querySelectorAll('#group-user-list input:checked');
-                    if(checks.length === 0) return alert("Select at least 1 member");
-                    const members = [auth.currentUser.uid];
-                    checks.forEach(c => members.push(c.value));
-                    
-                    let groupPic = "";
-                    const fileIn = document.getElementById('group-file-input');
-                    if(fileIn.files[0]) groupPic = await fileToBase64(fileIn.files[0]);
-                    
-                    const groupId = push(ref(db, 'messages')).key;
-                    push(ref(db, 'messages/' + groupId), { isSystem: true, text: `Group "${name}" created`, time: Date.now() });
-                    const groupData = { groupName: name, groupPic: groupPic, isGroup: true, lastMsg: "Group created", lastTime: Date.now(), unread: true };
-                    members.forEach(uid => update(ref(db, `users/${uid}/chats/${groupId}`), groupData));
-                    closeGroupModal();
-                }
-        
-                window.createNewsChannel = async function() {
-                    const name = prompt("Enter Announcement Channel Name:");
-                    if(!name) return;
-                    
-                    const chatId = push(ref(db, 'messages')).key;
-                    
-                    push(ref(db, 'messages/' + chatId), { 
-                        isSystem: true, 
-                        text: `Announcement Channel "${name}" created`, 
-                        time: Date.now() 
-                    });
-        
-                    const chatData = {
-                        groupName: name,
-                        groupPic: "", 
-                        isGroup: true,
-                        isAnnouncement: true, 
-                        lastMsg: "Channel created",
-                        lastTime: Date.now(),
-                        unread: true
-                    };
-        
-                    const updates = {};
-                    Object.keys(usersCache).forEach(uid => {
-                        updates[`users/${uid}/chats/${chatId}`] = chatData;
-                    });
-                    
-                    await update(ref(db), updates);
-                    openChat(chatId, name, "", true);
-                }
-                
-                window.openEditGroupModal = function() {
-                    if(!isCurrentChatGroup || !activeChatId) return;
-                    document.getElementById('edit-group-modal').style.display = 'flex';
-                    document.getElementById('edit-main-view').style.display = 'block';
-                    document.getElementById('edit-add-view').style.display = 'none';
-        
-                    const chatRef = myChats.find(c => c.id === activeChatId);
-                    document.getElementById('edit-group-name').value = chatRef.groupName;
-                    
-                    const toggle = document.getElementById('edit-announcement-toggle');
-                    toggle.checked = chatRef.isAnnouncement || false;
-        
-                    document.getElementById('admin-options').style.display = isCurrentUserAdmin ? 'block' : 'none';
-        
-                    setAvatar(document.getElementById('edit-group-pic-preview'), chatRef.groupPic, chatRef.groupName, false);
-                    renderGroupMembers();
-                }
-        
-                function renderGroupMembers() {
-                    const list = document.getElementById('edit-members-list');
-                    list.innerHTML = "";
-                    Object.keys(usersCache).forEach(uid => {
-                        get(ref(db, `users/${uid}/chats/${activeChatId}`)).then(snap => {
-                            if(snap.exists()) {
-                                const u = usersCache[uid];
-                                const row = document.createElement('div');
-                                row.className = 'member-row';
-                                const isMe = uid === auth.currentUser.uid;
-                                const showKickBtn = !isMe && isCurrentUserAdmin;
-                                row.innerHTML = `
-                                    <div class="avatar" style="width:30px; height:30px; font-size:12px; margin-right:10px;"></div>
-                                    <span>${isMe ? "You" : u.name}${u.isAdmin ? ' <span style="color:gold; font-size:10px;">★ ADMIN</span>' : ''}</span>
-                                    ${showKickBtn ? `<button class="kick-btn" onclick="kickMember('${uid}')">X</button>` : ''}
-                                `;
-                                setAvatar(row.querySelector('.avatar'), u.pfp, u.name, false);
-                                list.appendChild(row);
-                            }
-                        });
-                    });
-                }
-        
-                window.saveGroupEdit = async function() {
-                    if(!isCurrentUserAdmin) {
-                        alert('Only admins can edit group settings.');
-                        return;
-                    }
-                    const newName = document.getElementById('edit-group-name').value;
-                    const isAnnouncement = document.getElementById('edit-announcement-toggle').checked;
-                    const fileIn = document.getElementById('edit-group-file-input');
-                    
-                    let newPic = null;
-                    if (fileIn.files[0]) newPic = await fileToBase64(fileIn.files[0]);
-        
-                    Object.keys(usersCache).forEach(uid => {
-                        get(ref(db, `users/${uid}/chats/${activeChatId}`)).then(snap => {
-                            if(snap.exists()) {
-                                const updates = { groupName: newName, isAnnouncement: isAnnouncement };
-                                if(newPic) updates.groupPic = newPic;
-                                update(ref(db, `users/${uid}/chats/${activeChatId}`), updates);
-                            }
-                        });
-                    });
-        
-                    const sysText = isAnnouncement ? "Channel switched to Announcement Mode" : "Group info updated";
-                    push(ref(db, 'messages/' + activeChatId), { sender: auth.currentUser.uid, text: sysText, isSystem: true, time: Date.now() });
-                    document.getElementById('edit-group-modal').style.display = 'none';
-                }
-        
-                window.leaveCurrentGroup = function() {
-                    if(!confirm("Are you sure you want to leave?")) return;
-                    remove(ref(db, `users/${auth.currentUser.uid}/chats/${activeChatId}`)).then(() => {
-                        push(ref(db, 'messages/' + activeChatId), { text: `${usersCache[auth.currentUser.uid]?.name || 'User'} left the group`, isSystem: true, time: Date.now() });
-                        document.getElementById('edit-group-modal').style.display = 'none';
-                        document.getElementById('chat-window').classList.remove('open');
-                        activeChatId = null;
-                    });
-                }
-        
-                window.kickMember = function(targetUid) {
-                    if(!isCurrentUserAdmin) {
-                        alert('Only admins can remove members.');
-                        return;
-                    }
-                    if(!confirm("Remove this user?")) return;
-                    remove(ref(db, `users/${targetUid}/chats/${activeChatId}`));
-                    push(ref(db, 'messages/' + activeChatId), { text: `${usersCache[targetUid]?.name || 'User'} was removed`, isSystem: true, time: Date.now() });
-                    setTimeout(renderGroupMembers, 500); 
-                }
-        
-                window.showAddMemberView = function() {
-                    document.getElementById('edit-main-view').style.display = 'none';
-                    document.getElementById('edit-add-view').style.display = 'block';
-                    const list = document.getElementById('add-member-list');
-                    list.innerHTML = "";
-                    Object.keys(usersCache).forEach(uid => {
-                        get(ref(db, `users/${uid}/chats/${activeChatId}`)).then(snap => {
-                            if(!snap.exists()) { 
-                                const u = usersCache[uid];
-                                const item = document.createElement('div');
-                                item.className = 'user-check-item';
-                                item.innerHTML = `
-                                    <input type="checkbox" value="${uid}">
-                                    <div class="avatar" style="width:30px; height:30px; margin-right:10px; font-size:12px;"></div>
-                                    <span>${u.name}</span>
-                                `;
-                                setAvatar(item.querySelector('.avatar'), u.pfp, u.name, false);
-                                list.appendChild(item);
-                            }
-                        });
-                    });
-                }
-                window.hideAddMemberView = function() {
-                    document.getElementById('edit-main-view').style.display = 'block';
-                    document.getElementById('edit-add-view').style.display = 'none';
-                }
-        
-                window.confirmAddMembers = function() {
-                    const checks = document.querySelectorAll('#add-member-list input:checked');
-                    if(checks.length === 0) return;
-                    const currentGroupData = myChats.find(c => c.id === activeChatId);
-                    const baseData = {
-                        groupName: currentGroupData.groupName,
-                        groupPic: currentGroupData.groupPic || "",
-                        isGroup: true,
-                        lastMsg: "You were added",
-                        lastTime: Date.now(),
-                        unread: true,
-                        isAnnouncement: currentGroupData.isAnnouncement || false
-                    };
-                    checks.forEach(c => {
-                        const uid = c.value;
-                        update(ref(db, `users/${uid}/chats/${activeChatId}`), baseData);
-                        push(ref(db, 'messages/' + activeChatId), { text: `${usersCache[uid]?.name || 'User'} was added`, isSystem: true, time: Date.now() });
-                    });
-                    hideAddMemberView();
-                    setTimeout(renderGroupMembers, 1000);
-                }
-            </script>
-        </body>
-        </html>
-        <div id="settings" class="section">
-            <h2>System Settings</h2>
-            
-            <div class="card">
-                <h3>📅 Class Schedule</h3>
-                <p style="color:var(--text-secondary); margin-bottom:15px;">Update your Red Day and Green Day classes.</p>
-                <div class="schedule-grid">
-                    <div>
-                        <h4 style="color:#ef4444; margin-bottom:10px;">Red Day</h4>
-                        <div class="class-input-group"><label>1st Period</label><input type="text" id="set-c1" onchange="updateSchedule()"></div>
-                        <div class="class-input-group"><label>2nd Period</label><input type="text" id="set-c2" onchange="updateSchedule()"></div>
-                        <div class="class-input-group"><label>3rd Period</label><input type="text" id="set-c3" onchange="updateSchedule()"></div>
-                        <div class="class-input-group"><label>4th Period</label><input type="text" id="set-c4" onchange="updateSchedule()"></div>
-                    </div>
-                    <div>
-                        <h4 style="color:#10b981; margin-bottom:10px;">Green Day</h4>
-                        <div class="class-input-group"><label>5th Period</label><input type="text" id="set-c5" onchange="updateSchedule()"></div>
-                        <div class="class-input-group"><label>6th Period</label><input type="text" id="set-c6" onchange="updateSchedule()"></div>
-                        <div class="class-input-group"><label>7th Period</label><input type="text" id="set-c7" onchange="updateSchedule()"></div>
-                        <div class="class-input-group"><label>8th Period</label><input type="text" id="set-c8" onchange="updateSchedule()"></div>
-                    </div>
-                </div>
-                <button class="btn btn-primary" onclick="updateSchedule()" style="margin-top:15px;">Save Changes</button>
-            </div>
 
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h3>🔒 Stealth Mode</h3>
-                    <p style="color:var(--text-secondary); margin-bottom:15px;">Instantly switch between School and Secret modes.</p>
-                    <button class="btn btn-primary" onclick="toggleMode()">Switch Mode</button>
-                    <p style="font-size:0.8rem; margin-top:10px; color:var(--text-secondary);">Shortcut: Press <strong>ESC</strong> key</p>
-                </div>
-                <div class="card">
-                    <h3>🎨 Appearance</h3>
-                    <p style="color:var(--text-secondary); margin-bottom:15px;">Switch between Light and Dark interface.</p>
-                    <button class="btn" onclick="toggleTheme()">Toggle Theme</button>
+                <div class="cb-main">
+                    <div style="padding:15px; border-bottom:1px solid #e2e8f0; font-weight:bold; display:flex; justify-content:space-between;">
+                        <span>Current Chat: General</span>
+                        <span style="color:var(--success); font-size:0.8rem;">● Live</span>
+                    </div>
+                    
+                    <div class="cb-messages" id="chat-feed">
+                        <div class="msg received">Hey everyone! Has anyone started the history project?</div>
+                        <div class="msg sent">Yeah, I just finished the outline.</div>
+                        <div class="msg received">Nice! I'm still stuck on the intro.</div>
+                    </div>
+                    
+                    <div class="cb-input-area">
+                        <input type="text" class="cb-input" id="chat-msg-input" placeholder="Type a message...">
+                        <button class="cb-send" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
+
     </main>
 
-    <textarea id="drive-mad-code" style="display:none;"><!DOCTYPE html><html lang="en"><head><base href="https://cdn.jsdelivr.net/gh/genizy/dmad-poki@49b5ab6b987f5f3be58f9dae59c92e8fc1aab9b0/"><script>window.assgdd={"ancestorOrigins":{"0":"https://games.poki.com","1":"https://poki.com"},"href":"https://f9564e4e-ef25-4e4b-ba67-cb11a1576bbd.poki-gdn.com/cc1bc57a-e355-4696-97c2-097bf6188606/index.html?cloudsavegames=y"}</script><meta charset="utf-8"><title>Drive Mad</title><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><link rel="stylesheet" href="webapp/fancade.css"><script src="poki-sdk.js"></script></head><body id="body"><div id="canvas_border" class="emscripten_border"><div id="play_content" class="middle center"><div class="edge"><div class="box"><div class="black"><img src="webapp/cover.jpg" class="cover"><p class="title">Drive Mad</p></div></div></div><div id="progress_or_play"><progress id="progress" class="loading" value="0" max="100"></progress></div></div><canvas class="emscripten" id="canvas" tabindex=-1></canvas></div><script type="text/javascript" src="webapp/source_min.js"></script><script type="text/javascript" src="webapp/index.js"></script></body></html></textarea>
-    <textarea id="snake-code" style="display:none;"><!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;color:#fff;font-family:monospace;"><div style="position:absolute;top:10px;">Score: <span id="score">0</span></div><canvas id="c" width="400" height="400" style="border:1px solid #333"></canvas><script>c=document.getElementById('c');x=c.getContext('2d');S=20;p=[{x:10,y:10}];a={x:15,y:15};v={x:0,y:0};sc=0;setInterval(()=>{p.forEach(e=>{x.fillStyle='#000';x.fillRect(e.x*S,e.y*S,S-2,S-2)});p=[{x:p[0].x+v.x,y:p[0].y+v.y},...p.slice(0,sc+1)];if(p[0].x==a.x&&p[0].y==a.y){sc++;document.getElementById('score').innerText=sc;a={x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)}}if(p[0].x<0||p[0].x>19||p[0].y<0||p[0].y>19)location.reload();x.fillStyle='#f00';x.fillRect(a.x*S,a.y*S,S-2,S-2);x.fillStyle='#0f0';p.forEach(e=>x.fillRect(e.x*S,e.y*S,S-2,S-2))},100);document.onkeydown=e=>{k=e.keyCode;v={x:k==37?-1:k==39?1:0,y:k==38?-1:k==40?1:0}}</script></body></html></textarea>
-    <textarea id="geo-dash-code" style="display:none;"><!DOCTYPE html><html lang="en-US"><head><base href="https://rawcdn.githack.com/genizy/google-class/main/gdlite/"><title>Geometry Dash</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="themes/geometrydashlite.io/rs/css/home.css?v=1"></head><body style="margin:0;overflow:hidden;background:#000;"><div id="gameContainer" style="width:100vw;height:100vh;"></div><script src="Build/UnityLoader.js"></script><script>var gameInstance=UnityLoader.instantiate("gameContainer","Build/GeometryDashLite.json");</script></body></html></textarea>
-    <textarea id="breakout-code" style="display:none;"><!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;"><canvas id="c" width="480" height="320" style="background:#eee;border:2px solid #555"></canvas><script>var c=document.getElementById("c"),ctx=c.getContext("2d");var x=c.width/2,y=c.height-30,dx=2,dy=-2,ballRadius=10,paddleHeight=10,paddleWidth=75,paddleX=(c.width-paddleWidth)/2,rightPressed=false,leftPressed=false,brickRowCount=3,brickColumnCount=5,brickWidth=75,brickHeight=20,brickPadding=10,brickOffsetTop=30,brickOffsetLeft=30,bricks=[];for(var cCol=0;cCol<brickColumnCount;cCol++){bricks[cCol]=[];for(var r=0;r<brickRowCount;r++){bricks[cCol][r]={x:0,y:0,status:1}}}document.addEventListener("keydown",keyDownHandler,false);document.addEventListener("keyup",keyUpHandler,false);function keyDownHandler(e){if(e.key=="Right"||e.key=="ArrowRight"){rightPressed=true}else if(e.key=="Left"||e.key=="ArrowLeft"){leftPressed=true}}function keyUpHandler(e){if(e.key=="Right"||e.key=="ArrowRight"){rightPressed=false}else if(e.key=="Left"||e.key=="ArrowLeft"){leftPressed=false}}function collisionDetection(){for(var cCol=0;cCol<brickColumnCount;cCol++){for(var r=0;r<brickRowCount;r++){var b=bricks[cCol][r];if(b.status==1){if(x>b.x&&x<b.x+brickWidth&&y>b.y&&y<b.y+brickHeight){dy=-dy;b.status=0}}}}}function drawBall(){ctx.beginPath();ctx.arc(x,y,ballRadius,0,Math.PI*2);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}function drawPaddle(){ctx.beginPath();ctx.rect(paddleX,c.height-paddleHeight,paddleWidth,paddleHeight);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}function drawBricks(){for(var cCol=0;cCol<brickColumnCount;cCol++){for(var r=0;r<brickRowCount;r++){if(bricks[cCol][r].status==1){var brickX=(cCol*(brickWidth+brickPadding))+brickOffsetLeft;var brickY=(r*(brickHeight+brickPadding))+brickOffsetTop;bricks[cCol][r].x=brickX;bricks[cCol][r].y=brickY;ctx.beginPath();ctx.rect(brickX,brickY,brickWidth,brickHeight);ctx.fillStyle="#0095DD";ctx.fill();ctx.closePath()}}}}function draw(){ctx.clearRect(0,0,c.width,c.height);drawBricks();drawBall();drawPaddle();collisionDetection();if(x+dx>c.width-ballRadius||x+dx<ballRadius){dx=-dx}if(y+dy<ballRadius){dy=-dy}else if(y+dy>c.height-ballRadius){if(x>paddleX&&x<paddleX+paddleWidth){dy=-dy}else{document.location.reload()}}if(rightPressed&&paddleX<c.width-paddleWidth){paddleX+=7}else if(leftPressed&&paddleX>0){paddleX-=7}x+=dx;y+=dy;requestAnimationFrame(draw)}draw();</script></body></html></textarea>
-    <textarea id="pong-code" style="display:none;"><!DOCTYPE html><html><body style="margin:0;background:black;display:flex;justify-content:center;align-items:center;height:100vh;"><canvas id="gameCanvas" width="600" height="400"></canvas><script>var canvas=document.getElementById('gameCanvas');var canvasContext=canvas.getContext('2d');var ballX=50;var ballY=50;var ballSpeedX=10;var ballSpeedY=4;var paddle1Y=250;var paddle2Y=250;var playerScore=0;var computerScore=0;const PADDLE_HEIGHT=100;const PADDLE_THICKNESS=10;function calculateMousePos(evt){var rect=canvas.getBoundingClientRect();var root=document.documentElement;var mouseX=evt.clientX-rect.left-root.scrollLeft;var mouseY=evt.clientY-rect.top-root.scrollTop;return{x:mouseX,y:mouseY}}window.onload=function(){var framesPerSecond=30;setInterval(function(){moveEverything();drawEverything()},1000/framesPerSecond);canvas.addEventListener('mousemove',function(evt){var mousePos=calculateMousePos(evt);paddle1Y=mousePos.y-(PADDLE_HEIGHT/2)})};function ballReset(){if(playerScore>=3||computerScore>=3){playerScore=0;computerScore=0}ballSpeedX=-ballSpeedX;ballX=canvas.width/2;ballY=canvas.height/2}function computerMovement(){var paddle2YCenter=paddle2Y+(PADDLE_HEIGHT/2);if(paddle2YCenter<ballY-35){paddle2Y+=6}else if(paddle2YCenter>ballY+35){paddle2Y-=6}}function moveEverything(){computerMovement();ballX+=ballSpeedX;ballY+=ballSpeedY;if(ballX<0){if(ballY>paddle1Y&&ballY<paddle1Y+PADDLE_HEIGHT){ballSpeedX=-ballSpeedX;var deltaY=ballY-(paddle1Y+PADDLE_HEIGHT/2);ballSpeedY=deltaY*0.35}else{computerScore++;ballReset()}}if(ballX>canvas.width){if(ballY>paddle2Y&&ballY<paddle2Y+PADDLE_HEIGHT){ballSpeedX=-ballSpeedX;var deltaY=ballY-(paddle2Y+PADDLE_HEIGHT/2);ballSpeedY=deltaY*0.35}else{playerScore++;ballReset()}}if(ballY<0){ballSpeedY=-ballSpeedY}if(ballY>canvas.height){ballSpeedY=-ballSpeedY}}function drawEverything(){canvasContext.fillStyle='black';canvasContext.fillRect(0,0,canvas.width,canvas.height);canvasContext.fillStyle='white';canvasContext.fillRect(0,paddle1Y,PADDLE_THICKNESS,PADDLE_HEIGHT);canvasContext.fillRect(canvas.width-PADDLE_THICKNESS,paddle2Y,PADDLE_THICKNESS,PADDLE_HEIGHT);canvasContext.beginPath();canvasContext.arc(ballX,ballY,10,0,Math.PI*2,true);canvasContext.fill();canvasContext.fillText(playerScore,100,100);canvasContext.fillText(computerScore,canvas.width-100,100)}</script></body></html></textarea>
-    <textarea id="2048-code" style="display:none;"><!DOCTYPE html><html lang="en"><head><style>body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#f8f8f8}.title{font-size:68px;font-weight:bold;color:#333;text-align:center;text-shadow:2px 2px #eee;margin-top:50px}#game-container{width:400px;height:400px;margin:0 auto;display:flex;flex-wrap:wrap;background-color:#bbada0;box-shadow:0 0 10px rgba(0,0,0,0.3);border-radius:5px;overflow:hidden}.grid-item{width:90px;height:90px;margin:5px;background-color:#ccc0b3;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:36px;color:#776e65;box-shadow:0 0 10px rgba(0,0,0,0.2);transition:background-color 0.2s,transform 0.2s}.grid-item-2{background-color:#eee4da}.grid-item-4{background-color:#ede0c8}.grid-item-8{background-color:#f2b179}.grid-item-16{background-color:#f59563}.grid-item-32{background-color:#f67c5f}.grid-item-64{background-color:#f65e3b}.grid-item-128{background-color:#edcf72;color:#776e65}.grid-item-256{background-color:#edcc61;color:#776e65}.grid-item-512{background-color:#edc850;color:#776e65}.grid-item-1024{background-color:#edc53f;color:#776e65}.grid-item-2048{background-color:#edc22e;color:#776e65}.grid-item-new{animation:new-tile 0.2s forwards}.game-over{position:absolute;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;font-size:36px;color:#fff;z-index:9999;opacity:0;pointer-events:none;transition:opacity 0.2s}.game-over.show{opacity:1;pointer-events:all}.score{font-size:24px;color:#776e65;text-align:center;margin-bottom:10px}.score span{font-weight:bold;color:#8f7a66}.restart-button{padding:10px 20px;background-color:#8f7a66;color:#fff;border-radius:5px;cursor:pointer;transition:background-color 0.2s}.restart-button:hover{background-color:#776e65}@keyframes new-tile{0%{transform:scale(0.7)}100%{transform:scale(1)}}@media (max-width:480px){#game-container{width:300px;height:300px}.grid-item{width:65px;height:65px;font-size:24px}}</style></head><body><h1 class="title">2048</h1><div id="game-container"></div><div class="game-over">Game Over<div class="score">Score: <span id="final-score"></span></div><div class="restart-button" onclick="resetGame()">Restart</div></div><div class="score">Score: <span id="score">0</span></div><script>const gameContainer=document.querySelector('#game-container'),scoreEl=document.querySelector('#score'),gameOverEl=document.querySelector('.game-over'),finalScoreEl=document.querySelector('#final-score');let grid=[],score=0;function createGrid(){for(let i=0;i<4;i++){for(let j=0;j<4;j++){const g=document.createElement('div');g.classList.add('grid-item');g.setAttribute('data-row',i);g.setAttribute('data-col',j);gameContainer.appendChild(g);grid.push(g)}}}function addNumber(){const e=grid.filter(g=>g.innerHTML==='');if(e.length===0)return;const r=e[Math.floor(Math.random()*e.length)],n=Math.random()<0.9?2:4;r.innerHTML=n;r.classList.add(`grid-item-${n}`);r.classList.add('grid-item-new')}function moveLeft(){let h=false;for(let i=0;i<4;i++){for(let j=1;j<4;j++){const c=getGrid(i,j);if(c.innerHTML==='')continue;let k=j-1;while(k>=0){const p=getGrid(i,k);if(p.innerHTML!==''){if(p.innerHTML===c.innerHTML){mergeGrids(c,p);h=true}break}k--}if(k!==j-1){moveGrid(c,getGrid(i,k+1));h=true}}}return h}function moveRight(){let h=false;for(let i=0;i<4;i++){for(let j=2;j>=0;j--){const c=getGrid(i,j);if(c.innerHTML==='')continue;let k=j+1;while(k<=3){const p=getGrid(i,k);if(p.innerHTML!==''){if(p.innerHTML===c.innerHTML){mergeGrids(c,p);h=true}break}k++}if(k!==j+1){moveGrid(c,getGrid(i,k-1));h=true}}}return h}function moveUp(){let h=false;for(let i=1;i<4;i++){for(let j=0;j<4;j++){const c=getGrid(i,j);if(c.innerHTML==='')continue;let k=i-1;while(k>=0){const p=getGrid(k,j);if(p.innerHTML!==''){if(p.innerHTML===c.innerHTML){mergeGrids(c,p);h=true}break}k--}if(k!==i-1){moveGrid(c,getGrid(k+1,j));h=true}}}return h}function moveDown(){let h=false;for(let i=2;i>=0;i--){for(let j=0;j<4;j++){const c=getGrid(i,j);if(c.innerHTML==='')continue;let k=i+1;while(k<=3){const p=getGrid(k,j);if(p.innerHTML!==''){if(p.innerHTML===c.innerHTML){mergeGrids(c,p);h=true}break}k++}if(k!==i+1){moveGrid(c,getGrid(k-1,j));h=true}}}return h}function moveGrid(c,t){t.innerHTML=c.innerHTML;t.className=c.className;c.innerHTML='';c.className='grid-item'}function mergeGrids(c,t){const cv=parseInt(c.innerHTML),tv=parseInt(t.innerHTML);t.innerHTML=cv+tv;t.className=`grid-item grid-item-${cv+tv}`;c.innerHTML='';c.className='grid-item';score+=cv+tv;scoreEl.innerHTML=score}function getGrid(r,c){return grid.find(g=>g.getAttribute('data-row')==r&&g.getAttribute('data-col')==c)}function isGameOver(){const e=grid.filter(g=>g.innerHTML==='');if(e.length>0)return!1;for(let i=0;i<4;i++){for(let j=0;j<4;j++){const c=getGrid(i,j),r=getGrid(i,j+1),b=getGrid(i+1,j);if(r&&c.innerHTML===r.innerHTML)return!1;if(b&&c.innerHTML===b.innerHTML)return!1}}return!0}function resetGame(){grid.forEach(g=>{g.innerHTML='';g.className='grid-item'});score=0;scoreEl.innerHTML='0';gameOverEl.classList.remove('show');addNumber();addNumber()}document.addEventListener('keydown',e=>{let h=!1;if(e.keyCode===37)h=moveLeft();else if(e.keyCode===38)h=moveUp();else if(e.keyCode===39)h=moveRight();else if(e.keyCode===40)h=moveDown();if(h){addNumber();if(isGameOver()){finalScoreEl.innerHTML=score;gameOverEl.classList.add('show')}}});createGrid();addNumber();addNumber();</script></body></html></textarea>
-
     <script>
-        // --- 1. FIREBASE CONFIGURATION ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyABujQAAYKhMxJddtJSvTShWEZ8bqF3kzA",
-            authDomain: "chatterbox3000-fb3e2.firebaseapp.com",
-            databaseURL: "https://chatterbox3000-fb3e2-default-rtdb.firebaseio.com",
-            projectId: "chatterbox3000-fb3e2",
-            storageBucket: "chatterbox3000-fb3e2.firebasestorage.app",
-            messagingSenderId: "298622361038",
-            appId: "1:298622361038:web:c1e46432470dbce92a5f9f"
-        };
-
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const auth = firebase.auth();
-        const db = firebase.database();
-        let currentUser = null;
-        let userSchedule = null;
-
-        // --- 2. AUTHENTICATION LOGIC ---
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('user-display').innerText = user.email.split('@')[0];
-                loadUserData();
-                checkScheduleSetup(); // New Check
-            } else {
-                currentUser = null;
-                document.getElementById('login-overlay').style.display = 'flex';
-            }
-        });
-
-        function loginUser() {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('password').value;
-            const err = document.getElementById('login-error');
-            err.innerText = "Authenticating...";
-            auth.signInWithEmailAndPassword(e, p).catch(error => {
-                err.innerText = error.message;
-            });
-        }
-
-        function logoutUser() {
-            auth.signOut();
-            location.reload();
-        }
-
-        // --- 3. SCHEDULE LOGIC (NEW) ---
-        function checkScheduleSetup() {
-            db.ref('users/' + currentUser.uid + '/schedule').once('value', s => {
-                if (!s.exists()) {
-                    // No schedule found? Show popup!
-                    document.getElementById('schedule-overlay').style.display = 'flex';
-                } else {
-                    // Schedule exists, load it
-                    userSchedule = s.val();
-                    populateSettingsInputs(userSchedule);
-                    renderSchedule('red'); // Default view
-                }
-            });
-        }
-
-        function saveInitialSchedule() {
-            const sched = {
-                c1: document.getElementById('setup-c1').value || "Free Period",
-                c2: document.getElementById('setup-c2').value || "Free Period",
-                c3: document.getElementById('setup-c3').value || "Free Period",
-                c4: document.getElementById('setup-c4').value || "Free Period",
-                c5: document.getElementById('setup-c5').value || "Free Period",
-                c6: document.getElementById('setup-c6').value || "Free Period",
-                c7: document.getElementById('setup-c7').value || "Free Period",
-                c8: document.getElementById('setup-c8').value || "Free Period"
-            };
+        // --- NAVIGATION ---
+        function nav(sectionId, btn) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             
-            db.ref('users/' + currentUser.uid + '/schedule').set(sched).then(() => {
-                document.getElementById('schedule-overlay').style.display = 'none';
-                userSchedule = sched;
-                populateSettingsInputs(sched);
-                renderSchedule('red');
-            });
+            // Show selected
+            document.getElementById(sectionId).classList.add('active');
+            if(btn) btn.classList.add('active');
         }
 
-        function updateSchedule() {
-            const sched = {
-                c1: document.getElementById('set-c1').value,
-                c2: document.getElementById('set-c2').value,
-                c3: document.getElementById('set-c3').value,
-                c4: document.getElementById('set-c4').value,
-                c5: document.getElementById('set-c5').value,
-                c6: document.getElementById('set-c6').value,
-                c7: document.getElementById('set-c7').value,
-                c8: document.getElementById('set-c8').value
-            };
-            
-            db.ref('users/' + currentUser.uid + '/schedule').set(sched).then(() => {
-                const t = document.getElementById('toast');
-                t.innerText = "Schedule Updated!";
-                t.style.opacity = '1';
-                setTimeout(() => t.style.opacity = '0', 2000);
-                userSchedule = sched;
-                renderSchedule('red'); // Refresh dashboard view
-            });
-        }
-
-        function populateSettingsInputs(data) {
-            for(let i=1; i<=8; i++) {
-                if(document.getElementById('set-c'+i)) {
-                    document.getElementById('set-c'+i).value = data['c'+i];
-                }
-            }
-        }
-
-        function renderSchedule(dayType) {
-            if(!userSchedule) return;
-            const container = document.getElementById('schedule-display-list');
-            container.innerHTML = '';
-
-            let start = dayType === 'red' ? 1 : 5;
-            let end = dayType === 'red' ? 4 : 8;
-            let color = dayType === 'red' ? '#ef4444' : '#10b981';
-
-            for(let i=start; i<=end; i++) {
-                const div = document.createElement('div');
-                div.className = 'class-list-item';
-                div.innerHTML = `
-                    <span style="font-weight:500;">${userSchedule['c'+i]}</span>
-                    <span class="period-badge" style="color:${color}; border:1px solid ${color};">Period ${i}</span>
-                `;
-                container.appendChild(div);
-            }
-        }
-
-        // --- 4. NAVIGATION & SAVING ---
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            if(event && event.target) event.target.classList.add('active');
-        }
-
-        function saveData(type) {
-            if (!currentUser) return;
-            const val = document.getElementById('note-' + type).value;
-            db.ref('users/' + currentUser.uid + '/notes/' + type).set(val);
-            
-            const t = document.getElementById('toast');
-            t.innerText = "Saved automatically";
-            t.style.opacity = '1';
-            setTimeout(() => t.style.opacity = '0', 2000);
-        }
-
-        function loadUserData() {
-            const types = ['math', 'science', 'ela', 'history'];
-            types.forEach(t => {
-                db.ref('users/' + currentUser.uid + '/notes/' + t).once('value', s => {
-                    if(s.val()) document.getElementById('note-' + t).value = s.val();
-                });
-            });
-            initTodoListener();
-        }
-
-        // --- 5. CALCULATOR ---
-        function calc(val) {
-            const disp = document.getElementById('calcDisplay');
-            if (val === 'C') {
-                disp.value = '';
-            } else if (val === '=') {
-                try {
-                    let expr = disp.value
-                        .replace(/sin\(/g, 'Math.sin(')
-                        .replace(/cos\(/g, 'Math.cos(')
-                        .replace(/tan\(/g, 'Math.tan(')
-                        .replace(/sqrt\(/g, 'Math.sqrt(')
-                        .replace(/PI/g, 'Math.PI')
-                        .replace(/\^/g, '**');
-                    
-                    let res = eval(expr);
-                    disp.value = Number.isInteger(res) ? res : res.toFixed(4).replace(/\.?0+$/, '');
-                } catch { disp.value = 'Error'; }
-            } else {
-                disp.value += (val === 'pow(' ? '^' : val);
-            }
-        }
-
-        // --- 6. TO-DO LIST ---
-        function addTodo() {
-            const input = document.getElementById('newTodo');
-            const text = input.value.trim();
-            if (!text || !currentUser) return;
-            db.ref('users/' + currentUser.uid + '/todos').push({ text: text, done: false });
-            input.value = '';
-        }
-
-        function initTodoListener() {
-            if (!currentUser) return;
-            const list = document.getElementById('todoList');
-            const miniList = document.getElementById('mini-todo-list');
-
-            db.ref('users/' + currentUser.uid + '/todos').on('value', snapshot => {
-                list.innerHTML = '';
-                miniList.innerHTML = '';
-                let count = 0;
-
-                snapshot.forEach(child => {
-                    const task = child.val();
-                    const key = child.key;
-                    
-                    const div = document.createElement('div');
-                    div.className = `todo-item ${task.done ? 'done' : ''}`;
-                    div.innerHTML = `<span>${task.text}</span><div><button class="btn" style="padding:5px 10px; font-size:0.8rem;" onclick="toggleTodo('${key}', ${!task.done})">${task.done ? 'Undo' : 'Done'}</button><button class="btn btn-danger" style="padding:5px 10px; font-size:0.8rem; margin-left:5px;" onclick="deleteTodo('${key}')">X</button></div>`;
-                    list.appendChild(div);
-
-                    if (!task.done) {
-                        count++;
-                        const li = document.createElement('li');
-                        li.innerText = '• ' + task.text;
-                        miniList.appendChild(li);
-                    }
-                });
-                if (count === 0) miniList.innerHTML = '<li style="color:var(--text-secondary);">No pending tasks.</li>';
-            });
-        }
-
-        function toggleTodo(key, status) { db.ref('users/' + currentUser.uid + '/todos/' + key).update({ done: status }); }
-        function deleteTodo(key) { db.ref('users/' + currentUser.uid + '/todos/' + key).remove(); }
-
-
-        // --- 7. GAMES & FULLSCREEN ---
-        function loadGame(codeId) {
-            const container = document.getElementById('game-container');
-            const frame = document.getElementById('game-frame');
-            container.classList.add('fullscreen-mode');
-            document.getElementById('exit-game-fs').style.display = 'block';
-            frame.srcdoc = document.getElementById(codeId).value;
-            frame.onload = () => frame.contentWindow.focus();
-        }
-
-        function exitFullGame() {
-            const c = document.getElementById('game-container');
-            c.classList.remove('fullscreen-mode');
-            document.getElementById('exit-game-fs').style.display = 'none';
-            document.getElementById('game-frame').srcdoc = '';
-        }
-
-        function toggleFullscreenEl(id) {
-            const el = document.getElementById(id);
-            if(el.classList.contains('fullscreen-mode')) {
-                 el.classList.remove('fullscreen-mode');
-            } else {
-                 document.querySelectorAll('.fullscreen-mode').forEach(e => e.classList.remove('fullscreen-mode'));
-                 el.classList.add('fullscreen-mode');
-            }
-        }
-
-        // --- 8. SYSTEM SETTINGS ---
-        function toggleTheme() {
-            const b = document.body;
-            b.dataset.theme = b.dataset.theme === 'light' ? 'dark' : 'light';
-        }
-
+        // --- THEME TOGGLE (FUN MODE) ---
         function toggleMode() {
-            document.body.classList.toggle('mode-school');
             document.body.classList.toggle('mode-fun');
-            if(document.body.classList.contains('mode-school')) showSection('school-home');
-            else showSection('fun-home');
         }
 
-        // --- 9. GLOBAL EVENT LISTENERS ---
-        document.addEventListener('keydown', e => {
-            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+        // --- TIMER ---
+        let timerInterval;
+        let time = 1500; // 25 mins
 
-            if (e.key === "Escape") {
-                if (document.querySelector('.fullscreen-mode')) {
-                    exitFullGame();
-                    document.querySelectorAll('.fullscreen-mode').forEach(el => el.classList.remove('fullscreen-mode'));
-                } else if (document.body.classList.contains('mode-fun')) {
-                    toggleMode();
-                }
+        function updateTimer() {
+            let m = Math.floor(time / 60);
+            let s = time % 60;
+            document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+        }
+
+        function startTimer() {
+            if(timerInterval) return;
+            timerInterval = setInterval(() => {
+                if(time > 0) { time--; updateTimer(); }
+                else { clearInterval(timerInterval); alert("Time's Up!"); }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            time = 1500;
+            updateTimer();
+        }
+
+        // --- CALCULATOR ---
+        let calcExp = "";
+        function calcInput(val) {
+            const screen = document.getElementById('calc-screen');
+            if(val === 'C') { calcExp = ""; screen.innerText = "0"; return; }
+            if(val === '=') {
+                try { screen.innerText = eval(calcExp); calcExp = screen.innerText; }
+                catch { screen.innerText = "Error"; calcExp = ""; }
+                return;
             }
-        });
+            calcExp += val;
+            screen.innerText = calcExp;
+        }
 
-        // --- 10. UTILS ---
-        function countWords(area, display) {
-            const txt = document.getElementById(area).value.trim();
-            document.getElementById(display).innerText = txt ? txt.split(/\s+/).length + " words" : "0 words";
+        // --- CONVERTER ---
+        function convert(type) {
+            const val = parseFloat(document.getElementById('convert-input').value);
+            const resBox = document.getElementById('convert-result');
+            if(isNaN(val)) return;
+
+            if(type === 'c2f') resBox.value = (val * 9/5) + 32 + " °F";
+            if(type === 'f2c') resBox.value = (val - 32) * 5/9 + " °C";
+            if(type === 'km2mi') resBox.value = (val * 0.621371) + " Miles";
+        }
+
+        // --- CHATTER BOX ---
+        function sendChat() {
+            const input = document.getElementById('chat-msg-input');
+            const txt = input.value.trim();
+            if(!txt) return;
+
+            const feed = document.getElementById('chat-feed');
+            const msg = document.createElement('div');
+            msg.className = 'msg sent';
+            msg.innerText = txt;
+            
+            feed.appendChild(msg);
+            feed.scrollTop = feed.scrollHeight;
+            input.value = "";
+
+            // Auto Reply Simulation
+            setTimeout(() => {
+                const reply = document.createElement('div');
+                reply.className = 'msg received';
+                reply.innerText = "That's interesting! Tell me more.";
+                feed.appendChild(reply);
+                feed.scrollTop = feed.scrollHeight;
+            }, 1500);
         }
         
-        let timerInt;
-        function toggleTimer() {
-            if(timerInt) { clearInterval(timerInt); timerInt = null; }
-            else {
-                timerInt = setInterval(() => {
-                    const el = document.getElementById('timer-display');
-                    let [m, s] = el.innerText.split(':').map(Number);
-                    if(s===0) { if(m===0) return clearInterval(timerInt); m--; s=59; } else s--;
-                    el.innerText = `${m}:${s<10?'0'+s:s}`;
-                }, 1000);
+        // Enter key for chat
+        document.getElementById('chat-msg-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') sendChat();
+        });
+
+        // --- KANBAN (Simple move logic) ---
+        function moveTask(card) {
+            // Rotate through columns: Todo -> Doing -> Done -> Todo
+            const colTodo = document.getElementById('col-todo');
+            const colDoing = document.getElementById('col-doing');
+            const colDone = document.getElementById('col-done');
+            
+            const parent = card.parentElement;
+            
+            if(parent.id === 'col-todo') {
+                colDoing.appendChild(card);
+            } else if (parent.id === 'col-doing') {
+                colDone.appendChild(card);
+                card.style.opacity = "0.6";
+                card.style.textDecoration = "line-through";
+            } else {
+                colTodo.appendChild(card);
+                card.style.opacity = "1";
+                card.style.textDecoration = "none";
             }
         }
-        function resetTimer() { clearInterval(timerInt); timerInt=null; document.getElementById('timer-display').innerText="25:00"; }
+        
+        function addTaskPrompt() {
+            const task = prompt("Enter new task name:");
+            if(task) {
+                const div = document.createElement('div');
+                div.className = "task-card";
+                div.innerText = task;
+                div.setAttribute('onclick', 'moveTask(this)');
+                document.getElementById('col-todo').appendChild(div);
+            }
+        }
+
     </script>
 </body>
 </html>
