@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall Focus v5</title>
+    <title>StudyHall Focus</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -87,33 +87,23 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- RADIO STATION UI (CSS ONLY - NO IMAGES) --- */
-        .radio-container {
-            display: flex; flex-direction: column; align-items: center;
-        }
-        
-        /* The Vinyl Record */
+        /* --- RADIO STATION UI --- */
+        .radio-container { display: flex; flex-direction: column; align-items: center; }
         .record-player {
             width: 200px; height: 200px; background: #1e1e1e; border-radius: 50%;
             position: relative; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 10px 30px -5px rgba(0,0,0,0.3); border: 5px solid #2d2d2d;
             transition: transform 0.5s;
         }
-        .record-grooves {
-            width: 180px; height: 180px; border-radius: 50%;
-            border: 2px dashed #333; opacity: 0.5; position: absolute;
-        }
+        .record-grooves { width: 180px; height: 180px; border-radius: 50%; border: 2px dashed #333; opacity: 0.5; position: absolute; }
         .record-label {
             width: 80px; height: 80px; background: var(--accent); border-radius: 50%;
             display: flex; align-items: center; justify-content: center; z-index: 2;
         }
         .record-label i { color: white; font-size: 1.5rem; }
-        
-        /* Animation State */
         .record-player.playing { animation: spin 4s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Station Cards */
         .station-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 20px; width: 100%; }
         .station-btn {
             background: var(--bg-color); border: 1px solid var(--border); padding: 15px;
@@ -132,7 +122,7 @@
         }
         .mood-btn:hover, .mood-btn.active { border-color: var(--accent); color: var(--accent); }
 
-        /* --- STANDARD UI --- */
+        /* --- UTILS --- */
         .schedule-item { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
         .schedule-item input { border: none; background: transparent; color: var(--text-primary); font-family: inherit; font-size: 0.95rem; width: 100%; }
         .schedule-item input:focus { border-bottom: 1px solid var(--accent); }
@@ -153,18 +143,15 @@
         <div class="logo"><i class="fas fa-brain"></i> StudyHall</div>
         
         <button class="nav-btn active" onclick="showSection('dashboard', this)"><i class="fas fa-columns"></i> Dashboard</button>
-        
         <button class="nav-btn" onclick="toggleNotebookMenu(this)">
             <i class="fas fa-sticky-note"></i> Notebook <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i>
         </button>
         <div id="notebook-submenu" class="submenu"></div>
-
         <button class="nav-btn" onclick="showSection('radio-room', this)"><i class="fas fa-music"></i> Radio Room</button>
         <button class="nav-btn" onclick="showSection('todos', this)"><i class="fas fa-check-circle"></i> Tasks</button>
         <button class="nav-btn" onclick="showSection('calculator', this)"><i class="fas fa-calculator"></i> Calculator</button>
 
         <div style="flex-grow: 1;"></div>
-        
         <button class="nav-btn" onclick="showSection('settings', this)"><i class="fas fa-cog"></i> Settings</button>
         <button class="nav-btn" onclick="toggleZenMode()"><i class="fas fa-expand-arrows-alt"></i> Zen Mode</button>
     </nav>
@@ -178,14 +165,13 @@
             <div style="text-align:right;">
                 <h3 id="clock" style="margin:0; font-family:monospace; color:var(--accent);">00:00</h3>
                 <div id="now-playing-pill" style="font-size: 0.8rem; color: var(--accent); opacity: 0; transition: opacity 0.3s; margin-top: 5px;">
-                    <i class="fas fa-volume-up"></i> Playing Audio
+                    <i class="fas fa-volume-up"></i> Audio Active
                 </div>
             </div>
         </div>
 
         <div id="dashboard" class="section active">
             <div class="dashboard-grid">
-                
                 <div class="card" style="text-align:center;">
                     <h3 style="margin-top:0;"><i class="fas fa-stopwatch"></i> Focus Timer</h3>
                     <div style="font-size: 3.5rem; font-weight: 700; margin: 10px 0; font-family: monospace;" id="timer-display">25:00</div>
@@ -194,14 +180,10 @@
                         <button class="btn" style="background:var(--bg-color); border:1px solid var(--border);" onclick="resetTimer()">Reset</button>
                     </div>
                 </div>
-
                 <div class="card">
                     <h3 style="margin-top:0;"><i class="fas fa-tasks"></i> Top Tasks</h3>
-                    <ul id="dashboard-todo-list" style="padding-left: 20px; color: var(--text-secondary);">
-                        <li>No tasks yet.</li>
-                    </ul>
+                    <ul id="dashboard-todo-list" style="padding-left: 20px; color: var(--text-secondary);"><li>No tasks yet.</li></ul>
                 </div>
-
                 <div class="card">
                     <h3 style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Schedule</h3>
                     <div id="schedule-list"></div>
@@ -211,36 +193,34 @@
 
         <div id="radio-room" class="section">
             <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
-                <h3><i class="fas fa-broadcast-tower"></i> Study Frequencies</h3>
-                <p style="color:var(--text-secondary); margin-bottom: 30px;">High-fidelity streams. Select a station.</p>
+                <h3><i class="fas fa-broadcast-tower"></i> Radio Room</h3>
+                <p style="color:var(--text-secondary); margin-bottom: 30px;">Sources: Wikimedia Commons & Procedural Audio.</p>
                 
                 <div class="radio-container">
                     <div class="record-player" id="record-player">
                         <div class="record-grooves"></div>
-                        <div class="record-label">
-                            <i class="fas fa-music"></i>
-                        </div>
+                        <div class="record-label"><i class="fas fa-music"></i></div>
                     </div>
                 </div>
 
                 <div style="margin-top: 30px; margin-bottom: 20px;">
                     <button id="main-play-btn" class="btn btn-primary" style="width: 150px; border-radius: 30px; padding: 12px;" onclick="toggleAudio()">
-                        <i class="fas fa-play"></i> Start Radio
+                        <i class="fas fa-play"></i> Start
                     </button>
                     <div style="margin-top: 15px;">
-                         <input type="range" min="0" max="1" step="0.1" value="0.5" oninput="setVolume(this.value)" style="width: 200px; accent-color: var(--accent);">
+                         <input type="range" min="0" max="1" step="0.05" value="0.4" oninput="setVolume(this.value)" style="width: 200px; accent-color: var(--accent);">
                     </div>
                 </div>
 
                 <div class="station-grid">
-                    <div class="station-btn active" id="st-lofi" onclick="changeStation('lofi')">
-                        <i class="fas fa-coffee"></i> Lofi Girl
+                    <div class="station-btn active" id="st-piano" onclick="changeStation('piano')">
+                        <i class="fas fa-book-open"></i> Piano Focus
                     </div>
-                    <div class="station-btn" id="st-piano" onclick="changeStation('piano')">
-                        <i class="fas fa-book-open"></i> Piano
+                    <div class="station-btn" id="st-chill" onclick="changeStation('chill')">
+                        <i class="fas fa-coffee"></i> Chill Hop
                     </div>
-                    <div class="station-btn" id="st-synth" onclick="changeStation('synth')">
-                        <i class="fas fa-robot"></i> Synthwave
+                    <div class="station-btn" id="st-rain" onclick="changeStation('rain')">
+                        <i class="fas fa-cloud-rain"></i> Rain Storm
                     </div>
                     <div class="station-btn" id="st-noise" onclick="changeStation('noise')">
                         <i class="fas fa-wind"></i> Brown Noise
@@ -293,12 +273,10 @@
         <div id="settings" class="section">
             <div class="card" style="max-width: 500px; margin: 0 auto;">
                 <h3><i class="fas fa-sliders-h"></i> Preferences</h3>
-                
                 <div class="setting-row">
                     <span>Base Theme</span>
                     <button class="btn" style="background:var(--bg-color); border:1px solid var(--border);" onclick="toggleTheme()">Toggle Light/Dark</button>
                 </div>
-
                 <div style="margin-top: 20px;">
                     <span style="font-weight: 500;">Ambience & Mood</span>
                     <div class="mood-grid">
@@ -307,7 +285,6 @@
                         <div class="mood-btn" onclick="setMood('mood-midnight')">🌌 Deep</div>
                     </div>
                 </div>
-
                 <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
                     <span style="font-weight: 500;">Data</span>
                     <p style="font-size: 0.8rem; color: var(--text-secondary);">Clear all notes and schedule data?</p>
@@ -318,7 +295,7 @@
 
     </main>
 
-    <audio id="audio-engine" preload="none" crossorigin="anonymous"></audio>
+    <audio id="audio-engine" loop preload="none" crossorigin="anonymous"></audio>
 
     <script>
         // --- STATE & INIT ---
@@ -326,21 +303,21 @@
             theme: localStorage.getItem('theme') || 'light',
             mood: localStorage.getItem('mood') || '',
             isPlaying: false,
-            currentStation: 'lofi',
+            currentStation: 'piano',
             activeNoteId: null
         };
 
-        // RELIABLE STREAM SOURCES
+        // --- AUDIO SOURCES (UNBLOCKABLE STRATEGY) ---
         const stations = {
-            lofi: "https://stream.zeno.fm/0r0xa75zkvvtv", // Lofi Girl Mirror
-            piano: "https://stream.zeno.fm/r5eqz568g2zuv", // Classical Piano
-            synth: "https://stream.zeno.fm/te5tr7885v8uv", // Retrowave/Synth
-            // Using a brown noise file loop for stability vs math gen
-            noise: "https://media.githubusercontent.com/media/anars/blank-audio/master/10-minutes-of-silence.mp3" 
+            // Wikipedia (Wikimedia Commons) is rarely blocked
+            piano: "https://upload.wikimedia.org/wikipedia/commons/2/21/Erik_Satie_-_Gymnopedie_No_1.ogg",
+            chill: "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c4/Ghost_Waltz_-_Eugene_Clark.ogg/Ghost_Waltz_-_Eugene_Clark.ogg.mp3",
+            // Procedural (Generated by code below)
+            rain: "generate:rain",
+            noise: "generate:brown"
         };
 
-        // Note: Brown noise is actually generated via JS below if selected to avoid bandwidth
-        let audioCtx, noiseSource, noiseGain;
+        let audioCtx, jsNode, audioNode; 
 
         function init() {
             if(appState.theme === 'dark') document.body.setAttribute('data-theme', 'dark');
@@ -353,92 +330,110 @@
         }
 
         // --- AUDIO ENGINE ---
-        const audio = document.getElementById('audio-engine');
-        
+        const audioEl = document.getElementById('audio-engine');
+
         function changeStation(id) {
-            // UI Update
             document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('st-' + id).classList.add('active');
             appState.currentStation = id;
-            
-            // If playing, switch immediately
             if(appState.isPlaying) {
-                playAudioSource();
+                playAudioSource(); // Switch immediately
             }
         }
 
         function toggleAudio() {
             if(appState.isPlaying) {
                 // STOP
-                audio.pause();
-                stopNoise(); // If noise is running
+                audioEl.pause();
+                stopProceduralAudio();
                 appState.isPlaying = false;
-                document.getElementById('main-play-btn').innerHTML = '<i class="fas fa-play"></i> Start Radio';
+                document.getElementById('main-play-btn').innerHTML = '<i class="fas fa-play"></i> Start';
                 document.getElementById('record-player').classList.remove('playing');
                 document.getElementById('now-playing-pill').style.opacity = '0';
+                document.getElementById('stream-status').innerText = "";
             } else {
                 // PLAY
                 playAudioSource();
                 appState.isPlaying = true;
-                document.getElementById('main-play-btn').innerHTML = '<i class="fas fa-pause"></i> Pause Radio';
+                document.getElementById('main-play-btn').innerHTML = '<i class="fas fa-pause"></i> Pause';
                 document.getElementById('record-player').classList.add('playing');
                 document.getElementById('now-playing-pill').style.opacity = '1';
             }
         }
 
         function playAudioSource() {
+            const source = stations[appState.currentStation];
             const status = document.getElementById('stream-status');
-            status.innerText = "Buffering stream...";
+            
+            // Stop previous sounds
+            audioEl.pause();
+            stopProceduralAudio();
 
-            if(appState.currentStation === 'noise') {
-                audio.pause(); // Stop standard audio
-                startNoiseGen(); // Start JS noise
-                status.innerText = "Generating Neural Static...";
+            if (source.startsWith("generate:")) {
+                // Start JS Generator
+                const type = source.split(':')[1];
+                startProceduralAudio(type);
+                status.innerText = "Generating " + type + " (Offline Mode)";
             } else {
-                stopNoise(); // Stop JS noise
-                audio.src = stations[appState.currentStation];
-                audio.play()
-                    .then(() => status.innerText = "Live Stream Active")
-                    .catch(e => status.innerText = "Stream Blocked. Try another station.");
+                // Start File Stream
+                audioEl.src = source;
+                audioEl.volume = document.querySelector('input[type=range]').value;
+                audioEl.play()
+                    .then(() => status.innerText = "Playing from Wikimedia Commons")
+                    .catch(e => status.innerText = "Error: School network blocked this file.");
             }
         }
 
         function setVolume(val) {
-            audio.volume = val;
-            if(noiseGain) noiseGain.gain.value = val * 0.2; // Noise is loud, lower it
+            audioEl.volume = val;
+            if(jsNode) jsNode.gain.value = val * 0.15; // Generators are loud
         }
 
-        // JS Noise Generator (Re-added as fallback/feature because it's so stable)
-        function startNoiseGen() {
+        // --- PROCEDURAL AUDIO GENERATOR (RAIN & NOISE) ---
+        function startProceduralAudio(type) {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const bufferSize = 2 * audioCtx.sampleRate;
             const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const data = buffer.getChannelData(0);
             
-            // Brown Noise Math
-            let lastOut = 0;
             for (let i = 0; i < bufferSize; i++) {
                 const white = Math.random() * 2 - 1;
-                data[i] = (lastOut + (0.02 * white)) / 1.02;
-                lastOut = data[i];
-                data[i] *= 3.5; 
+                if(type === 'brown') {
+                    // Brown Noise Math
+                    let lastOut = 0;
+                    data[i] = (lastOut + (0.02 * white)) / 1.02;
+                    lastOut = data[i];
+                    data[i] *= 3.5; 
+                } else if (type === 'rain') {
+                    // Pink Noise (Rain-like)
+                    let b0, b1, b2, b3, b4, b5, b6;
+                    b0=b1=b2=b3=b4=b5=b6=0.0;
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                    data[i] *= 0.11; 
+                }
             }
 
-            noiseSource = audioCtx.createBufferSource();
-            noiseSource.buffer = buffer;
-            noiseSource.loop = true;
-            noiseGain = audioCtx.createGain();
-            noiseGain.gain.value = audio.volume * 0.2;
-            noiseSource.connect(noiseGain);
-            noiseGain.connect(audioCtx.destination);
-            noiseSource.start();
+            audioNode = audioCtx.createBufferSource();
+            audioNode.buffer = buffer;
+            audioNode.loop = true;
+            jsNode = audioCtx.createGain();
+            jsNode.gain.value = audioEl.volume * 0.15; // Scale volume down
+            audioNode.connect(jsNode);
+            jsNode.connect(audioCtx.destination);
+            audioNode.start();
         }
 
-        function stopNoise() {
-            if(noiseSource) { noiseSource.stop(); noiseSource = null; }
+        function stopProceduralAudio() {
+            if(audioNode) { audioNode.stop(); audioNode = null; }
         }
 
-        // --- CORE FEATURES ---
+        // --- STANDARD APP LOGIC ---
         function setMood(moodClass) {
             document.body.className = ''; 
             document.body.removeAttribute('data-theme');
@@ -446,7 +441,6 @@
             if(moodClass === 'mood-midnight') document.body.setAttribute('data-theme', 'dark');
             localStorage.setItem('mood', moodClass);
         }
-
         function toggleTheme() {
             const current = document.body.getAttribute('data-theme');
             const next = current === 'light' ? 'dark' : 'light';
@@ -455,15 +449,12 @@
             localStorage.setItem('mood', '');
             document.body.className = '';
         }
-
         function clearData() {
             if(confirm("Delete all notes and todos?")) {
                 localStorage.clear();
                 location.reload();
             }
         }
-
-        // --- NAVIGATION & UTILS (Standard) ---
         function showSection(id, btn) {
             document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -477,13 +468,7 @@
         function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }
 
         // --- SCHEDULE, NOTES, TODOS ---
-        const defaultSchedule = [
-            { id: 'p1', class: "Mathematics" },
-            { id: 'p2', class: "History" },
-            { id: 'p3', class: "Science" },
-            { id: 'p4', class: "English" },
-            { id: 'p5', class: "Elective" }
-        ];
+        const defaultSchedule = [ { id: 'p1', class: "Mathematics" }, { id: 'p2', class: "History" }, { id: 'p3', class: "Science" }, { id: 'p4', class: "English" }, { id: 'p5', class: "Elective" } ];
         function loadSchedule() {
             const saved = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
             const container = document.getElementById('schedule-list');
@@ -491,10 +476,7 @@
             saved.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'schedule-item';
-                div.innerHTML = `
-                    <div style="width:20%; font-weight:600; color:var(--accent);">Period ${index+1}</div>
-                    <div style="width:80%;"><input type="text" value="${item.class}" onchange="updateClass(${index}, this.value)"></div>
-                `;
+                div.innerHTML = `<div style="width:20%; font-weight:600; color:var(--accent);">Period ${index+1}</div><div style="width:80%;"><input type="text" value="${item.class}" onchange="updateClass(${index}, this.value)"></div>`;
                 container.appendChild(div);
             });
         }
