@@ -16,10 +16,11 @@
             --card-bg: #ffffff;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --accent: #6366f1; /* Indigo for focus */
+            --accent: #6366f1;
             --accent-hover: #4f46e5;
             --border: #e2e8f0;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --player-bg: #1e1e2e;
         }
 
         [data-theme="dark"] {
@@ -30,23 +31,19 @@
             --text-secondary: #94a3b8;
             --accent: #818cf8;
             --border: #334155;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --player-bg: #000000;
         }
 
         * { box-sizing: border-box; transition: background 0.3s, color 0.3s; outline: none; }
         body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; }
 
-        /* --- LAYOUT --- */
+        /* --- SIDEBAR --- */
         .sidebar {
             width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
             display: flex; flex-direction: column; padding: 1.5rem 1rem;
-            transition: transform 0.3s ease, width 0.3s ease;
-            z-index: 100;
+            transition: margin-left 0.3s ease; z-index: 100; overflow-y: auto;
         }
-        
-        /* Zen Mode: Hides sidebar */
         body.zen-mode .sidebar { margin-left: -240px; }
-        body.zen-mode .zen-toggle i { transform: rotate(180deg); }
 
         .logo { font-weight: 700; font-size: 1.2rem; margin-bottom: 2rem; color: var(--accent); display: flex; align-items: center; gap: 10px; }
         
@@ -58,32 +55,42 @@
         }
         .nav-btn:hover { background: var(--bg-color); color: var(--accent); }
         .nav-btn.active { background: var(--bg-color); color: var(--accent); font-weight: 600; }
-        
+
+        /* Submenu for Notes */
+        .submenu { 
+            margin-left: 20px; border-left: 2px solid var(--border); 
+            overflow: hidden; max-height: 0; transition: max-height 0.3s ease;
+        }
+        .submenu.open { max-height: 300px; }
+        .sub-btn {
+            display: block; width: 100%; padding: 8px 12px; text-align: left; background: none; border: none;
+            color: var(--text-secondary); cursor: pointer; font-size: 0.9rem;
+        }
+        .sub-btn:hover, .sub-btn.active { color: var(--accent); font-weight: 600; }
+
+        /* --- MAIN AREA --- */
         .main { flex: 1; padding: 2rem; overflow-y: auto; position: relative; scroll-behavior: smooth; }
-        
-        /* --- COMPONENTS --- */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         
         .card { 
             background: var(--card-bg); padding: 1.5rem; border-radius: 16px; 
             border: 1px solid var(--border); box-shadow: var(--shadow); 
         }
-
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
 
-        /* --- EDITABLE SCHEDULE --- */
-        .schedule-item { 
-            padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; 
-        }
-        .schedule-item input { 
-            border: none; background: transparent; color: var(--text-primary); font-family: inherit; font-size: 0.95rem; width: 100%;
-        }
+        /* --- SECTIONS --- */
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- CUSTOM COMPONENTS --- */
+        .schedule-item { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        .schedule-item input { border: none; background: transparent; color: var(--text-primary); font-family: inherit; font-size: 0.95rem; width: 100%; }
         .schedule-item input:focus { border-bottom: 1px solid var(--accent); }
 
-        /* --- NOTES --- */
         textarea { 
-            width: 100%; height: 200px; background: var(--bg-color); color: var(--text-primary); 
-            border: 1px solid var(--border); padding: 1rem; border-radius: 12px; resize: none; line-height: 1.6;
+            width: 100%; height: 60vh; background: var(--bg-color); color: var(--text-primary); 
+            border: 1px solid var(--border); padding: 2rem; border-radius: 12px; resize: none; line-height: 1.6; font-size: 1.1rem;
         }
 
         /* --- CALCULATOR --- */
@@ -92,45 +99,55 @@
             padding: 15px; border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer; 
             background: var(--bg-color); color: var(--text-primary); box-shadow: 0 2px 0 var(--border);
         }
-        .calc-btn:active { transform: translateY(2px); box-shadow: none; }
         .calc-btn.accent { background: var(--accent); color: white; border: none; }
-        #calcDisplay { 
-            width: 100%; padding: 15px; font-size: 1.8rem; text-align: right; 
-            background: var(--bg-color); border: 1px solid var(--border); 
-            color: var(--text-primary); border-radius: 10px; font-family: monospace; 
+        #calcDisplay { width: 100%; padding: 15px; font-size: 1.8rem; text-align: right; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-primary); border-radius: 10px; font-family: monospace; }
+
+        /* --- MUSIC PLAYER (Unblocked) --- */
+        .player-wrapper {
+            background: var(--player-bg); color: white; padding: 20px; border-radius: 16px; 
+            display: flex; align-items: center; justify-content: space-between; gap: 20px;
         }
+        .visualizer { display: flex; gap: 3px; height: 30px; align-items: flex-end; }
+        .bar { width: 4px; background: var(--accent); animation: bounce 1s infinite ease-in-out; }
+        .bar:nth-child(2) { animation-delay: 0.2s; } .bar:nth-child(3) { animation-delay: 0.4s; }
+        .play-btn { 
+            width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--accent); 
+            color: white; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; 
+        }
+        @keyframes bounce { 0%, 100% { height: 5px; } 50% { height: 25px; } }
 
         /* --- UTILS --- */
-        .section { display: none; animation: fadeIn 0.3s ease; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
         .btn-primary { background: var(--accent); color: white; }
         .btn-danger { background: #ef4444; color: white; }
-        
-        /* Music Player Frame */
-        .music-container { 
-            position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; 
-            border-radius: 12px; border: 1px solid var(--border);
-        }
-        .music-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
     </style>
 </head>
 <body data-theme="light">
 
     <nav class="sidebar">
-        <div class="logo"><i class="fas fa-brain"></i> StudyHall Focus</div>
+        <div class="logo"><i class="fas fa-brain"></i> StudyHall</div>
         
         <button class="nav-btn active" onclick="showSection('dashboard', this)"><i class="fas fa-columns"></i> Dashboard</button>
-        <button class="nav-btn" onclick="showSection('notes', this)"><i class="fas fa-sticky-note"></i> Notebook</button>
+        
+        <button class="nav-btn" onclick="toggleNotebookMenu(this)">
+            <i class="fas fa-sticky-note"></i> Notebook <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i>
+        </button>
+        <div id="notebook-submenu" class="submenu">
+            </div>
+
         <button class="nav-btn" onclick="showSection('todos', this)"><i class="fas fa-check-circle"></i> Tasks</button>
         <button class="nav-btn" onclick="showSection('calculator', this)"><i class="fas fa-calculator"></i> Calculator</button>
-        <button class="nav-btn" onclick="showSection('music', this)"><i class="fas fa-headphones"></i> Lo-Fi Music</button>
 
         <div style="flex-grow: 1;"></div>
         
+        <div style="background: var(--bg-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: center;">
+            <div style="font-size: 0.8rem; margin-bottom: 5px; color: var(--text-secondary);">Lo-Fi Radio</div>
+            <button id="sidebar-play-btn" onclick="toggleMusic()" style="background: var(--accent); border: none; color: white; padding: 5px 15px; border-radius: 20px; cursor: pointer;">
+                <i class="fas fa-play"></i> Play
+            </button>
+        </div>
+
         <button class="nav-btn" onclick="toggleZenMode()"><i class="fas fa-expand-arrows-alt"></i> Zen Mode</button>
         <button class="nav-btn" onclick="toggleTheme()"><i class="fas fa-moon"></i> Theme</button>
     </nav>
@@ -139,11 +156,10 @@
         <div class="header">
             <div>
                 <h2 id="page-title" style="margin:0;">Dashboard</h2>
-                <p style="margin:5px 0 0; color:var(--text-secondary);">Welcome back to your workspace.</p>
+                <p id="page-subtitle" style="margin:5px 0 0; color:var(--text-secondary);">Welcome back.</p>
             </div>
             <div style="text-align:right;">
                 <h3 id="clock" style="margin:0; font-family:monospace; color:var(--accent);">00:00</h3>
-                <span id="date" style="font-size:0.8rem; color:var(--text-secondary);">Loading...</span>
             </div>
         </div>
 
@@ -151,7 +167,7 @@
             <div class="dashboard-grid">
                 
                 <div class="card" style="text-align:center;">
-                    <h3 style="margin-top:0;"><i class="fas fa-stopwatch"></i> Pomodoro Timer</h3>
+                    <h3 style="margin-top:0;"><i class="fas fa-stopwatch"></i> Focus Timer</h3>
                     <div style="font-size: 3.5rem; font-weight: 700; margin: 10px 0; font-family: monospace;" id="timer-display">25:00</div>
                     <div style="display:flex; justify-content:center; gap:10px;">
                         <button class="btn btn-primary" onclick="toggleTimer()" id="timer-btn">Start</button>
@@ -161,46 +177,39 @@
 
                 <div class="card">
                     <h3 style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Class Schedule</h3>
-                    <div id="schedule-list">
-                        </div>
-                    <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">* Click text to edit. Changes save automatically.</p>
+                    <div id="schedule-list"></div>
+                    <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">* Edit class names here to update your notebook.</p>
                 </div>
 
                 <div class="card">
-                    <h3 style="margin-top:0;"><i class="fas fa-tasks"></i> Top Priorities</h3>
-                    <ul id="mini-todo-list" style="padding-left: 20px; color: var(--text-secondary);">
-                        <li>No tasks yet.</li>
-                    </ul>
+                    <h3 style="margin-top:0;"><i class="fas fa-headphones-alt"></i> Study Beats</h3>
+                    <div class="player-wrapper">
+                        <div>
+                            <div style="font-weight: 600;">Lofi Hip Hop</div>
+                            <div style="font-size: 0.8rem; opacity: 0.8;">Radio Stream (No YouTube)</div>
+                        </div>
+                        <div class="visualizer" id="visualizer" style="opacity: 0;">
+                            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                        </div>
+                        <button class="play-btn" onclick="toggleMusic()" id="main-play-btn"><i class="fas fa-play"></i></button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="notes" class="section">
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h3><i class="fas fa-square-root-alt"></i> Math / Science</h3>
-                    <textarea id="note-math" oninput="saveNote('math')" placeholder="Formulas, equations, definitions..."></textarea>
-                </div>
-                <div class="card">
-                    <h3><i class="fas fa-book-open"></i> Humanities</h3>
-                    <textarea id="note-english" oninput="saveNote('english')" placeholder="History dates, essay ideas, reading notes..."></textarea>
-                </div>
-                <div class="card">
-                    <h3><i class="fas fa-lightbulb"></i> Brainstorming</h3>
-                    <textarea id="note-misc" oninput="saveNote('misc')" placeholder="Project ideas and random thoughts..."></textarea>
-                </div>
-            </div>
+        <div id="notebook-view" class="section">
+            <textarea id="current-note" oninput="saveCurrentNote()" placeholder="Start typing your notes here..."></textarea>
+            <p id="save-status" style="text-align: right; font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">Saved.</p>
         </div>
 
         <div id="todos" class="section">
             <div class="card" style="max-width: 600px; margin: 0 auto;">
                 <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <input type="text" id="newTodo" placeholder="What needs to be done?" 
+                    <input type="text" id="newTodo" placeholder="Add assignment..." 
                            style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-color); color:var(--text-primary);">
-                    <button class="btn btn-primary" onclick="addTodo()">Add Task</button>
+                    <button class="btn btn-primary" onclick="addTodo()">Add</button>
                 </div>
-                <div id="todoList">
-                    </div>
+                <div id="todoList"></div>
             </div>
         </div>
 
@@ -212,17 +221,14 @@
                     <button class="calc-btn" onclick="calc('8')">8</button>
                     <button class="calc-btn" onclick="calc('9')">9</button>
                     <button class="calc-btn accent" onclick="calc('/')">÷</button>
-                    
                     <button class="calc-btn" onclick="calc('4')">4</button>
                     <button class="calc-btn" onclick="calc('5')">5</button>
                     <button class="calc-btn" onclick="calc('6')">6</button>
                     <button class="calc-btn accent" onclick="calc('*')">×</button>
-                    
                     <button class="calc-btn" onclick="calc('1')">1</button>
                     <button class="calc-btn" onclick="calc('2')">2</button>
                     <button class="calc-btn" onclick="calc('3')">3</button>
                     <button class="calc-btn accent" onclick="calc('-')">-</button>
-                    
                     <button class="calc-btn" onclick="calc('C')">C</button>
                     <button class="calc-btn" onclick="calc('0')">0</button>
                     <button class="calc-btn" onclick="calc('=')">=</button>
@@ -231,36 +237,154 @@
             </div>
         </div>
 
-        <div id="music" class="section">
-            <div class="card" style="max-width: 800px; margin: 0 auto;">
-                <h3><i class="fas fa-headphones-alt"></i> Focus Zone</h3>
-                <p style="color:var(--text-secondary); margin-bottom: 20px;">Lofi Girl Radio - Beats to relax/study to.</p>
-                <div class="music-container">
-                    <iframe src="https://www.youtube.com/embed/jfKfPfyJRdk" title="Lofi Girl Radio" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-            </div>
-        </div>
-
     </main>
 
+    <audio id="audio-stream" preload="none">
+        <source src="https://streams.ilovemusic.de/iloveradio17.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
-        // --- 1. SETUP & THEME ---
+        // --- STATE MANAGEMENT ---
         const appState = {
-            theme: localStorage.getItem('theme') || 'light'
+            theme: localStorage.getItem('theme') || 'light',
+            activeNoteId: null, // Tracks which class note is open
+            isPlaying: false
         };
 
+        // Default Classes
+        const defaultSchedule = [
+            { id: 'p1', class: "Mathematics" },
+            { id: 'p2', class: "History" },
+            { id: 'p3', class: "Science" },
+            { id: 'p4', class: "English" },
+            { id: 'p5', class: "Elective" }
+        ];
+
         function init() {
-            // Apply theme
             if(appState.theme === 'dark') document.body.setAttribute('data-theme', 'dark');
-            
-            // Start Clock
             updateClock();
             setInterval(updateClock, 1000);
-
-            // Load Data
-            loadNotes();
-            loadTodos();
             loadSchedule();
+            loadTodos();
+            renderNotebookMenu();
+        }
+
+        // --- SCHEDULE & SIDEBAR LOGIC ---
+        function loadSchedule() {
+            const saved = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
+            const container = document.getElementById('schedule-list');
+            container.innerHTML = '';
+            
+            saved.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'schedule-item';
+                div.innerHTML = `
+                    <div style="width:20%; font-weight:600; color:var(--accent);">Period ${index+1}</div>
+                    <div style="width:80%;">
+                        <input type="text" value="${item.class}" onchange="updateClass(${index}, this.value)">
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateClass(index, newName) {
+            let schedule = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
+            schedule[index].class = newName;
+            localStorage.setItem('study_schedule', JSON.stringify(schedule));
+            renderNotebookMenu(); // Refresh sidebar immediately
+        }
+
+        function renderNotebookMenu() {
+            const schedule = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
+            const submenu = document.getElementById('notebook-submenu');
+            submenu.innerHTML = '';
+            
+            // Add schedule items
+            schedule.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'sub-btn';
+                btn.innerHTML = `<i class="fas fa-circle" style="font-size:0.5rem; margin-right:8px;"></i> ${item.class}`;
+                btn.onclick = () => openNote(item.id, item.class, btn);
+                submenu.appendChild(btn);
+            });
+
+            // Add a "Misc" item
+            const miscBtn = document.createElement('button');
+            miscBtn.className = 'sub-btn';
+            miscBtn.innerHTML = `<i class="fas fa-circle" style="font-size:0.5rem; margin-right:8px;"></i> Brainstorming`;
+            miscBtn.onclick = () => openNote('misc', 'Brainstorming', miscBtn);
+            submenu.appendChild(miscBtn);
+        }
+
+        function toggleNotebookMenu(btn) {
+            const menu = document.getElementById('notebook-submenu');
+            menu.classList.toggle('open');
+            const arrow = btn.querySelector('.fa-chevron-down');
+            arrow.style.transform = menu.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        // --- NOTEBOOK LOGIC ---
+        function openNote(noteId, noteTitle, btnElement) {
+            // UI Updates
+            document.querySelectorAll('.nav-btn, .sub-btn').forEach(el => el.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+            
+            // Show Note Section
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById('notebook-view').classList.add('active');
+            
+            // Set Header
+            document.getElementById('page-title').innerText = noteTitle;
+            document.getElementById('page-subtitle').innerText = "Auto-saving...";
+
+            // Load Content
+            appState.activeNoteId = noteId;
+            const content = localStorage.getItem('note_' + noteId) || '';
+            document.getElementById('current-note').value = content;
+        }
+
+        function saveCurrentNote() {
+            if(!appState.activeNoteId) return;
+            const val = document.getElementById('current-note').value;
+            localStorage.setItem('note_' + appState.activeNoteId, val);
+            
+            const status = document.getElementById('save-status');
+            status.innerText = "Saved at " + new Date().toLocaleTimeString();
+        }
+
+        // --- MUSIC PLAYER (NO YOUTUBE) ---
+        function toggleMusic() {
+            const audio = document.getElementById('audio-stream');
+            const mainBtn = document.getElementById('main-play-btn');
+            const sideBtn = document.getElementById('sidebar-play-btn');
+            const viz = document.getElementById('visualizer');
+
+            if(appState.isPlaying) {
+                audio.pause();
+                appState.isPlaying = false;
+                mainBtn.innerHTML = '<i class="fas fa-play"></i>';
+                sideBtn.innerHTML = '<i class="fas fa-play"></i> Play';
+                viz.style.opacity = '0';
+            } else {
+                audio.play().catch(e => alert("Stream blocked by network. Try refreshing or using a hotspot."));
+                appState.isPlaying = true;
+                mainBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                sideBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                viz.style.opacity = '1';
+            }
+        }
+
+        // --- NAVIGATION & UTILS ---
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(btn) {
+                document.querySelectorAll('.nav-btn, .sub-btn').forEach(el => el.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('page-title').innerText = btn.innerText.trim();
+                document.getElementById('page-subtitle').innerText = "StudyHall Focus";
+            }
         }
 
         function toggleTheme() {
@@ -274,147 +398,68 @@
             document.body.classList.toggle('zen-mode');
         }
 
-        function showSection(id, btn) {
-            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            
-            if(btn) {
-                document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById('page-title').innerText = btn.innerText;
-            }
-        }
-
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            document.getElementById('date').innerText = now.toLocaleDateString([], {weekday: 'long', month: 'short', day: 'numeric'});
         }
 
-        // --- 2. NOTES SYSTEM ---
-        function saveNote(id) {
-            const val = document.getElementById('note-' + id).value;
-            localStorage.setItem('study_note_' + id, val);
-        }
-
-        function loadNotes() {
-            ['math', 'english', 'misc'].forEach(id => {
-                const saved = localStorage.getItem('study_note_' + id);
-                if(saved) document.getElementById('note-' + id).value = saved;
-            });
-        }
-
-        // --- 3. TODO SYSTEM ---
-        function addTodo(text = null) {
+        // --- TODO LOGIC ---
+        function addTodo() {
             const input = document.getElementById('newTodo');
-            const val = text || input.value.trim();
+            const val = input.value.trim();
             if(!val) return;
-
+            
             const list = document.getElementById('todoList');
             const item = document.createElement('div');
-            item.style.cssText = "padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;";
-            item.innerHTML = `
-                <span style="font-weight:500;">${val}</span>
-                <button class="btn btn-danger" onclick="removeTodo(this)" style="padding:5px 10px; font-size:0.8rem;">Done</button>
-            `;
+            item.style.cssText = "padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;";
+            item.innerHTML = `<span>${val}</span> <button class="btn btn-danger" onclick="this.parentElement.remove(); saveTodos()" style="font-size:0.8rem; padding:5px;">Done</button>`;
             list.appendChild(item);
             input.value = '';
-            
-            if(!text) saveTodos();
-        }
-
-        function removeTodo(btn) {
-            btn.parentElement.remove();
             saveTodos();
         }
 
         function saveTodos() {
             const tasks = [];
-            document.querySelectorAll('#todoList span').forEach(span => tasks.push(span.innerText));
+            document.querySelectorAll('#todoList span').forEach(s => tasks.push(s.innerText));
             localStorage.setItem('study_todos', JSON.stringify(tasks));
-            
-            // Update Mini List
-            const mini = document.getElementById('mini-todo-list');
-            if(tasks.length === 0) mini.innerHTML = '<li>No tasks yet.</li>';
-            else mini.innerHTML = tasks.slice(0,3).map(t => `<li>${t}</li>`).join('');
         }
 
         function loadTodos() {
             const tasks = JSON.parse(localStorage.getItem('study_todos') || '[]');
-            tasks.forEach(t => addTodo(t));
-            saveTodos(); // Refresh mini list
-        }
-
-        // --- 4. SCHEDULE SYSTEM (Editable) ---
-        const defaultSchedule = [
-            { period: "1st Period", class: "Mathematics" },
-            { period: "2nd Period", class: "History" },
-            { period: "3rd Period", class: "Science" },
-            { period: "4th Period", class: "English" }
-        ];
-
-        function loadSchedule() {
-            const saved = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
-            const container = document.getElementById('schedule-list');
-            container.innerHTML = '';
-            
-            saved.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = 'schedule-item';
-                div.innerHTML = `
-                    <div style="width:30%; font-weight:600; color:var(--accent);">${item.period}</div>
-                    <div style="width:70%;">
-                        <input type="text" value="${item.class}" oninput="saveSchedule(${index}, this.value)">
-                    </div>
-                `;
-                container.appendChild(div);
+            const list = document.getElementById('todoList');
+            tasks.forEach(t => {
+                const item = document.createElement('div');
+                item.style.cssText = "padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;";
+                item.innerHTML = `<span>${t}</span> <button class="btn btn-danger" onclick="this.parentElement.remove(); saveTodos()" style="font-size:0.8rem; padding:5px;">Done</button>`;
+                list.appendChild(item);
             });
         }
 
-        function saveSchedule(index, newVal) {
-            let current = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
-            current[index].class = newVal;
-            localStorage.setItem('study_schedule', JSON.stringify(current));
-        }
-
-        // --- 5. CALCULATOR & TIMER ---
+        // --- CALCULATOR ---
         function calc(val) {
             const display = document.getElementById('calcDisplay');
-            if(val === 'C') display.value = '';
-            else if(val === '=') {
-                try { display.value = eval(display.value); } catch { display.value = 'Error'; }
-            } else display.value += val;
+            if(val==='C') display.value = '';
+            else if(val==='=') { try { display.value = eval(display.value); } catch { display.value = 'Error'; } }
+            else display.value += val;
         }
 
+        // --- TIMER ---
         let tmr;
         function toggleTimer() {
             const btn = document.getElementById('timer-btn');
-            if(tmr) {
-                clearInterval(tmr); tmr = null;
-                btn.innerText = "Start";
-                btn.classList.remove('btn-danger');
-            } else {
-                btn.innerText = "Pause";
-                btn.classList.add('btn-danger');
+            if(tmr) { clearInterval(tmr); tmr = null; btn.innerText = "Start"; btn.classList.remove('btn-danger'); }
+            else {
+                btn.innerText = "Pause"; btn.classList.add('btn-danger');
                 tmr = setInterval(() => {
                     const el = document.getElementById('timer-display');
                     let [m, s] = el.innerText.split(':').map(Number);
-                    if(s === 0) {
-                        if(m === 0) { clearInterval(tmr); return; }
-                        m--; s = 59;
-                    } else s--;
+                    if(s===0) { if(m===0) { clearInterval(tmr); return; } m--; s=59; } else s--;
                     el.innerText = `${m}:${s<10?'0'+s:s}`;
                 }, 1000);
             }
         }
-        function resetTimer() {
-            clearInterval(tmr); tmr = null;
-            document.getElementById('timer-display').innerText = "25:00";
-            document.getElementById('timer-btn').innerText = "Start";
-            document.getElementById('timer-btn').classList.remove('btn-danger');
-        }
+        function resetTimer() { clearInterval(tmr); tmr=null; document.getElementById('timer-display').innerText="25:00"; document.getElementById('timer-btn').innerText="Start"; document.getElementById('timer-btn').classList.remove('btn-danger'); }
 
-        // Initialize App
         window.onload = init;
     </script>
 </body>
