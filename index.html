@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall Focus</title>
+    <title>StudyHall Cloud</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <style>
         /* --- CSS VARIABLES --- */
         :root {
@@ -20,6 +23,7 @@
             --accent-hover: #4f46e5;
             --border: #e2e8f0;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --status-bg: #f1f5f9;
         }
 
         [data-theme="dark"] {
@@ -31,6 +35,7 @@
             --accent: #818cf8;
             --border: #334155;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --status-bg: #1e293b;
         }
 
         /* Mood Themes */
@@ -87,7 +92,7 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- RADIO STATION UI --- */
+        /* --- RADIO UI --- */
         .radio-container { display: flex; flex-direction: column; align-items: center; }
         .record-player {
             width: 200px; height: 200px; background: #1e1e1e; border-radius: 50%;
@@ -113,6 +118,21 @@
         .station-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
         .station-btn i { font-size: 1.5rem; margin-bottom: 8px; display: block; }
 
+        /* --- NOTEBOOK UI --- */
+        textarea { 
+            width: 100%; height: 65vh; background: var(--bg-color); color: var(--text-primary); 
+            border: 1px solid var(--border); padding: 2rem; border-radius: 12px; resize: none; 
+            line-height: 1.6; font-size: 1.1rem;
+        }
+        .cloud-status {
+            display: flex; align-items: center; gap: 8px; font-size: 0.8rem; 
+            background: var(--status-bg); padding: 5px 12px; border-radius: 20px;
+            color: var(--text-secondary);
+        }
+        .cloud-status.synced { color: #22c55e; }
+        .cloud-status.saving { color: #eab308; }
+        .cloud-status.error { color: #ef4444; }
+
         /* --- SETTINGS UI --- */
         .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
         .mood-grid { display: flex; gap: 10px; margin-top: 10px; }
@@ -126,7 +146,6 @@
         .schedule-item { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
         .schedule-item input { border: none; background: transparent; color: var(--text-primary); font-family: inherit; font-size: 0.95rem; width: 100%; }
         .schedule-item input:focus { border-bottom: 1px solid var(--accent); }
-        textarea { width: 100%; height: 60vh; background: var(--bg-color); color: var(--text-primary); border: 1px solid var(--border); padding: 2rem; border-radius: 12px; resize: none; line-height: 1.6; font-size: 1.1rem; }
         .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
         .btn-primary { background: var(--accent); color: white; }
         .btn-danger { background: #ef4444; color: white; }
@@ -160,7 +179,9 @@
         <div class="header">
             <div>
                 <h2 id="page-title" style="margin:0;">Dashboard</h2>
-                <p id="page-subtitle" style="margin:5px 0 0; color:var(--text-secondary);">Ready to focus?</p>
+                <div id="status-bar" class="cloud-status" style="margin-top:5px; display:inline-flex;">
+                    <i class="fas fa-cloud"></i> <span id="cloud-text">Ready</span>
+                </div>
             </div>
             <div style="text-align:right;">
                 <h3 id="clock" style="margin:0; font-family:monospace; color:var(--accent);">00:00</h3>
@@ -194,7 +215,7 @@
         <div id="radio-room" class="section">
             <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
                 <h3><i class="fas fa-broadcast-tower"></i> Radio Room</h3>
-                <p style="color:var(--text-secondary); margin-bottom: 30px;">Sources: Wikimedia Commons & Procedural Audio.</p>
+                <p style="color:var(--text-secondary); margin-bottom: 30px;">Unblockable Streams & Audio Generation.</p>
                 
                 <div class="radio-container">
                     <div class="record-player" id="record-player">
@@ -231,8 +252,8 @@
         </div>
 
         <div id="notebook-view" class="section">
-            <textarea id="current-note" oninput="saveCurrentNote()" placeholder="Start typing your notes here..."></textarea>
-            <p id="save-status" style="text-align: right; font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">Saved.</p>
+            <textarea id="current-note" oninput="handleNoteInput()" placeholder="Start typing your notes here..."></textarea>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">* Notes are automatically synced to Firebase.</p>
         </div>
 
         <div id="todos" class="section">
@@ -285,10 +306,10 @@
                         <div class="mood-btn" onclick="setMood('mood-midnight')">🌌 Deep</div>
                     </div>
                 </div>
-                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
-                    <span style="font-weight: 500;">Data</span>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Clear all notes and schedule data?</p>
-                    <button class="btn btn-danger" onclick="clearData()">Reset App Data</button>
+                <div style="margin-top: 20px;">
+                    <span style="font-weight: 500;">Your Cloud ID</span>
+                    <p style="font-size:0.8rem; color:var(--text-secondary);">Use this ID to access notes on other devices.</p>
+                    <input type="text" id="user-id-display" readonly style="width:100%; padding:10px; background:var(--bg-color); border:1px solid var(--border); border-radius:6px; color:var(--text-primary);">
                 </div>
             </div>
         </div>
@@ -298,30 +319,63 @@
     <audio id="audio-engine" loop preload="none" crossorigin="anonymous"></audio>
 
     <script>
-        // --- STATE & INIT ---
+        // --- 1. FIREBASE CONFIGURATION ---
+        // TODO: PASTE YOUR FIREBASE CONFIG HERE
+        const firebaseConfig = {
+            apiKey: "PASTE_API_KEY_HERE",
+            authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
+            databaseURL: "PASTE_DATABASE_URL_HERE",
+            projectId: "PASTE_PROJECT_ID",
+            storageBucket: "PASTE_BUCKET_HERE",
+            messagingSenderId: "PASTE_SENDER_ID",
+            appId: "PASTE_APP_ID"
+        };
+
+        // Initialize Firebase safely
+        let db;
+        let userId;
+        try {
+            if(firebaseConfig.apiKey !== "PASTE_API_KEY_HERE") {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                console.log("Firebase initialized");
+            } else {
+                console.warn("Firebase Config missing - using LocalStorage only.");
+            }
+        } catch(e) { console.error("Firebase Error:", e); }
+
+        // --- 2. STATE & INIT ---
         const appState = {
             theme: localStorage.getItem('theme') || 'light',
             mood: localStorage.getItem('mood') || '',
             isPlaying: false,
             currentStation: 'piano',
-            activeNoteId: null
+            activeNoteId: null,
+            isSaving: false
         };
 
-        // --- AUDIO SOURCES (UNBLOCKABLE STRATEGY) ---
         const stations = {
-            // Wikipedia (Wikimedia Commons) is rarely blocked
             piano: "https://upload.wikimedia.org/wikipedia/commons/2/21/Erik_Satie_-_Gymnopedie_No_1.ogg",
             chill: "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c4/Ghost_Waltz_-_Eugene_Clark.ogg/Ghost_Waltz_-_Eugene_Clark.ogg.mp3",
-            // Procedural (Generated by code below)
             rain: "generate:rain",
             noise: "generate:brown"
         };
 
-        let audioCtx, jsNode, audioNode; 
+        let audioCtx, jsNode, audioNode, saveTimeout;
 
         function init() {
+            // Theme/Mood
             if(appState.theme === 'dark') document.body.setAttribute('data-theme', 'dark');
             if(appState.mood) document.body.className = appState.mood;
+            
+            // User ID Logic
+            userId = localStorage.getItem('study_user_id');
+            if(!userId) {
+                userId = 'student_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('study_user_id', userId);
+            }
+            document.getElementById('user-id-display').value = userId;
+
             updateClock();
             setInterval(updateClock, 1000);
             loadSchedule();
@@ -329,21 +383,82 @@
             renderNotebookMenu();
         }
 
-        // --- AUDIO ENGINE ---
+        // --- 3. CLOUD SYNC LOGIC ---
+        function handleNoteInput() {
+            const status = document.getElementById('cloud-text');
+            const icon = document.querySelector('.cloud-status');
+            
+            // Optimistic Local Save
+            const val = document.getElementById('current-note').value;
+            localStorage.setItem('note_' + appState.activeNoteId, val);
+            
+            // UI Feedback
+            status.innerText = "Saving...";
+            icon.classList.add('saving');
+            icon.classList.remove('synced');
+
+            // Debounce Cloud Save (Wait 1s after typing stops)
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveToCloud(val);
+            }, 1000);
+        }
+
+        function saveToCloud(content) {
+            if(db) {
+                db.ref('users/' + userId + '/notes/' + appState.activeNoteId).set(content)
+                    .then(() => {
+                        document.getElementById('cloud-text').innerText = "Synced";
+                        document.querySelector('.cloud-status').classList.remove('saving');
+                        document.querySelector('.cloud-status').classList.add('synced');
+                    })
+                    .catch(e => {
+                        document.getElementById('cloud-text').innerText = "Offline (Local Only)";
+                        document.querySelector('.cloud-status').classList.add('error');
+                    });
+            } else {
+                // Fallback UI if no config
+                document.getElementById('cloud-text').innerText = "Local Mode";
+            }
+        }
+
+        function fetchFromCloud(noteId) {
+            if(db) {
+                document.getElementById('cloud-text').innerText = "Syncing...";
+                db.ref('users/' + userId + '/notes/' + noteId).once('value', (snap) => {
+                    const cloudContent = snap.val();
+                    const localContent = localStorage.getItem('note_' + noteId);
+                    
+                    // Prioritize Cloud if exists, otherwise Local
+                    if(cloudContent) {
+                        document.getElementById('current-note').value = cloudContent;
+                        // Update local to match cloud
+                        localStorage.setItem('note_' + noteId, cloudContent);
+                    } else {
+                        document.getElementById('current-note').value = localContent || "";
+                    }
+                    document.getElementById('cloud-text').innerText = "Synced";
+                    document.querySelector('.cloud-status').classList.add('synced');
+                });
+            } else {
+                // Local only fetch
+                document.getElementById('current-note').value = localStorage.getItem('note_' + noteId) || "";
+                document.getElementById('cloud-text').innerText = "Local Mode";
+            }
+        }
+
+        // --- 4. AUDIO ENGINE (UNBLOCKABLE) ---
         const audioEl = document.getElementById('audio-engine');
 
         function changeStation(id) {
             document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('st-' + id).classList.add('active');
             appState.currentStation = id;
-            if(appState.isPlaying) {
-                playAudioSource(); // Switch immediately
-            }
+            if(appState.isPlaying) playAudioSource();
         }
 
         function toggleAudio() {
             if(appState.isPlaying) {
-                // STOP
                 audioEl.pause();
                 stopProceduralAudio();
                 appState.isPlaying = false;
@@ -352,7 +467,6 @@
                 document.getElementById('now-playing-pill').style.opacity = '0';
                 document.getElementById('stream-status').innerText = "";
             } else {
-                // PLAY
                 playAudioSource();
                 appState.isPlaying = true;
                 document.getElementById('main-play-btn').innerHTML = '<i class="fas fa-pause"></i> Pause';
@@ -364,96 +478,66 @@
         function playAudioSource() {
             const source = stations[appState.currentStation];
             const status = document.getElementById('stream-status');
-            
-            // Stop previous sounds
             audioEl.pause();
             stopProceduralAudio();
 
             if (source.startsWith("generate:")) {
-                // Start JS Generator
                 const type = source.split(':')[1];
                 startProceduralAudio(type);
                 status.innerText = "Generating " + type + " (Offline Mode)";
             } else {
-                // Start File Stream
                 audioEl.src = source;
                 audioEl.volume = document.querySelector('input[type=range]').value;
-                audioEl.play()
-                    .then(() => status.innerText = "Playing from Wikimedia Commons")
-                    .catch(e => status.innerText = "Error: School network blocked this file.");
+                audioEl.play().then(() => status.innerText = "Playing from Wikimedia Commons")
+                              .catch(e => status.innerText = "Network Error.");
             }
         }
 
         function setVolume(val) {
             audioEl.volume = val;
-            if(jsNode) jsNode.gain.value = val * 0.15; // Generators are loud
+            if(jsNode) jsNode.gain.value = val * 0.15;
         }
 
-        // --- PROCEDURAL AUDIO GENERATOR (RAIN & NOISE) ---
         function startProceduralAudio(type) {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const bufferSize = 2 * audioCtx.sampleRate;
             const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const data = buffer.getChannelData(0);
-            
             for (let i = 0; i < bufferSize; i++) {
                 const white = Math.random() * 2 - 1;
                 if(type === 'brown') {
-                    // Brown Noise Math
                     let lastOut = 0;
                     data[i] = (lastOut + (0.02 * white)) / 1.02;
                     lastOut = data[i];
                     data[i] *= 3.5; 
                 } else if (type === 'rain') {
-                    // Pink Noise (Rain-like)
-                    let b0, b1, b2, b3, b4, b5, b6;
-                    b0=b1=b2=b3=b4=b5=b6=0.0;
-                    b0 = 0.99886 * b0 + white * 0.0555179;
-                    b1 = 0.99332 * b1 + white * 0.0750759;
-                    b2 = 0.96900 * b2 + white * 0.1538520;
-                    b3 = 0.86650 * b3 + white * 0.3104856;
-                    b4 = 0.55000 * b4 + white * 0.5329522;
-                    b5 = -0.7616 * b5 - white * 0.0168980;
-                    data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-                    data[i] *= 0.11; 
+                    data[i] = (Math.random() * 2 - 1) * 0.2; // Simplistic rain
                 }
             }
-
             audioNode = audioCtx.createBufferSource();
             audioNode.buffer = buffer;
             audioNode.loop = true;
             jsNode = audioCtx.createGain();
-            jsNode.gain.value = audioEl.volume * 0.15; // Scale volume down
+            jsNode.gain.value = audioEl.volume * 0.15;
             audioNode.connect(jsNode);
             jsNode.connect(audioCtx.destination);
             audioNode.start();
         }
+        function stopProceduralAudio() { if(audioNode) { audioNode.stop(); audioNode = null; } }
 
-        function stopProceduralAudio() {
-            if(audioNode) { audioNode.stop(); audioNode = null; }
-        }
-
-        // --- STANDARD APP LOGIC ---
+        // --- 5. UI & HELPERS ---
         function setMood(moodClass) {
-            document.body.className = ''; 
-            document.body.removeAttribute('data-theme');
+            document.body.className = ''; document.body.removeAttribute('data-theme');
             if(moodClass) document.body.classList.add(moodClass);
             if(moodClass === 'mood-midnight') document.body.setAttribute('data-theme', 'dark');
             localStorage.setItem('mood', moodClass);
         }
         function toggleTheme() {
-            const current = document.body.getAttribute('data-theme');
-            const next = current === 'light' ? 'dark' : 'light';
+            const next = document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
             document.body.setAttribute('data-theme', next);
             localStorage.setItem('theme', next);
             localStorage.setItem('mood', '');
             document.body.className = '';
-        }
-        function clearData() {
-            if(confirm("Delete all notes and todos?")) {
-                localStorage.clear();
-                location.reload();
-            }
         }
         function showSection(id, btn) {
             document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
@@ -467,7 +551,7 @@
         function toggleZenMode() { document.body.classList.toggle('zen-mode'); }
         function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }
 
-        // --- SCHEDULE, NOTES, TODOS ---
+        // Schedule & Notes
         const defaultSchedule = [ { id: 'p1', class: "Mathematics" }, { id: 'p2', class: "History" }, { id: 'p3', class: "Science" }, { id: 'p4', class: "English" }, { id: 'p5', class: "Elective" } ];
         function loadSchedule() {
             const saved = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
@@ -515,13 +599,10 @@
             showSection('notebook-view');
             document.getElementById('page-title').innerText = noteTitle;
             appState.activeNoteId = noteId;
-            document.getElementById('current-note').value = localStorage.getItem('note_' + noteId) || '';
+            fetchFromCloud(noteId); // CLOUD FETCH
         }
-        function saveCurrentNote() {
-            if(!appState.activeNoteId) return;
-            localStorage.setItem('note_' + appState.activeNoteId, document.getElementById('current-note').value);
-            document.getElementById('save-status').innerText = "Saved at " + new Date().toLocaleTimeString();
-        }
+        
+        // Todos & Calc
         function addTodo() {
             const input = document.getElementById('newTodo');
             const val = input.value.trim();
