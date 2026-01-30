@@ -3,597 +3,547 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall Focus v14 (Clean)</title>
+    <title>StudyHall v15 (Discord Mode)</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
-        /* --- CSS VARIABLES --- */
+        /* --- DISCORD THEME VARIABLES --- */
         :root {
-            --bg-color: #fcfcfc;
-            --sidebar-bg: #ffffff;
-            --card-bg: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #94a3b8;
-            --accent: #6366f1;
-            --accent-light: #e0e7ff;
-            --border: #f1f5f9;
-            --shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
-            --gold: #fbbf24;
-            --danger: #ef4444;
-            --success: #10b981;
+            --bg-tertiary: #202225;   /* Far left sidebar (Server list) - Not used here to save space */
+            --bg-secondary: #2f3136;  /* Sidebar (Channel list) */
+            --bg-primary: #36393f;    /* Main Chat Area */
+            --bg-floating: #18191c;   /* Tooltips/Modals */
+            --channel-hover: #393c43;
+            --channel-active: #393c43; /* slightly lighter */
+            --text-normal: #dcddde;
+            --text-muted: #72767d;
+            --header-primary: #ffffff;
+            --header-secondary: #b9bbbe;
+            --interactive-normal: #b9bbbe;
+            --interactive-hover: #dcddde;
+            --interactive-active: #ffffff;
+            --brand: #5865F2;         /* Blurple */
+            --brand-hover: #4752c4;
+            --danger: #ed4245;
+            --success: #3ba55c;
+            --gold: #f5a623;
         }
 
-        [data-theme="dark"] {
-            --bg-color: #0f172a;
-            --sidebar-bg: #1e293b;
-            --card-bg: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #64748b;
-            --accent: #818cf8;
-            --accent-light: #1e293b;
-            --border: #334155;
-            --shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
-        }
+        * { box-sizing: border-box; transition: all 0.2s ease; outline: none; scrollbar-width: thin; scrollbar-color: #202225 #2f3136; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-normal); height: 100vh; display: flex; overflow: hidden; }
 
-        /* RESET & BASE */
-        * { box-sizing: border-box; transition: all 0.3s ease; outline: none; }
-        body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-primary); height: 100vh; display: flex; overflow: hidden; }
-
-        /* --- SIDEBAR (MINIMALIST) --- */
+        /* --- SIDEBAR (Channel List Style) --- */
         .sidebar {
-            width: 250px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 2rem 1.5rem; z-index: 100;
+            width: 240px; background: var(--bg-secondary); display: flex; flex-direction: column; 
+            flex-shrink: 0; user-select: none;
         }
-        body.zen-mode .sidebar { margin-left: -250px; }
-
-        .logo { font-weight: 800; font-size: 1.1rem; color: var(--accent); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px; }
-
-        /* Minimal Player Profile */
-        .mini-profile { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-        .mini-avatar { 
-            width: 45px; height: 45px; border-radius: 50%; background: var(--accent-light); color: var(--accent);
-            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 2px solid transparent;
-        }
-        .profile-info { flex: 1; }
-        .profile-name { font-weight: 700; font-size: 0.9rem; display: block; }
-        .profile-meta { font-size: 0.75rem; color: var(--text-secondary); display: flex; gap: 10px; align-items: center; }
-        .xp-pill { background: var(--accent-light); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.7rem; }
-
-        /* Nav Links */
-        .nav-btn {
-            background: none; border: none; width: 100%; text-align: left; padding: 10px 0;
-            margin-bottom: 2px; color: var(--text-secondary); cursor: pointer; font-weight: 500;
-            display: flex; align-items: center; gap: 12px; font-size: 0.95rem;
-        }
-        .nav-btn:hover { color: var(--accent); transform: translateX(5px); }
-        .nav-btn.active { color: var(--accent); font-weight: 700; }
-        .nav-btn i { width: 20px; text-align: center; }
-
-        /* Submenu */
-        .submenu { margin-left: 32px; overflow: hidden; max-height: 0; border-left: 2px solid var(--border); padding-left: 10px; }
-        .submenu.open { max-height: 200px; margin-bottom: 10px; }
-        .sub-btn { display: block; width: 100%; padding: 6px 0; text-align: left; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.85rem; }
-        .sub-btn:hover { color: var(--text-primary); }
-
-        /* --- MAIN AREA --- */
-        .main { flex: 1; padding: 0; overflow-y: auto; position: relative; }
-        .container { max-width: 800px; margin: 0 auto; padding: 3rem 2rem; }
-
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; }
-        .page-title { font-size: 1.5rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
-        .date-display { font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; font-family: monospace; }
-
-        /* --- DASHBOARD (CLEANED) --- */
         
-        /* Hero Timer */
-        .hero-timer { text-align: center; margin-bottom: 3rem; position: relative; }
-        .timer-big { font-size: 5rem; font-weight: 800; font-family: 'Inter', monospace; letter-spacing: -2px; line-height: 1; margin: 10px 0; color: var(--text-primary); }
-        .timer-status { font-size: 0.9rem; color: var(--text-secondary); letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+        /* Server Header */
+        .server-header {
+            height: 48px; padding: 0 16px; display: flex; align-items: center; 
+            font-weight: 700; color: var(--header-primary); box-shadow: 0 1px 0 rgba(4,4,5,0.2);
+            font-size: 1rem; cursor: pointer; transition: background 0.2s;
+        }
+        .server-header:hover { background-color: rgba(255,255,255,0.05); }
+
+        /* Channel List */
+        .scroller { flex: 1; overflow-y: auto; padding: 8px; }
+        .category-label {
+            padding: 18px 8px 4px 18px; font-size: 12px; font-weight: 700; color: var(--text-muted); 
+            text-transform: uppercase; display: flex; justify-content: space-between;
+        }
+        .channel-btn {
+            display: flex; align-items: center; padding: 6px 8px; margin: 2px 0; border-radius: 4px;
+            color: var(--text-muted); cursor: pointer; font-weight: 500; font-size: 15px; border: none; background: none; width: 100%;
+        }
+        .channel-btn:hover { background-color: var(--channel-hover); color: var(--interactive-hover); }
+        .channel-btn.active { background-color: var(--channel-active); color: var(--header-primary); }
+        .channel-hash { color: var(--text-muted); font-size: 20px; margin-right: 6px; font-weight: 300; }
+        .channel-btn.active .channel-hash { color: var(--text-normal); }
+
+        /* User Area (Bottom) */
+        .user-area {
+            background-color: #292b2f; height: 52px; padding: 0 8px; display: flex; align-items: center; 
+            font-size: 14px; flex-shrink: 0;
+        }
+        .avatar-wrapper { position: relative; width: 32px; height: 32px; margin-right: 8px; cursor: pointer; }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: var(--brand); }
+        .status-indicator {
+            position: absolute; bottom: -2px; right: -2px; width: 10px; height: 10px; 
+            border-radius: 50%; background: var(--success); border: 2px solid #292b2f;
+        }
+        .user-info { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .user-name { font-weight: 600; color: var(--header-primary); font-size: 14px; }
+        .user-sub { font-size: 12px; color: var(--text-muted); }
         
-        /* Ghost Controls (Fade on hover) */
-        .timer-controls { display: flex; justify-content: center; gap: 20px; opacity: 0.3; transition: opacity 0.3s; margin-bottom: 20px; }
-        .hero-timer:hover .timer-controls { opacity: 1; }
-        .icon-btn { background: none; border: 1px solid var(--border); width: 35px; height: 35px; border-radius: 50%; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-color); }
-
-        .main-btn { 
-            background: var(--accent); color: white; border: none; padding: 12px 40px; 
-            border-radius: 30px; font-size: 1rem; font-weight: 600; cursor: pointer; 
-            box-shadow: 0 5px 20px rgba(99, 102, 241, 0.3); transform: scale(1);
+        .user-btn { 
+            width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; color: var(--interactive-normal); border: none; background: none; 
         }
-        .main-btn:active { transform: scale(0.95); }
-        .main-btn.active { background: var(--text-primary); box-shadow: none; }
+        .user-btn:hover { background-color: var(--channel-hover); color: var(--interactive-hover); }
 
-        /* Focus Hub (Tabbed Widget) */
-        .focus-hub { background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; min-height: 300px; }
-        .hub-tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 20px; }
-        .hub-tab { 
-            padding: 20px; background: none; border: none; font-weight: 600; color: var(--text-secondary); 
-            cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem;
-        }
-        .hub-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-        .hub-content { padding: 25px; display: none; animation: fadeIn 0.3s ease; }
-        .hub-content.active { display: block; }
-
-        /* Hub Items */
-        .task-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .task-row:last-child { border: none; }
-        .mini-player-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; padding: 10px; background: var(--bg-color); border-radius: 12px; border: 1px solid var(--border); cursor: pointer; }
-        .mini-player-row:hover { border-color: var(--accent); }
-        .mini-player-row.active { border-color: var(--accent); background: var(--accent-light); }
-
-        /* --- SHOP UI (GRID) --- */
-        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; }
-        .shop-item { 
-            background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; 
-            padding: 15px; text-align: center; cursor: pointer; position: relative;
-        }
-        .shop-item:hover { transform: translateY(-3px); border-color: var(--accent); }
-        .shop-item.owned { border-color: var(--success); opacity: 0.8; }
-        .shop-item.equipped { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); opacity: 1; }
-        .price-tag { display: inline-block; background: var(--gold); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; margin-top: 5px; }
-
-        /* --- UTILS --- */
-        .section { display: none; } 
-        .section.active { display: block; animation: fadeIn 0.4s ease; }
-        textarea { width: 100%; height: 60vh; border: 1px solid var(--border); border-radius: 12px; padding: 20px; font-family: inherit; background: var(--bg-color); color: var(--text-primary); resize: none; }
-        #xp-toast { position: fixed; bottom: 30px; right: 30px; background: var(--text-primary); color: white; padding: 10px 20px; border-radius: 30px; font-weight: 600; transform: translateY(100px); opacity: 0; }
-        #xp-toast.show { transform: translateY(0); opacity: 1; }
+        /* --- MAIN CONTENT --- */
+        .chat-area { flex: 1; display: flex; flex-direction: column; background: var(--bg-primary); min-width: 0; }
         
-        /* Floating Zen Button */
-        #zen-exit-btn { position: fixed; bottom: 20px; left: 20px; background: var(--accent); color: white; padding: 10px 20px; border-radius: 30px; border: none; cursor: pointer; display: none; z-index: 999; }
-        body.zen-mode #zen-exit-btn { display: block; }
+        /* Top Bar */
+        .chat-header {
+            height: 48px; padding: 0 16px; display: flex; align-items: center; 
+            box-shadow: 0 1px 0 rgba(4,4,5,0.2); color: var(--header-primary); font-weight: 700;
+        }
+        .header-hash { color: var(--text-muted); margin-right: 8px; font-size: 24px; font-weight: 300; }
+        .topic { margin-left: 16px; color: var(--text-muted); font-size: 14px; font-weight: 400; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 16px; }
+
+        /* Content Container */
+        .content-scroller { flex: 1; overflow-y: auto; padding: 20px; }
+        .msg-group { margin-bottom: 20px; animation: fadeUp 0.3s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- DASHBOARD ELEMENTS --- */
+        .card { background: #2f3136; padding: 16px; border-radius: 8px; margin-bottom: 16px; position: relative; }
+        
+        /* Timer/Stopwatch Tabs */
+        .pill-nav { display: flex; background: #202225; padding: 4px; border-radius: 4px; width: fit-content; margin: 0 auto 20px; }
+        .pill-btn {
+            background: none; border: none; padding: 6px 16px; color: var(--text-muted); 
+            border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 14px;
+        }
+        .pill-btn:hover { color: var(--text-normal); }
+        .pill-btn.active { background: #40444b; color: var(--header-primary); }
+
+        .big-timer { font-size: 4rem; font-weight: 800; text-align: center; color: var(--header-primary); font-family: monospace; letter-spacing: -2px; }
+        .timer-controls { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        
+        .discord-btn {
+            background-color: var(--brand); color: white; padding: 10px 24px; border: none; border-radius: 3px; 
+            font-weight: 500; font-size: 14px; cursor: pointer; transition: background 0.2s;
+        }
+        .discord-btn:hover { background-color: var(--brand-hover); }
+        .discord-btn.secondary { background-color: #4f545c; }
+        .discord-btn.secondary:hover { background-color: #686d73; }
+        .discord-btn.danger { background-color: var(--danger); }
+
+        /* Shop Grid */
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+        .shop-item {
+            background: #202225; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; border: 2px solid transparent;
+        }
+        .shop-item:hover { background: #292b2f; }
+        .shop-item.owned { border-color: var(--success); opacity: 0.7; }
+        .shop-item.equipped { border-color: var(--brand); opacity: 1; box-shadow: 0 0 10px rgba(88, 101, 242, 0.3); }
 
         /* Avatar Effects */
-        .fx-fire { box-shadow: 0 0 10px #ef4444; border-color: #ef4444; }
-        .fx-rainbow { border-color: transparent; background-image: linear-gradient(white, white), linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); background-origin: border-box; background-clip: content-box, border-box; }
-        .fx-neon { box-shadow: 0 0 8px #10b981; border-color: #10b981; }
-        .fx-gold { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
+        .fx-fire { box-shadow: 0 0 10px #ed4245; border-color: #ed4245 !important; }
+        .fx-neon { box-shadow: 0 0 8px #3ba55c; border-color: #3ba55c !important; }
+        .fx-gold { border-color: var(--gold) !important; box-shadow: 0 0 10px var(--gold); }
+        .fx-rainbow { border: 2px solid transparent !important; background-image: linear-gradient(#292b2f, #292b2f), linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); background-origin: border-box; background-clip: content-box, border-box; }
+
+        /* Notebook */
+        textarea {
+            width: 100%; height: 70vh; background: #202225; border: none; color: var(--text-normal);
+            padding: 16px; border-radius: 8px; font-family: 'Consolas', 'Courier New', monospace; resize: none;
+        }
+
+        /* Utils */
+        .hidden { display: none; }
+        input[type="file"] { display: none; }
 
     </style>
 </head>
-<body data-theme="light">
+<body>
 
     <nav class="sidebar">
-        <div class="logo"><i class="fas fa-shapes"></i> StudyHall</div>
-        
-        <div class="mini-profile">
-            <div class="mini-avatar" id="sidebar-avatar"><i class="fas fa-user"></i></div>
-            <div class="profile-info">
-                <span class="profile-name">Student</span>
-                <div class="profile-meta">
-                    <span id="player-level">Lvl 1</span>
-                    <span style="color:var(--gold); font-weight:600;"><i class="fas fa-coins"></i> <span id="coin-balance">0</span></span>
-                </div>
-            </div>
+        <div class="server-header">
+            StudyHall Server <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 12px;"></i>
         </div>
 
-        <button class="nav-btn active" onclick="showSection('dashboard', this)"><i class="fas fa-home"></i> Dashboard</button>
-        <button class="nav-btn" onclick="toggleNotebookMenu(this)"><i class="fas fa-book"></i> Notebook</button>
-        <div id="notebook-submenu" class="submenu"></div>
-        <button class="nav-btn" onclick="showSection('shop', this)"><i class="fas fa-store"></i> Market</button>
-        <button class="nav-btn" onclick="showSection('radio-full', this)"><i class="fas fa-broadcast-tower"></i> Radio</button>
-        <button class="nav-btn" onclick="showSection('calculator', this)"><i class="fas fa-calculator"></i> Tools</button>
-        
-        <div style="flex-grow: 1;"></div>
-        <button class="nav-btn" onclick="showSection('settings', this)"><i class="fas fa-cog"></i> Settings</button>
-        <button class="nav-btn" onclick="toggleZenMode()"><i class="fas fa-expand"></i> Zen Mode</button>
+        <div class="scroller">
+            <div class="category-label"><i class="fas fa-angle-down"></i> &nbsp; FOCUS & TOOLS</div>
+            <button class="channel-btn active" onclick="showPage('dashboard', this)"><span class="channel-hash">#</span> dashboard</button>
+            <button class="channel-btn" onclick="showPage('notebook', this)"><span class="channel-hash">#</span> notebook</button>
+            <button class="channel-btn" onclick="showPage('calculator', this)"><span class="channel-hash">#</span> calculator</button>
+            
+            <div class="category-label" style="margin-top: 16px;"><i class="fas fa-angle-down"></i> &nbsp; SYSTEM</div>
+            <button class="channel-btn" onclick="showPage('settings', this)"><span class="channel-hash">#</span> settings</button>
+        </div>
+
+        <div class="user-area">
+            <div class="avatar-wrapper" onclick="document.getElementById('custom-avatar-input').click()" title="Change Avatar">
+                <img src="" id="user-avatar" class="avatar-img">
+                <div class="status-indicator"></div>
+            </div>
+            <div class="user-info">
+                <div class="user-name">Student</div>
+                <div class="user-sub" id="coin-display">#0000</div>
+            </div>
+            <button class="user-btn" onclick="showPage('shop', null)" title="Open Market"><i class="fas fa-store"></i></button>
+            <button class="user-btn" title="Mute (Not Active)"><i class="fas fa-microphone-slash"></i></button>
+            <button class="user-btn" title="Deafen (Not Active)"><i class="fas fa-headphones-alt"></i></button>
+        </div>
     </nav>
 
-    <button id="zen-exit-btn" onclick="toggleZenMode()">Exit Zen</button>
-    <div id="xp-toast">+100 XP</div>
+    <input type="file" id="custom-avatar-input" accept="image/*" onchange="handleAvatarUpload(this)">
 
-    <main class="main">
-        <div class="container">
+    <main class="chat-area">
+        
+        <div class="chat-header">
+            <span class="header-hash">#</span> <span id="header-title">dashboard</span>
+            <span class="topic" id="header-topic">Track your study time and level up</span>
+        </div>
+
+        <div class="content-scroller">
             
-            <div class="header">
-                <h1 class="page-title" id="page-title">Dashboard</h1>
-                <div class="date-display" id="clock">00:00</div>
-            </div>
+            <div id="dashboard" class="page-section">
+                <div class="pill-nav">
+                    <button class="pill-btn active" id="tab-timer" onclick="setMode('timer')">Timer</button>
+                    <button class="pill-btn" id="tab-stopwatch" onclick="setMode('stopwatch')">Stopwatch</button>
+                </div>
 
-            <div id="dashboard" class="section active">
-                
-                <div class="hero-timer">
-                    <div class="timer-status" id="timer-status">Focus Session</div>
-                    <div class="timer-big" id="timer-display">25:00</div>
-                    
+                <div class="card" style="text-align: center; padding: 40px;">
+                    <div id="timer-display" class="big-timer">25:00</div>
+                    <div style="color: var(--text-muted); margin-top: 10px;" id="mode-status">Session Reward: 500 XP</div>
+
                     <div class="timer-controls">
-                        <button class="icon-btn" onclick="adjustTimer(-5)"><i class="fas fa-minus"></i></button>
-                        <button class="icon-btn" onclick="adjustTimer(5)"><i class="fas fa-plus"></i></button>
-                    </div>
-
-                    <button class="main-btn" id="timer-btn" onclick="toggleTimer()">Start Focus</button>
-                </div>
-
-                <div class="focus-hub">
-                    <div class="hub-tabs">
-                        <button class="hub-tab active" onclick="switchTab('tab-tasks', this)">My Tasks</button>
-                        <button class="hub-tab" onclick="switchTab('tab-audio', this)">Audio</button>
-                        <button class="hub-tab" onclick="switchTab('tab-schedule', this)">Schedule</button>
-                    </div>
-
-                    <div id="tab-tasks" class="hub-content active">
-                        <div style="display:flex; gap:10px; margin-bottom:20px;">
-                            <input type="text" id="dash-todo-input" placeholder="Add a new task..." style="flex:1; padding:10px; border:1px solid var(--border); border-radius:8px; background:var(--bg-color);">
-                            <button class="icon-btn" onclick="addTodoDash()" style="background:var(--accent); color:white; border:none;"><i class="fas fa-plus"></i></button>
-                        </div>
-                        <div id="dash-todo-list">
-                            <p style="color:var(--text-secondary); text-align:center;">No active tasks.</p>
+                        <div id="time-adjusters" style="display: flex; gap: 10px;">
+                            <button class="discord-btn secondary" onclick="adjustTime(-5)">-5m</button>
+                            <button class="discord-btn secondary" onclick="adjustTime(5)">+5m</button>
                         </div>
                     </div>
-
-                    <div id="tab-audio" class="hub-content">
-                        <div class="mini-player-row active" id="row-lofi" onclick="changeStation('lofi')">
-                            <i class="fas fa-coffee" style="font-size:1.5rem; color:var(--accent);"></i>
-                            <div><strong>Lofi Girl</strong><br><span style="font-size:0.8rem; opacity:0.7;">Beats to study to</span></div>
-                        </div>
-                        <div class="mini-player-row" id="row-piano" onclick="changeStation('piano')">
-                            <i class="fas fa-music" style="font-size:1.5rem; color:var(--accent);"></i>
-                            <div><strong>Classical Piano</strong><br><span style="font-size:0.8rem; opacity:0.7;">Deep focus</span></div>
-                        </div>
-                        <div class="mini-player-row" id="row-rain" onclick="changeStation('rain')">
-                            <i class="fas fa-cloud-rain" style="font-size:1.5rem; color:var(--accent);"></i>
-                            <div><strong>Rain Storm</strong><br><span style="font-size:0.8rem; opacity:0.7;">Generated Noise</span></div>
-                        </div>
-                        <div style="text-align:center; margin-top:10px;">
-                            <p id="stream-status" style="font-size:0.8rem; color:var(--text-secondary);">Ready to play</p>
-                            <input type="range" min="0" max="1" step="0.1" oninput="setVolume(this.value)" style="width:100%; accent-color:var(--accent);">
-                        </div>
-                    </div>
-
-                    <div id="tab-schedule" class="hub-content">
-                        <div id="dash-schedule-list"></div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="discord-btn" id="main-action-btn" onclick="toggleTimer()">Start Session</button>
+                        <button class="discord-btn danger" onclick="resetTimer()">Reset</button>
                     </div>
                 </div>
-            </div>
 
-            <div id="shop" class="section">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h3 style="margin:0;">Characters</h3>
-                    <span style="font-weight:700; color:var(--gold);"><i class="fas fa-coins"></i> <span id="shop-balance">0</span></span>
-                </div>
-                <div class="shop-grid" id="shop-avatars"></div>
-                <h3 style="margin:30px 0 15px;">Effects</h3>
-                <div class="shop-grid" id="shop-effects"></div>
-            </div>
-
-            <div id="notebook-view" class="section">
-                <textarea id="current-note" oninput="handleNoteInput()" placeholder="Type your notes here..."></textarea>
-                <div style="text-align:right; font-size:0.8rem; color:var(--text-secondary); margin-top:5px;" id="cloud-status">Saved locally</div>
-            </div>
-
-            <div id="calculator" class="section">
-                <div class="card" style="max-width:300px; margin:0 auto;">
-                    <input type="text" id="calcDisplay" readonly style="width:100%; padding:15px; text-align:right; border:none; background:var(--bg-color); font-size:1.5rem; margin-bottom:10px; border-radius:8px;">
-                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;">
-                        <button class="icon-btn" style="width:100%" onclick="calc('7')">7</button>
-                        <button class="icon-btn" style="width:100%" onclick="calc('8')">8</button>
-                        <button class="icon-btn" style="width:100%" onclick="calc('9')">9</button>
-                        <button class="icon-btn" style="width:100%; color:var(--accent);" onclick="calc('/')">/</button>
-                        
-                        <button class="icon-btn" style="width:100%" onclick="calc('4')">4</button>
-                        <button class="icon-btn" style="width:100%" onclick="calc('5')">5</button>
-                        <button class="icon-btn" style="width:100%" onclick="calc('6')">6</button>
-                        <button class="icon-btn" style="width:100%; color:var(--accent);" onclick="calc('*')">*</button>
-                        
-                        <button class="icon-btn" style="width:100%" onclick="calc('1')">1</button>
-                        <button class="icon-btn" style="width:100%" onclick="calc('2')">2</button>
-                        <button class="icon-btn" style="width:100%" onclick="calc('3')">3</button>
-                        <button class="icon-btn" style="width:100%; color:var(--accent);" onclick="calc('-')">-</button>
-                        
-                        <button class="icon-btn" style="width:100%" onclick="calc('C')">C</button>
-                        <button class="icon-btn" style="width:100%" onclick="calc('0')">0</button>
-                        <button class="icon-btn" style="width:100%" onclick="calc('=')">=</button>
-                        <button class="icon-btn" style="width:100%; color:var(--accent);" onclick="calc('+')">+</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="settings" class="section">
-                <h3>Settings</h3>
                 <div class="card">
-                    <p>Theme</p>
-                    <button class="main-btn" onclick="toggleTheme()" style="font-size:0.8rem; padding:8px 20px;">Toggle Dark Mode</button>
-                    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
-                    <p>Data Recovery (User ID)</p>
-                    <input type="text" id="user-id-display" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px;">
-                    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
-                    <button class="main-btn" onclick="clearData()" style="background:var(--danger);">Reset Everything</button>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600;">
+                        <span id="lvl-label">Level 1</span>
+                        <span style="color: var(--gold);"><i class="fas fa-coins"></i> <span id="wallet">0</span></span>
+                    </div>
+                    <div style="background: #202225; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div id="xp-fill" style="background: var(--brand); width: 0%; height: 100%;"></div>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 5px; text-align: right;" id="xp-text">0 / 1000 XP</div>
                 </div>
             </div>
 
-            <div id="radio-full" class="section">
-                <div class="card" style="text-align:center;">
-                    <h3>Audio Controller</h3>
-                    <p>Use the Audio tab in Dashboard for quick access.</p>
-                    <button class="main-btn" onclick="showSection('dashboard')">Go to Dashboard</button>
+            <div id="shop" class="page-section hidden">
+                <h2 style="color: var(--header-primary); margin-bottom: 20px;">Marketplace</h2>
+                <p style="color: var(--text-muted);">Since you can upload your own Avatar, buy <strong>Effects</strong> here!</p>
+                
+                <h3 style="color: var(--text-muted); text-transform: uppercase; font-size: 12px; margin-top: 30px;">Profile Effects</h3>
+                <div class="shop-grid" id="shop-container"></div>
+            </div>
+
+            <div id="notebook" class="page-section hidden">
+                <textarea id="notepad" placeholder="Write your notes here... (Auto-saves)" oninput="saveNote()"></textarea>
+                <div style="text-align: right; color: var(--text-muted); font-size: 12px; margin-top: 5px;">
+                    <i class="fas fa-cloud"></i> Synced
+                </div>
+            </div>
+
+            <div id="calculator" class="page-section hidden">
+                <div class="card" style="max-width: 300px; margin: 0 auto;">
+                    <input id="calc-display" style="width: 100%; background: #202225; border: none; color: white; padding: 15px; font-size: 24px; text-align: right; margin-bottom: 10px; border-radius: 4px;" readonly>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                        <button class="discord-btn secondary" onclick="calc('7')">7</button>
+                        <button class="discord-btn secondary" onclick="calc('8')">8</button>
+                        <button class="discord-btn secondary" onclick="calc('9')">9</button>
+                        <button class="discord-btn" onclick="calc('/')">/</button>
+                        
+                        <button class="discord-btn secondary" onclick="calc('4')">4</button>
+                        <button class="discord-btn secondary" onclick="calc('5')">5</button>
+                        <button class="discord-btn secondary" onclick="calc('6')">6</button>
+                        <button class="discord-btn" onclick="calc('*')">*</button>
+                        
+                        <button class="discord-btn secondary" onclick="calc('1')">1</button>
+                        <button class="discord-btn secondary" onclick="calc('2')">2</button>
+                        <button class="discord-btn secondary" onclick="calc('3')">3</button>
+                        <button class="discord-btn" onclick="calc('-')">-</button>
+                        
+                        <button class="discord-btn danger" onclick="calc('C')">C</button>
+                        <button class="discord-btn secondary" onclick="calc('0')">0</button>
+                        <button class="discord-btn secondary" onclick="calc('=')">=</button>
+                        <button class="discord-btn" onclick="calc('+')">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings" class="page-section hidden">
+                <div class="card">
+                    <h3>User Settings</h3>
+                    <p>Click your Avatar in the bottom left to change your picture.</p>
+                    <button class="discord-btn danger" onclick="if(confirm('Clear all data?')){localStorage.clear(); location.reload();}">Reset All Data</button>
                 </div>
             </div>
 
         </div>
     </main>
 
-    <audio id="audio-engine" loop preload="none" crossorigin="anonymous"></audio>
-
     <script>
-        // --- CONFIG ---
-        const firebaseConfig = { apiKey: "PASTE_KEY_HERE" };
-        let db, userId;
-        try { if(typeof firebase!=='undefined' && firebaseConfig.apiKey.length>20) { firebase.initializeApp(firebaseConfig); db=firebase.database(); } } catch(e){}
-
-        // --- STATE ---
-        const appState = {
-            theme: localStorage.getItem('theme') || 'light',
-            currentStation: 'lofi',
-            isPlaying: false,
-            timerDuration: 25,
-            activeNoteId: null,
-            xp: parseInt(localStorage.getItem('study_xp')) || 0,
-            level: parseInt(localStorage.getItem('study_level')) || 1,
-            coins: parseInt(localStorage.getItem('study_coins')) || 0,
-            inventory: JSON.parse(localStorage.getItem('study_inventory')) || ['av_default'],
-            equippedAvatar: localStorage.getItem('study_eq_avatar') || 'av_default',
-            equippedEffect: localStorage.getItem('study_eq_effect') || ''
+        // --- DATA STATE ---
+        const state = {
+            xp: parseInt(localStorage.getItem('sh_xp')) || 0,
+            lvl: parseInt(localStorage.getItem('sh_lvl')) || 1,
+            coins: parseInt(localStorage.getItem('sh_coins')) || 0,
+            inventory: JSON.parse(localStorage.getItem('sh_inventory')) || [],
+            equippedEffect: localStorage.getItem('sh_equipped_effect') || '',
+            customAvatar: localStorage.getItem('sh_avatar_img') || '', // Base64 string
+            
+            // Timer State
+            mode: 'timer', // 'timer' or 'stopwatch'
+            timerDuration: 25, 
+            secondsElapsed: 0,
+            active: false
         };
 
-        const shopItems = [
-            { id: 'av_default', type: 'avatar', name: 'Student', cost: 0, icon: 'fa-user' },
-            { id: 'av_robot', type: 'avatar', name: 'Droid', cost: 500, icon: 'fa-robot' },
-            { id: 'av_wiz', type: 'avatar', name: 'Wizard', cost: 1000, icon: 'fa-hat-wizard' },
-            { id: 'av_cat', type: 'avatar', name: 'Cat', cost: 1500, icon: 'fa-cat' },
-            { id: 'av_astro', type: 'avatar', name: 'Astro', cost: 2000, icon: 'fa-user-astronaut' },
-            { id: 'fx_gold', type: 'effect', name: 'Gold', cost: 1000, class: 'fx-gold' },
-            { id: 'fx_fire', type: 'effect', name: 'Fire', cost: 2500, class: 'fx-fire' },
-            { id: 'fx_neon', type: 'effect', name: 'Neon', cost: 3000, class: 'fx-neon' },
-            { id: 'fx_rainbow', type: 'effect', name: 'Rainbow', cost: 5000, class: 'fx-rainbow' }
+        const items = [
+            { id: 'fx_gold', name: 'Gold Border', cost: 500, class: 'fx-gold' },
+            { id: 'fx_fire', name: 'Fire Aura', cost: 1200, class: 'fx-fire' },
+            { id: 'fx_neon', name: 'Neon Glow', cost: 1500, class: 'fx-neon' },
+            { id: 'fx_rainbow', name: 'RGB Gamer', cost: 3000, class: 'fx-rainbow' }
         ];
 
-        const stations = {
-            lofi: "https://fastly.jsdelivr.net/gh/sasi-k/lofi-player/public/music/1.mp3",
-            piano: "https://fastly.jsdelivr.net/gh/josephernest/BigSound/master/examples/mp3/02.mp3",
-            rain: "generate:rain",
-            noise: "generate:brown"
-        };
-        let audioCtx, jsNode, audioNode, saveTimeout, tmr;
+        let interval = null;
 
         // --- INIT ---
         function init() {
-            if(appState.theme==='dark') document.body.setAttribute('data-theme', 'dark');
-            userId = localStorage.getItem('study_user_id') || 'u_'+Math.random().toString(36).substr(2,9);
-            localStorage.setItem('study_user_id', userId);
-            const idDisp = document.getElementById('user-id-display');
-            if(idDisp) { idDisp.value=userId; idDisp.addEventListener('change', e=>{ if(confirm("Swap?")){ localStorage.setItem('study_user_id',e.target.value); location.reload(); } }); }
-
-            setInterval(()=>document.getElementById('clock').innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}), 1000);
+            updateUI();
+            document.getElementById('notepad').value = localStorage.getItem('sh_note') || '';
             
-            // Render Initial Data
-            updateProfileUI(); loadSchedule(); loadTodos(); renderNotebookMenu(); renderShop(); updateTimerDisplay();
-
-            const ae = document.getElementById('audio-engine');
-            if(ae) ae.onerror = () => { setTimeout(()=>changeStation('noise'), 2000); };
-        }
-
-        // --- TABS & NAV ---
-        function showSection(id, btn) {
-            document.querySelectorAll('.section').forEach(e=>e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if(btn) {
-                document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById('page-title').innerText = btn.innerText.trim();
-            }
-        }
-        function switchTab(id, btn) {
-            document.querySelectorAll('.hub-content').forEach(e=>e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.hub-tab').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-        function toggleZenMode() { document.body.classList.toggle('zen-mode'); }
-        function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme')==='light'?'dark':'light'); localStorage.setItem('theme', document.body.getAttribute('data-theme')); }
-
-        // --- AUDIO ---
-        function changeStation(id) {
-            appState.currentStation = id;
-            document.querySelectorAll('.mini-player-row').forEach(el=>el.classList.remove('active'));
-            const row = document.getElementById('row-'+id); if(row) row.classList.add('active');
-            
-            if(appState.isPlaying) playAudioSource();
-        }
-        function playAudioSource() {
-            const ae = document.getElementById('audio-engine'); ae.pause(); stopGen();
-            const src = stations[appState.currentStation];
-            const status = document.getElementById('stream-status');
-            
-            if(src.startsWith("generate:")) {
-                startGen(src.split(':')[1]);
-                status.innerText = "Playing Generated Audio";
+            // Set default avatar if none custom
+            if(!state.customAvatar) {
+                document.getElementById('user-avatar').src = "https://ui-avatars.com/api/?name=Student&background=5865F2&color=fff";
             } else {
-                status.innerText = "Buffering...";
-                ae.src = src; ae.play().then(()=>status.innerText="Playing").catch(()=>status.innerText="Blocked - Try Noise");
+                document.getElementById('user-avatar').src = state.customAvatar;
             }
+            renderShop();
         }
-        function toggleAudio() { // Handled by dashboard start/stop if we wanted a global btn, but now handled by volume mainly or implicit play
-             // Simplified: To start audio, just change volume or station. 
-             // But for the timer button? No, timer is focus. 
-             // Let's make station click toggle play/pause?
-             if(appState.isPlaying) {
-                 const ae = document.getElementById('audio-engine'); ae.pause(); stopGen();
-                 appState.isPlaying = false;
-                 document.getElementById('stream-status').innerText = "Paused";
-             } else {
-                 playAudioSource();
-                 appState.isPlaying = true;
-             }
-        }
-        // Force station click to play
-        const oldChange = changeStation;
-        changeStation = (id) => {
-            appState.currentStation = id; 
-            document.querySelectorAll('.mini-player-row').forEach(el=>el.classList.remove('active'));
-            document.getElementById('row-'+id).classList.add('active');
-            playAudioSource(); appState.isPlaying = true;
-        }
-        function setVolume(v) { 
-            const ae = document.getElementById('audio-engine'); if(ae) ae.volume = v;
-            if(jsNode) jsNode.gain.value = v*0.15;
-        }
-        
-        // Gen Audio
-        function startGen(type) {
-            if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-            const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*2, audioCtx.sampleRate);
-            const d = buf.getChannelData(0);
-            for(let i=0; i<d.length; i++) {
-                const w = Math.random()*2-1;
-                if(type==='brown') { d[i] = ((d[i-1]||0) + (0.02*w)) / 1.02; d[i]*=3.5; }
-                else d[i] = (Math.random()*2-1)*0.1;
-            }
-            audioNode = audioCtx.createBufferSource(); audioNode.buffer=buf; audioNode.loop=true;
-            jsNode = audioCtx.createGain(); jsNode.gain.value=0.1;
-            audioNode.connect(jsNode); jsNode.connect(audioCtx.destination); audioNode.start();
-        }
-        function stopGen() { if(audioNode){audioNode.stop(); audioNode=null;} }
 
-        // --- TIMER ---
-        function adjustTimer(min) {
-            appState.timerDuration += min;
-            if(appState.timerDuration < 5) appState.timerDuration = 5;
-            updateTimerDisplay();
-        }
-        function updateTimerDisplay() {
-            document.getElementById('timer-display').innerText = `${appState.timerDuration}:00`;
-        }
-        function toggleTimer() {
-            const btn = document.getElementById('timer-btn');
-            if(tmr) { clearInterval(tmr); tmr=null; btn.innerText="Start Focus"; btn.classList.remove('active'); }
-            else {
-                btn.innerText="Pause"; btn.classList.add('active');
-                tmr = setInterval(() => {
-                    let [m,s] = document.getElementById('timer-display').innerText.split(':').map(Number);
-                    if(s===0 && m===0) {
-                        clearInterval(tmr); tmr=null; btn.innerText="Start Focus"; btn.classList.remove('active');
-                        alert("Done!"); addRewards(500, 500); return;
-                    }
-                    if(s===0) { m--; s=59; } else s--;
-                    document.getElementById('timer-display').innerText = `${m}:${s<10?'0'+s:s}`;
-                }, 1000);
-            }
-        }
-        function resetTimer() { clearInterval(tmr); tmr=null; updateTimerDisplay(); document.getElementById('timer-btn').innerText="Start Focus"; document.getElementById('timer-btn').classList.remove('active'); }
-
-        // --- RPG & SHOP ---
-        function addRewards(xp, coins) {
-            appState.xp += xp; appState.coins += coins;
-            if(appState.xp >= appState.level*1000) { appState.level++; alert("Level Up!"); }
-            saveData(); updateProfileUI(); renderShop();
-            const t=document.getElementById('xp-toast'); t.innerText=`+${coins} Coins`; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000);
-        }
-        function updateProfileUI() {
-            document.getElementById('player-level').innerText = "Lvl " + appState.level;
-            document.getElementById('coin-balance').innerText = appState.coins;
-            document.getElementById('shop-balance').innerText = appState.coins;
-            const av = shopItems.find(i=>i.id===appState.equippedAvatar)||shopItems[0];
-            const fx = shopItems.find(i=>i.id===appState.equippedEffect);
-            const fr = document.getElementById('sidebar-avatar');
-            fr.innerHTML = `<i class="fas ${av.icon}"></i>`;
-            fr.className = 'mini-avatar ' + (fx?fx.class:'');
-        }
-        function renderShop() {
-            const g1 = document.getElementById('shop-avatars'); const g2 = document.getElementById('shop-effects');
-            g1.innerHTML=''; g2.innerHTML='';
-            shopItems.forEach(item => {
-                const owned = appState.inventory.includes(item.id);
-                const eq = (appState.equippedAvatar===item.id || appState.equippedEffect===item.id);
-                const d = document.createElement('div');
-                d.className = `shop-item ${owned?'owned':''} ${eq?'equipped':''}`;
-                d.onclick = () => {
-                    if(owned) {
-                        if(item.type==='avatar') appState.equippedAvatar=item.id;
-                        else appState.equippedEffect = (appState.equippedEffect===item.id?'':item.id);
-                    } else {
-                        if(appState.coins>=item.cost) { if(confirm("Buy?")) { appState.coins-=item.cost; appState.inventory.push(item.id); } }
-                        else alert("Need coins");
-                    }
-                    saveData(); updateProfileUI(); renderShop();
+        // --- NAVIGATION ---
+        function showPage(id, btn) {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            
+            if(btn) {
+                document.querySelectorAll('.channel-btn').forEach(el => el.classList.remove('active'));
+                btn.classList.add('active');
+                
+                document.getElementById('header-title').innerText = id;
+                const topics = {
+                    'dashboard': 'Track your study time and level up',
+                    'shop': 'Spend your hard earned coins',
+                    'notebook': 'Auto-saving scratchpad',
+                    'calculator': 'Quick math',
+                    'settings': 'Manage data'
                 };
-                d.innerHTML = `<div style="font-size:1.5rem; margin-bottom:5px;"><i class="fas ${item.icon||'fa-star'} ${item.class||''}"></i></div><div style="font-size:0.8rem; font-weight:600;">${item.name}</div>${!owned ? `<div class="price-tag">${item.cost}</div>` : ''}`;
-                if(item.type==='avatar') g1.appendChild(d); else g2.appendChild(d);
+                document.getElementById('header-topic').innerText = topics[id] || '';
+            }
+        }
+
+        // --- TIMER / STOPWATCH LOGIC ---
+        function setMode(mode) {
+            state.mode = mode;
+            resetTimer();
+            document.getElementById('tab-timer').className = mode === 'timer' ? 'pill-btn active' : 'pill-btn';
+            document.getElementById('tab-stopwatch').className = mode === 'stopwatch' ? 'pill-btn active' : 'pill-btn';
+            
+            document.getElementById('time-adjusters').style.display = mode === 'timer' ? 'flex' : 'none';
+            document.getElementById('timer-display').innerText = mode === 'timer' ? `${state.timerDuration}:00` : "00:00";
+            document.getElementById('mode-status').innerText = mode === 'timer' 
+                ? `Session Reward: ${state.timerDuration * 20} XP` 
+                : "Reward: 20 XP per minute";
+        }
+
+        function adjustTime(mins) {
+            if(state.active) return;
+            state.timerDuration += mins;
+            if(state.timerDuration < 5) state.timerDuration = 5;
+            document.getElementById('timer-display').innerText = `${state.timerDuration}:00`;
+            document.getElementById('mode-status').innerText = `Session Reward: ${state.timerDuration * 20} XP`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('main-action-btn');
+            if(state.active) {
+                clearInterval(interval);
+                state.active = false;
+                btn.innerText = "Resume";
+                btn.className = "discord-btn"; // Green/Blurple
+            } else {
+                state.active = true;
+                btn.innerText = "Pause";
+                btn.className = "discord-btn secondary"; // Grey
+                interval = setInterval(tick, 1000);
+            }
+        }
+
+        function tick() {
+            const display = document.getElementById('timer-display');
+            
+            if(state.mode === 'timer') {
+                // COUNTDOWN
+                let [m, s] = display.innerText.split(':').map(Number);
+                if(m === 0 && s === 0) {
+                    completeSession();
+                    return;
+                }
+                if(s === 0) { m--; s = 59; } else { s--; }
+                display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
+            } else {
+                // STOPWATCH (Count Up)
+                state.secondsElapsed++;
+                let m = Math.floor(state.secondsElapsed / 60);
+                let s = state.secondsElapsed % 60;
+                display.innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+            }
+        }
+
+        function completeSession() {
+            clearInterval(interval);
+            state.active = false;
+            document.getElementById('main-action-btn').innerText = "Start Session";
+            
+            let reward = 0;
+            if(state.mode === 'timer') {
+                reward = state.timerDuration * 20;
+                alert(`Session Complete! +${reward} XP & Coins`);
+                resetTimer(); // Reset back to default
+            } else {
+                // Stopwatch manual finish
+                // Note: This function is called automatically for timer, but we need a button for Stopwatch finish
+            }
+            addRewards(reward, reward);
+        }
+
+        function resetTimer() {
+            clearInterval(interval);
+            state.active = false;
+            document.getElementById('main-action-btn').innerText = "Start Session";
+            document.getElementById('main-action-btn').className = "discord-btn";
+            
+            if(state.mode === 'stopwatch' && state.secondsElapsed > 60) {
+                // Claim rewards on reset if stopwatch
+                let mins = Math.floor(state.secondsElapsed / 60);
+                let reward = mins * 20;
+                if(confirm(`Finish stopwatch session? You earned ${reward} XP.`)) {
+                    addRewards(reward, reward);
+                }
+            }
+            
+            state.secondsElapsed = 0;
+            document.getElementById('timer-display').innerText = state.mode === 'timer' ? `${state.timerDuration}:00` : "00:00";
+        }
+
+        // --- RPG SYSTEM ---
+        function addRewards(xp, coins) {
+            state.xp += xp;
+            state.coins += coins;
+            if(state.xp >= state.lvl * 1000) {
+                state.lvl++;
+                alert("🎉 LEVEL UP! You are now Level " + state.lvl);
+            }
+            saveData();
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('wallet').innerText = state.coins;
+            document.getElementById('coin-display').innerText = `#${state.coins} Coins`; // Subtext in user area
+            document.getElementById('lvl-label').innerText = `Level ${state.lvl}`;
+            
+            const nextLvl = state.lvl * 1000;
+            const prevLvl = (state.lvl - 1) * 1000;
+            const percentage = ((state.xp - prevLvl) / (nextLvl - prevLvl)) * 100;
+            
+            document.getElementById('xp-fill').style.width = `${percentage}%`;
+            document.getElementById('xp-text').innerText = `${state.xp} / ${nextLvl} XP`;
+
+            // Apply Effect
+            const av = document.getElementById('user-avatar');
+            av.className = 'avatar-img ' + (state.equippedEffect || '');
+        }
+
+        function handleAvatarUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    state.customAvatar = e.target.result; // Base64 string
+                    document.getElementById('user-avatar').src = state.customAvatar;
+                    saveData();
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function renderShop() {
+            const container = document.getElementById('shop-container');
+            container.innerHTML = '';
+            items.forEach(item => {
+                const owned = state.inventory.includes(item.id);
+                const equipped = state.equippedEffect === item.id;
+                
+                const div = document.createElement('div');
+                div.className = `shop-item ${owned ? 'owned' : ''} ${equipped ? 'equipped' : ''}`;
+                div.onclick = () => buyOrEquip(item);
+                
+                div.innerHTML = `
+                    <div style="width:50px; height:50px; background:#36393f; border-radius:50%; margin:0 auto 10px;" class="${item.class}"></div>
+                    <div style="font-weight:600; font-size:14px;">${item.name}</div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">
+                        ${owned ? (equipped ? 'EQUIPPED' : 'OWNED') : `<i class="fas fa-coins"></i> ${item.cost}`}
+                    </div>
+                `;
+                container.appendChild(div);
             });
         }
 
-        // --- DATA ---
+        function buyOrEquip(item) {
+            if(state.inventory.includes(item.id)) {
+                // Equip/Unequip
+                state.equippedEffect = state.equippedEffect === item.id ? '' : item.id;
+            } else {
+                // Buy
+                if(state.coins >= item.cost) {
+                    if(confirm(`Buy ${item.name} for ${item.cost} coins?`)) {
+                        state.coins -= item.cost;
+                        state.inventory.push(item.id);
+                        state.equippedEffect = item.id; // Auto equip
+                    }
+                } else {
+                    alert("Not enough coins!");
+                }
+            }
+            saveData();
+            updateUI();
+            renderShop();
+        }
+
+        // --- UTILS ---
+        function saveNote() {
+            localStorage.setItem('sh_note', document.getElementById('notepad').value);
+        }
         function saveData() {
-            localStorage.setItem('study_xp', appState.xp);
-            localStorage.setItem('study_level', appState.level);
-            localStorage.setItem('study_coins', appState.coins);
-            localStorage.setItem('study_inventory', JSON.stringify(appState.inventory));
-            localStorage.setItem('study_eq_avatar', appState.equippedAvatar);
-            localStorage.setItem('study_eq_effect', appState.equippedEffect);
+            localStorage.setItem('sh_xp', state.xp);
+            localStorage.setItem('sh_lvl', state.lvl);
+            localStorage.setItem('sh_coins', state.coins);
+            localStorage.setItem('sh_inventory', JSON.stringify(state.inventory));
+            localStorage.setItem('sh_equipped_effect', state.equippedEffect);
+            localStorage.setItem('sh_avatar_img', state.customAvatar);
         }
-        
-        // --- TODO & NOTES ---
-        function addTodoDash() {
-            const i = document.getElementById('dash-todo-input');
-            if(!i.value) return;
-            const l = JSON.parse(localStorage.getItem('study_todos')||'[]');
-            l.push(i.value); localStorage.setItem('study_todos', JSON.stringify(l));
-            i.value=''; loadTodos();
+        function calc(val) {
+            const d = document.getElementById('calc-display');
+            if(val === 'C') d.value = '';
+            else if(val === '=') { try { d.value = eval(d.value); } catch { d.value = 'Error'; } }
+            else d.value += val;
         }
-        function loadTodos() {
-            const l = JSON.parse(localStorage.getItem('study_todos')||'[]');
-            const d = document.getElementById('dash-todo-list');
-            d.innerHTML = l.length ? '' : 'No tasks.';
-            l.forEach((t,x) => {
-                d.innerHTML += `<div class="task-row"><span>${t}</span><button class="icon-btn" onclick="finTask(${x})"><i class="fas fa-check"></i></button></div>`;
-            });
-        }
-        window.finTask = (i) => {
-            const l = JSON.parse(localStorage.getItem('study_todos'));
-            l.splice(i,1); localStorage.setItem('study_todos', JSON.stringify(l));
-            loadTodos(); addRewards(50, 50);
-        };
-        
-        // Schedule
-        function loadSchedule() {
-            const s = JSON.parse(localStorage.getItem('study_schedule')) || [{class:'Math'},{class:'History'},{class:'Science'},{class:'English'},{class:'Elective'}];
-            const c = document.getElementById('dash-schedule-list'); c.innerHTML='';
-            s.forEach((it,i)=> {
-                c.innerHTML += `<div class="task-row"><strong style="color:var(--accent)">P${i+1}</strong> <input value="${it.class}" onchange="saveSched(${i},this.value)" style="border:none; background:transparent;"></div>`;
-            });
-        }
-        window.saveSched = (i,v) => {
-            const s = JSON.parse(localStorage.getItem('study_schedule')) || [{class:'Math'},{class:'History'},{class:'Science'},{class:'English'},{class:'Elective'}];
-            s[i].class = v; localStorage.setItem('study_schedule', JSON.stringify(s));
-            renderNotebookMenu();
-        };
-        function renderNotebookMenu() {
-            const s = JSON.parse(localStorage.getItem('study_schedule'));
-            const m = document.getElementById('notebook-submenu'); m.innerHTML='';
-            if(s) s.forEach((it,i) => {
-                const b = document.createElement('button'); b.className='sub-btn';
-                b.innerText=it.class; b.onclick=()=>openNote('p'+i,it.class,b); m.appendChild(b);
-            });
-        }
-        window.toggleNotebookMenu=(b)=>{ document.getElementById('notebook-submenu').classList.toggle('open'); }
-        function openNote(id,t,b){ showSection('notebook-view'); document.getElementById('page-title').innerText=t; appState.activeNoteId=id; document.getElementById('current-note').value=localStorage.getItem('note_'+id)||''; }
-        window.handleNoteInput=()=>{ localStorage.setItem('note_'+appState.activeNoteId, document.getElementById('current-note').value); clearTimeout(saveTimeout); saveTimeout=setTimeout(cloudSave,1000); };
-        function cloudSave() { 
-            if(db && userId) db.ref('users/'+userId+'/notes/'+appState.activeNoteId).set(localStorage.getItem('note_'+appState.activeNoteId));
-            document.getElementById('cloud-status').innerText="Synced";
-        }
-        function calc(v) { 
-            const d=document.getElementById('calcDisplay'); 
-            if(v==='C')d.value=''; else if(v==='=')try{d.value=eval(d.value)}catch{} else d.value+=v; 
-        }
-        function clearData() { if(confirm("Reset?")) { localStorage.clear(); location.reload(); } }
 
-        window.onload = init;
+        init();
     </script>
 </body>
 </html>
