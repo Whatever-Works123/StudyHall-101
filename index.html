@@ -16,11 +16,11 @@
             --card-bg: #ffffff;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --accent: #6366f1;
+            --accent: #6366f1; /* Indigo */
             --accent-hover: #4f46e5;
             --border: #e2e8f0;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            --player-bg: #1e1e2e;
+            --active-noise-btn: #e0e7ff;
         }
 
         [data-theme="dark"] {
@@ -31,7 +31,7 @@
             --text-secondary: #94a3b8;
             --accent: #818cf8;
             --border: #334155;
-            --player-bg: #000000;
+            --active-noise-btn: #312e81;
         }
 
         * { box-sizing: border-box; transition: background 0.3s, color 0.3s; outline: none; }
@@ -83,7 +83,7 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- CUSTOM COMPONENTS --- */
+        /* --- COMPONENT STYLES --- */
         .schedule-item { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
         .schedule-item input { border: none; background: transparent; color: var(--text-primary); font-family: inherit; font-size: 0.95rem; width: 100%; }
         .schedule-item input:focus { border-bottom: 1px solid var(--accent); }
@@ -93,7 +93,17 @@
             border: 1px solid var(--border); padding: 2rem; border-radius: 12px; resize: none; line-height: 1.6; font-size: 1.1rem;
         }
 
-        /* --- CALCULATOR --- */
+        /* Noise Buttons */
+        .noise-btn {
+            flex: 1; padding: 15px; border: 1px solid var(--border); background: var(--bg-color); 
+            color: var(--text-secondary); border-radius: 8px; cursor: pointer; font-weight: 500;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .noise-btn i { font-size: 1.2rem; margin-bottom: 5px; }
+        .noise-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .noise-btn.active { background: var(--active-noise-btn); color: var(--accent); border-color: var(--accent); }
+
+        /* Calculator */
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
         .calc-btn { 
             padding: 15px; border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer; 
@@ -102,21 +112,7 @@
         .calc-btn.accent { background: var(--accent); color: white; border: none; }
         #calcDisplay { width: 100%; padding: 15px; font-size: 1.8rem; text-align: right; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-primary); border-radius: 10px; font-family: monospace; }
 
-        /* --- MUSIC PLAYER (Unblocked) --- */
-        .player-wrapper {
-            background: var(--player-bg); color: white; padding: 20px; border-radius: 16px; 
-            display: flex; align-items: center; justify-content: space-between; gap: 20px;
-        }
-        .visualizer { display: flex; gap: 3px; height: 30px; align-items: flex-end; }
-        .bar { width: 4px; background: var(--accent); animation: bounce 1s infinite ease-in-out; }
-        .bar:nth-child(2) { animation-delay: 0.2s; } .bar:nth-child(3) { animation-delay: 0.4s; }
-        .play-btn { 
-            width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--accent); 
-            color: white; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; 
-        }
-        @keyframes bounce { 0%, 100% { height: 5px; } 50% { height: 25px; } }
-
-        /* --- UTILS --- */
+        /* Utils */
         .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
         .btn-primary { background: var(--accent); color: white; }
         .btn-danger { background: #ef4444; color: white; }
@@ -141,13 +137,6 @@
 
         <div style="flex-grow: 1;"></div>
         
-        <div style="background: var(--bg-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: center;">
-            <div style="font-size: 0.8rem; margin-bottom: 5px; color: var(--text-secondary);">Lo-Fi Radio</div>
-            <button id="sidebar-play-btn" onclick="toggleMusic()" style="background: var(--accent); border: none; color: white; padding: 5px 15px; border-radius: 20px; cursor: pointer;">
-                <i class="fas fa-play"></i> Play
-            </button>
-        </div>
-
         <button class="nav-btn" onclick="toggleZenMode()"><i class="fas fa-expand-arrows-alt"></i> Zen Mode</button>
         <button class="nav-btn" onclick="toggleTheme()"><i class="fas fa-moon"></i> Theme</button>
     </nav>
@@ -176,23 +165,31 @@
                 </div>
 
                 <div class="card">
-                    <h3 style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Class Schedule</h3>
-                    <div id="schedule-list"></div>
-                    <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">* Edit class names here to update your notebook.</p>
+                    <h3 style="margin-top:0;"><i class="fas fa-wave-square"></i> Neural Static</h3>
+                    <p style="color:var(--text-secondary); font-size:0.8rem; margin-bottom:15px;">Locally generated audio. No Wi-Fi required.</p>
+                    
+                    <div style="display:flex; gap:10px;">
+                        <button class="noise-btn" id="btn-brown" onclick="toggleNoise('brown')">
+                            <i class="fas fa-water"></i> Brown
+                        </button>
+                        <button class="noise-btn" id="btn-pink" onclick="toggleNoise('pink')">
+                            <i class="fas fa-cloud-rain"></i> Pink
+                        </button>
+                        <button class="noise-btn" id="btn-white" onclick="toggleNoise('white')">
+                            <i class="fas fa-wind"></i> White
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top:20px;">
+                        <label style="font-size:0.8rem; color:var(--text-secondary);">Volume</label>
+                        <input type="range" min="0" max="0.5" step="0.01" value="0.1" oninput="setVolume(this.value)" style="width:100%; accent-color:var(--accent); cursor:pointer;">
+                    </div>
                 </div>
 
                 <div class="card">
-                    <h3 style="margin-top:0;"><i class="fas fa-headphones-alt"></i> Study Beats</h3>
-                    <div class="player-wrapper">
-                        <div>
-                            <div style="font-weight: 600;">Lofi Hip Hop</div>
-                            <div style="font-size: 0.8rem; opacity: 0.8;">Radio Stream (No YouTube)</div>
-                        </div>
-                        <div class="visualizer" id="visualizer" style="opacity: 0;">
-                            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                        </div>
-                        <button class="play-btn" onclick="toggleMusic()" id="main-play-btn"><i class="fas fa-play"></i></button>
-                    </div>
+                    <h3 style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Class Schedule</h3>
+                    <div id="schedule-list"></div>
+                    <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">* Renaming classes updates your notebook.</p>
                 </div>
             </div>
         </div>
@@ -239,19 +236,14 @@
 
     </main>
 
-    <audio id="audio-stream" preload="none">
-        <source src="https://streams.ilovemusic.de/iloveradio17.mp3" type="audio/mpeg">
-    </audio>
-
     <script>
         // --- STATE MANAGEMENT ---
         const appState = {
             theme: localStorage.getItem('theme') || 'light',
-            activeNoteId: null, // Tracks which class note is open
-            isPlaying: false
+            activeNoteId: null, 
+            currentNoise: null
         };
 
-        // Default Classes
         const defaultSchedule = [
             { id: 'p1', class: "Mathematics" },
             { id: 'p2', class: "History" },
@@ -269,7 +261,84 @@
             renderNotebookMenu();
         }
 
-        // --- SCHEDULE & SIDEBAR LOGIC ---
+        // --- NOISE GENERATOR (WEB AUDIO API) ---
+        let audioCtx, noiseSource, gainNode;
+
+        function toggleNoise(type) {
+            // 1. Setup Audio Context (Must happen on click)
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+
+            // 2. Stop if playing
+            if (noiseSource) {
+                noiseSource.stop();
+                noiseSource = null;
+                document.querySelectorAll('.noise-btn').forEach(b => b.classList.remove('active'));
+                
+                // If clicking the same button, stop here (toggle OFF)
+                if (appState.currentNoise === type) {
+                    appState.currentNoise = null;
+                    return;
+                }
+            }
+
+            // 3. Play new noise
+            appState.currentNoise = type;
+            document.getElementById('btn-' + type).classList.add('active');
+
+            // Create Buffer
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+
+            // Generate Math-based Sound
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                
+                if(type === 'white') {
+                    data[i] = white;
+                } else if (type === 'pink') {
+                    // Approximate pink noise (1/f)
+                    let b0, b1, b2, b3, b4, b5, b6;
+                    b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                    data[i] *= 0.11; 
+                } else if (type === 'brown') {
+                    // Brown noise (1/f^2) - Integrate white noise
+                    let lastOut = 0;
+                    data[i] = (lastOut + (0.02 * white)) / 1.02;
+                    lastOut = data[i];
+                    data[i] *= 3.5; 
+                }
+            }
+
+            noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer;
+            noiseSource.loop = true;
+            
+            // Volume Control
+            if(!gainNode) gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.1; // Default low volume
+            
+            noiseSource.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            noiseSource.start();
+        }
+
+        function setVolume(val) {
+            if(gainNode) gainNode.gain.value = val;
+        }
+
+
+        // --- SCHEDULE & SIDEBAR ---
         function loadSchedule() {
             const saved = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
             const container = document.getElementById('schedule-list');
@@ -292,7 +361,7 @@
             let schedule = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
             schedule[index].class = newName;
             localStorage.setItem('study_schedule', JSON.stringify(schedule));
-            renderNotebookMenu(); // Refresh sidebar immediately
+            renderNotebookMenu();
         }
 
         function renderNotebookMenu() {
@@ -300,7 +369,6 @@
             const submenu = document.getElementById('notebook-submenu');
             submenu.innerHTML = '';
             
-            // Add schedule items
             schedule.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = 'sub-btn';
@@ -309,7 +377,7 @@
                 submenu.appendChild(btn);
             });
 
-            // Add a "Misc" item
+            // Misc button
             const miscBtn = document.createElement('button');
             miscBtn.className = 'sub-btn';
             miscBtn.innerHTML = `<i class="fas fa-circle" style="font-size:0.5rem; margin-right:8px;"></i> Brainstorming`;
@@ -324,21 +392,17 @@
             arrow.style.transform = menu.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
         }
 
-        // --- NOTEBOOK LOGIC ---
+        // --- NOTEBOOK ---
         function openNote(noteId, noteTitle, btnElement) {
-            // UI Updates
             document.querySelectorAll('.nav-btn, .sub-btn').forEach(el => el.classList.remove('active'));
             if(btnElement) btnElement.classList.add('active');
             
-            // Show Note Section
             document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
             document.getElementById('notebook-view').classList.add('active');
             
-            // Set Header
             document.getElementById('page-title').innerText = noteTitle;
             document.getElementById('page-subtitle').innerText = "Auto-saving...";
 
-            // Load Content
             appState.activeNoteId = noteId;
             const content = localStorage.getItem('note_' + noteId) || '';
             document.getElementById('current-note').value = content;
@@ -351,28 +415,6 @@
             
             const status = document.getElementById('save-status');
             status.innerText = "Saved at " + new Date().toLocaleTimeString();
-        }
-
-        // --- MUSIC PLAYER (NO YOUTUBE) ---
-        function toggleMusic() {
-            const audio = document.getElementById('audio-stream');
-            const mainBtn = document.getElementById('main-play-btn');
-            const sideBtn = document.getElementById('sidebar-play-btn');
-            const viz = document.getElementById('visualizer');
-
-            if(appState.isPlaying) {
-                audio.pause();
-                appState.isPlaying = false;
-                mainBtn.innerHTML = '<i class="fas fa-play"></i>';
-                sideBtn.innerHTML = '<i class="fas fa-play"></i> Play';
-                viz.style.opacity = '0';
-            } else {
-                audio.play().catch(e => alert("Stream blocked by network. Try refreshing or using a hotspot."));
-                appState.isPlaying = true;
-                mainBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                sideBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
-                viz.style.opacity = '1';
-            }
         }
 
         // --- NAVIGATION & UTILS ---
@@ -403,7 +445,7 @@
             document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
 
-        // --- TODO LOGIC ---
+        // --- TODOS ---
         function addTodo() {
             const input = document.getElementById('newTodo');
             const val = input.value.trim();
@@ -435,7 +477,7 @@
             });
         }
 
-        // --- CALCULATOR ---
+        // --- CALCULATOR & TIMER ---
         function calc(val) {
             const display = document.getElementById('calcDisplay');
             if(val==='C') display.value = '';
@@ -443,7 +485,6 @@
             else display.value += val;
         }
 
-        // --- TIMER ---
         let tmr;
         function toggleTimer() {
             const btn = document.getElementById('timer-btn');
