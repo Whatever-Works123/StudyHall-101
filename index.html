@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall v22</title>
+    <title>StudyHall v23</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- THEME VARIABLES (Light Mode Default) --- */
+        /* --- THEME VARIABLES --- */
         :root {
             --bg-body: #F9F9F9;       
             --bg-sidebar: #FFFFFF;    
@@ -21,7 +21,6 @@
             --accent-hover: #FF7F00;  
             --success: #10B981;       
             --danger: #EF4444;
-            --paper-bg: #FFFFFF;
             --radius: 24px;
             --font: 'Nunito', sans-serif;
             --shadow: 0 4px 30px rgba(0,0,0,0.04); 
@@ -39,7 +38,6 @@
             --accent-hover: #F59E0B; 
             --success: #34D399;       
             --danger: #F87171;        
-            --paper-bg: #374151;      
             --shadow: 0 4px 30px rgba(0,0,0,0.4);
             --border: 1px solid #4B5563;
         }
@@ -57,6 +55,7 @@
         /* --- SIDEBAR --- */
         .sidebar { width: 250px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 30px 20px; flex-shrink: 0; border-right: var(--border); }
         .app-title { font-size: 1.3rem; font-weight: 800; color: var(--accent); margin-bottom: 40px; display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px; }
+        
         .nav-link { display: flex; align-items: center; gap: 15px; padding: 12px 15px; margin-bottom: 5px; border-radius: 15px; color: var(--text-muted); cursor: pointer; font-weight: 600; font-size: 0.95rem; border: none; background: none; width: 100%; text-align: left; }
         .nav-link:hover { background: var(--bg-input); color: var(--text-main); }
         .nav-link.active { background: var(--bg-input); color: var(--accent); font-weight: 800; }
@@ -64,8 +63,12 @@
         /* --- USER AREA --- */
         .spacer { flex: 1; }
         .user-area { display: flex; align-items: center; gap: 10px; padding-top: 20px; border-top: var(--border); }
+        .avatar-container { position:relative; }
         .avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--bg-input); cursor: pointer; }
-        .user-info { flex: 1; overflow: hidden; }
+        .avatar-badge { position:absolute; bottom:-2px; right:-2px; background:var(--bg-card); color:var(--text-muted); font-size:0.6rem; padding:2px; border-radius:50%; border:1px solid var(--border); pointer-events:none; }
+        
+        .user-info { flex: 1; overflow: hidden; cursor: pointer; padding: 5px; border-radius: 8px; }
+        .user-info:hover { background: var(--bg-input); }
         .user-name { font-weight: 700; font-size: 0.9rem; white-space: nowrap; }
         .user-coins { font-size: 0.8rem; color: var(--accent); font-weight: 700; }
 
@@ -77,16 +80,15 @@
 
         .card { background: var(--bg-card); border-radius: var(--radius); padding: 30px; margin-bottom: 25px; box-shadow: var(--shadow); border: var(--border); }
 
-        /* --- CLEAN WIDGETS --- */
+        /* --- WIDGETS --- */
         .grid-main { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
         
-        /* XP Bar */
+        /* XP & Tasks */
         .xp-container { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
         .xp-track { flex: 1; background: var(--bg-input); height: 8px; border-radius: 10px; overflow: hidden; }
         .xp-fill { background: var(--accent); width: 0%; height: 100%; border-radius: 10px; }
         .lvl-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 10px; font-weight: 800; font-size: 0.8rem; }
 
-        /* Tasks */
         .todo-input { width: 100%; background: var(--bg-input); border: none; padding: 15px; border-radius: 15px; color: var(--text-main); font-weight: 600; margin-bottom: 15px; }
         .todo-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--bg-input); }
         .todo-check { width: 20px; height: 20px; border: 2px solid var(--text-muted); border-radius: 6px; margin-right: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -100,21 +102,25 @@
         .pet-display { font-size: 4.5rem; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); margin: 10px 0; }
         .pet-msg { font-size: 0.9rem; font-weight: 700; color: var(--text-muted); }
 
-        /* Buttons */
+        /* Buttons & Inputs */
         .btn { padding: 12px 25px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; font-size: 0.95rem; background: var(--bg-input); color: var(--text-main); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 10px rgba(255, 159, 67, 0.3); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(255, 159, 67, 0.4); }
         .btn-danger { background: var(--danger); color: white; }
         .btn-full { width: 100%; }
+        
+        .input-group { margin-bottom: 20px; }
+        .input-label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
 
         /* Notes */
         #notepad { width: 100%; height: 65vh; background: transparent; color: var(--text-main); padding: 0; border: none; font-family: 'Nunito', sans-serif; line-height: 1.6; font-size: 1.1rem; resize: none; }
         
-        /* Utils */
-        .hidden { display: none !important; }
+        /* Shop */
         .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
         .shop-item { background: var(--bg-input); border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; border: 2px solid transparent; }
         .shop-item.equipped { border-color: var(--accent); background: var(--bg-card); }
+        
+        .hidden { display: none !important; }
 
     </style>
 </head>
@@ -134,7 +140,6 @@
 
             <div id="register-form" class="hidden">
                 <input type="text" id="reg-name" class="auth-input" placeholder="Choose a Username">
-                
                 <input type="email" id="reg-email" class="auth-input" placeholder="Email">
                 <input type="password" id="reg-pass" class="auth-input" placeholder="Password">
                 <button class="btn btn-primary btn-full" onclick="register()">Sign Up</button>
@@ -148,19 +153,20 @@
         
         <nav class="sidebar">
             <div class="app-title"><i class="fas fa-shapes"></i> StudyHall</div>
-            <button class="nav-link active" onclick="showPage('home', this)"><i class="fas fa-home"></i> Dashboard</button>
+            <button class="nav-link active" id="nav-home" onclick="showPage('home', this)"><i class="fas fa-home"></i> Dashboard</button>
             <button class="nav-link" onclick="showPage('notes', this)"><i class="fas fa-pencil-alt"></i> Notes</button>
             <button class="nav-link" onclick="showPage('focus', this)"><i class="fas fa-clock"></i> Timer</button>
             <button class="nav-link" onclick="showPage('shop', this)"><i class="fas fa-store"></i> Market</button>
-            <button class="nav-link" onclick="showPage('settings', this)"><i class="fas fa-cog"></i> Settings</button>
+            <button class="nav-link" id="nav-settings" onclick="showPage('settings', this)"><i class="fas fa-cog"></i> Settings</button>
             
             <div class="spacer"></div>
             
             <div class="user-area">
-                <div class="avatar-container" onclick="document.getElementById('file-input').click()">
+                <div class="avatar-container" onclick="document.getElementById('file-input').click()" title="Change Avatar">
                     <img src="" id="user-avatar" class="avatar-img">
+                    <div class="avatar-badge"><i class="fas fa-camera"></i></div>
                 </div>
-                <div class="user-info">
+                <div class="user-info" onclick="openSettingsFromProfile()" title="Go to Settings">
                     <div class="user-name" id="sidebar-name">Student</div>
                     <div class="user-coins"><i class="fas fa-coins"></i> <span id="coin-display">0</span></div>
                 </div>
@@ -230,13 +236,27 @@
 
             <div id="settings" class="page hidden">
                 <div class="card">
+                    <h3>My Account</h3>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Username</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="settings-username" class="todo-input" style="margin:0;" placeholder="Enter new name">
+                            <button class="btn btn-primary" onclick="updateUsername()">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Email</label>
+                        <div style="color:var(--text-muted); font-size:0.9rem; padding:10px 0;">Logged in as: <span id="uid-display">...</span></div>
+                    </div>
+                    
+                    <button class="btn btn-danger" onclick="logout()">Log Out</button>
+                </div>
+
+                <div class="card">
                     <h3>Appearance</h3>
                     <button class="btn" onclick="toggleTheme()" id="theme-btn">Switch to Dark Mode</button>
-                </div>
-                <div class="card">
-                    <h3>Account</h3>
-                    <p style="color:var(--text-muted); font-size:0.9rem;">Logged in as: <span id="uid-display">...</span></p>
-                    <button class="btn btn-danger" onclick="logout()">Log Out</button>
                 </div>
             </div>
         </main>
@@ -274,14 +294,15 @@
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
                 document.getElementById('app-screen').style.display = 'flex';
-                document.getElementById('uid-display').innerText = window.state.username || user.email;
+                document.getElementById('uid-display').innerText = user.email;
 
                 // Load Data
                 onValue(dbRef, (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
                         window.state = { ...window.state, ...data };
-                        // Backwards compatibility
+                        
+                        // Defaults
                         if(!window.state.inventory) window.state.inventory = ['pet_dog'];
                         if(!window.state.todos) window.state.todos = [];
                         if(!window.state.username) window.state.username = "Student";
@@ -292,8 +313,6 @@
                         window.updateUI();
                         document.body.setAttribute('data-theme', window.state.theme || 'light');
                         document.getElementById('notepad').value = window.state.notes || '';
-                    } else {
-                        // Data might not be there instantly on creation, wait for register func to set it
                     }
                 });
                 window.init();
@@ -312,14 +331,10 @@
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-pass').value;
 
-            if(!name) {
-                document.getElementById('auth-error').innerText = "Please enter a username.";
-                return;
-            }
+            if(!name) { document.getElementById('auth-error').innerText = "Please enter a username."; return; }
 
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                // Create initial DB state immediately
                 const newUserState = {
                     username: name,
                     xp: 0, lvl: 1, coins: 0, streak: 1, lastLogin: new Date().toDateString(),
@@ -375,9 +390,12 @@
         window.init = function() {
             document.getElementById('daily-quote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
             checkStreak();
-            
-            // Set Avatar
-            const bg = window.state.theme === 'light' ? 'E5E7EB' : '374151';
+            updateAvatarDisplay();
+        }
+
+        function updateAvatarDisplay() {
+             // Set Avatar
+             const bg = window.state.theme === 'light' ? 'E5E7EB' : '374151';
             const nameParam = window.state.username || 'St';
             if(!window.state.avatar) document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${nameParam}&background=${bg}&color=9CA3AF`;
             else document.getElementById('user-avatar').src = window.state.avatar;
@@ -398,16 +416,31 @@
         window.showPage = function(id, btn) {
             document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
+            
+            // Handle active class
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
             if(btn) {
-                document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
                 btn.classList.add('active');
+            } else if(id === 'settings') {
+                document.getElementById('nav-settings').classList.add('active');
             }
+
+            // Titles
             const t = {'home':`Hello, ${window.state.username}`,'notes':'Notes','focus':'Focus Timer','shop':'Market','settings':'Settings'};
             document.getElementById('page-title').innerText = t[id] || t['home'];
+
+            // Pre-fill settings input
+            if(id === 'settings') {
+                document.getElementById('settings-username').value = window.state.username;
+            }
+        }
+
+        // NAVIGATION HELPER
+        window.openSettingsFromProfile = function() {
+            showPage('settings', null);
         }
 
         window.updateUI = function() {
-            // Update Name in Sidebar
             document.getElementById('sidebar-name').innerText = window.state.username;
             if(document.getElementById('page-title').innerText.includes('Hello')) {
                 document.getElementById('page-title').innerText = `Hello, ${window.state.username}`;
@@ -423,6 +456,18 @@
             document.getElementById('pet-display').innerText = pet.char;
             
             document.getElementById('theme-btn').innerText = window.state.theme === 'light' ? "Switch to Dark Mode" : "Switch to Light Mode";
+            updateAvatarDisplay();
+        }
+
+        // UPDATE NAME
+        window.updateUsername = function() {
+            const newName = document.getElementById('settings-username').value;
+            if(newName && newName.trim() !== "") {
+                window.state.username = newName.trim();
+                window.saveData();
+                window.updateUI();
+                alert("Username updated!");
+            }
         }
 
         // TODO
@@ -518,12 +563,8 @@
         window.toggleTheme = () => {
             window.state.theme = window.state.theme === 'light' ? 'dark' : 'light';
             document.body.setAttribute('data-theme', window.state.theme);
-            const bg = window.state.theme === 'light' ? 'E5E7EB' : '374151';
-            const nameParam = window.state.username || 'St';
-            if(window.state.avatar.includes('ui-avatars')) {
-                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${nameParam}&background=${bg}&color=9CA3AF`;
-            }
-            window.saveData(); window.updateUI();
+            window.updateUI(); // Updates avatar for dark mode bg
+            window.saveData();
         }
         window.uploadAvatar = (inp) => {
             const r = new FileReader();
