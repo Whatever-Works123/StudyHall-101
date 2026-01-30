@@ -28,17 +28,25 @@
         }
 
         /* Light Mode Overrides */
-        [data-theme="light"] {
-            --bg-body: #F3F4F6;
-            --bg-sidebar: #FFFFFF;
-            --bg-card: #FFFFFF;
-            --bg-input: #E5E7EB;
-            --text-main: #1F2937;
-            --text-muted: #6B7280;
-            --accent: #6366F1;        /* Blurple for light mode */
-            --accent-hover: #4F46E5;
+       [data-theme="light"] {
+            --bg-body: #F9F5EB;       /* Chill Cream */
+            --bg-sidebar: #FFFBF2;    /* Lighter Cream */
+            --bg-card: #FFFFFF;       /* White */
+            --bg-input: #F0EBE0;      /* Beige Input */
+            
+            --text-main: #5C5446;     /* Warm Coffee Brown */
+            --text-muted: #9C9488;    /* Warm Grey */
+            
+            --accent: #FF9F43;        /* Galactic Orange */
+            --accent-hover: #FF7F00;  /* Deep Orange */
+            
+            --success: #2ECC71;       
+            --danger: #FF6B6B;
+            
             --paper-bg: #FFFFFF;
-            --paper-text: #1F2937;
+            --paper-text: #5C5446;
+            
+            --shadow: 0 4px 20px rgba(92, 84, 70, 0.08); /* Soft warm shadow */
         }
 
         * { box-sizing: border-box; transition: background 0.3s ease, color 0.3s ease; outline: none; }
