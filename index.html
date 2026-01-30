@@ -1,452 +1,704 @@
-<script>
-    // --- 1. FIREBASE CONFIGURATION ---
-    // (Keep your existing Firebase config here if you added it!)
-    const firebaseConfig = {
-        apiKey: "PASTE_YOUR_API_KEY_HERE", 
-        // ... rest of your config
-    };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHall Focus</title>
 
-    // Initialize Firebase safely
-    let db;
-    let userId;
-    try {
-        if(firebaseConfig && firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE" && typeof firebase !== 'undefined') {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <style>
+        /* --- CSS VARIABLES --- */
+        :root {
+            --bg-color: #f8fafc;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent: #6366f1; /* Indigo */
+            --accent-hover: #4f46e5;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --status-bg: #f1f5f9;
+            --danger: #ef4444;
+            --success: #22c55e;
         }
-    } catch(e) { console.log("Local Mode Only"); }
 
-    // --- 2. STATE & INIT ---
-    const appState = {
-        theme: localStorage.getItem('theme') || 'light',
-        mood: localStorage.getItem('mood') || '',
-        isPlaying: false,
-        currentStation: 'lofi',
-        activeNoteId: null
-    };
-
-    // --- 3. UNBLOCKABLE AUDIO SOURCES ---
-    // Switched to GitHub Raw & Code-Generated Audio
-    const stations = {
-        // Lofi: Hosted on GitHub (Usually unblocked)
-        lofi: "https://raw.githubusercontent.com/sasi-k/lofi-player/master/public/music/1.mp3",
-        
-        // Piano: Hosted on GitHub
-        piano: "https://raw.githubusercontent.com/pffy/mp3-piano-sound/master/mp3/c4.mp3", // Note: Switched to a test tone first to verify
-
-        // We will actually use a specific GitHub hosted song for Piano to ensure it plays longer
-        piano_full: "https://raw.githubusercontent.com/josephernest/BigSound/master/examples/mp3/02.mp3", 
-
-        // Generators (100% Unblockable because they are code)
-        rain: "generate:rain",
-        noise: "generate:brown"
-    };
-
-    let audioCtx, jsNode, audioNode, saveTimeout;
-
-    function init() {
-        if(appState.theme === 'dark') document.body.setAttribute('data-theme', 'dark');
-        if(appState.mood) document.body.className = appState.mood;
-        
-        // User ID Logic
-        userId = localStorage.getItem('study_user_id');
-        if(!userId) {
-            userId = 'student_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('study_user_id', userId);
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --sidebar-bg: #1e293b;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #818cf8;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --status-bg: #1e293b;
         }
-        const userDisplay = document.getElementById('user-id-display');
-        if(userDisplay) userDisplay.value = userId;
 
-        updateClock();
-        setInterval(updateClock, 1000);
-        loadSchedule();
-        loadTodos();
-        renderNotebookMenu();
+        /* Mood Themes */
+        body.mood-sunset { --bg-color: #fff1f2; --accent: #e11d48; }
+        body.mood-forest { --bg-color: #f0fdf4; --accent: #16a34a; }
+        body.mood-midnight { --bg-color: #020617; --sidebar-bg: #0f172a; --card-bg: #0f172a; --text-primary: #f8fafc; --text-secondary: #94a3b8; --border: #1e293b; }
+
+        * { box-sizing: border-box; transition: background 0.4s, color 0.3s; outline: none; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 1.5rem 1rem;
+            transition: margin-left 0.3s ease; z-index: 100; overflow-y: auto;
+        }
+        body.zen-mode .sidebar { margin-left: -240px; }
+
+        .logo { font-weight: 700; font-size: 1.2rem; margin-bottom: 2rem; color: var(--accent); display: flex; align-items: center; gap: 10px; }
         
-        // Add Error Listener to Audio Player
+        .nav-btn {
+            background: none; border: none; width: 100%; text-align: left; padding: 12px;
+            margin-bottom: 5px; color: var(--text-secondary); border-radius: 8px;
+            cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 12px;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: var(--bg-color); color: var(--accent); }
+        .nav-btn.active { background: var(--bg-color); color: var(--accent); font-weight: 600; }
+
+        /* Submenu */
+        .submenu { 
+            margin-left: 20px; border-left: 2px solid var(--border); 
+            overflow: hidden; max-height: 0; transition: max-height 0.3s ease;
+        }
+        .submenu.open { max-height: 300px; }
+        .sub-btn {
+            display: block; width: 100%; padding: 8px 12px; text-align: left; background: none; border: none;
+            color: var(--text-secondary); cursor: pointer; font-size: 0.9rem;
+        }
+        .sub-btn:hover, .sub-btn.active { color: var(--accent); font-weight: 600; }
+
+        /* --- MAIN AREA --- */
+        .main { flex: 1; padding: 2rem; overflow-y: auto; position: relative; scroll-behavior: smooth; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        
+        .card { 
+            background: var(--card-bg); padding: 1.5rem; border-radius: 16px; 
+            border: 1px solid var(--border); box-shadow: var(--shadow); 
+        }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+
+        /* --- SECTIONS --- */
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- RADIO UI --- */
+        .radio-container { display: flex; flex-direction: column; align-items: center; }
+        .record-player {
+            width: 200px; height: 200px; background: #1e1e1e; border-radius: 50%;
+            position: relative; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.3); border: 5px solid #2d2d2d;
+            transition: transform 0.5s;
+        }
+        .record-grooves { width: 180px; height: 180px; border-radius: 50%; border: 2px dashed #333; opacity: 0.5; position: absolute; }
+        .record-label {
+            width: 80px; height: 80px; background: var(--accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; z-index: 2;
+        }
+        .record-label i { color: white; font-size: 1.5rem; }
+        .record-player.playing { animation: spin 4s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .station-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 20px; width: 100%; }
+        .station-btn {
+            background: var(--bg-color); border: 1px solid var(--border); padding: 15px;
+            border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.2s;
+        }
+        .station-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .station-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .station-btn i { font-size: 1.5rem; margin-bottom: 8px; display: block; }
+
+        /* --- NOTEBOOK UI --- */
+        textarea { 
+            width: 100%; height: 65vh; background: var(--bg-color); color: var(--text-primary); 
+            border: 1px solid var(--border); padding: 2rem; border-radius: 12px; resize: none; 
+            line-height: 1.6; font-size: 1.1rem;
+        }
+        .cloud-status {
+            display: flex; align-items: center; gap: 8px; font-size: 0.8rem; 
+            background: var(--status-bg); padding: 5px 12px; border-radius: 20px;
+            color: var(--text-secondary);
+        }
+        .cloud-status.synced { color: #22c55e; }
+        .cloud-status.saving { color: #eab308; }
+        .cloud-status.error { color: #ef4444; }
+
+        /* --- SETTINGS UI --- */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        .mood-grid { display: flex; gap: 10px; margin-top: 10px; }
+        .mood-btn {
+            flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer;
+            text-align: center; font-size: 0.9rem; font-weight: 500; background: var(--card-bg); color: var(--text-primary);
+        }
+        .mood-btn:hover, .mood-btn.active { border-color: var(--accent); color: var(--accent); }
+
+        /* --- UTILS --- */
+        .schedule-item { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        .schedule-item input { border: none; background: transparent; color: var(--text-primary); font-family: inherit; font-size: 0.95rem; width: 100%; }
+        .schedule-item input:focus { border-bottom: 1px solid var(--accent); }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        #calcDisplay { width: 100%; padding: 15px; font-size: 1.8rem; text-align: right; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-primary); border-radius: 10px; font-family: monospace; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
+        .calc-btn { padding: 15px; border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer; background: var(--bg-color); color: var(--text-primary); box-shadow: 0 2px 0 var(--border); }
+        .calc-btn.accent { background: var(--accent); color: white; border: none; }
+
+    </style>
+</head>
+<body data-theme="light">
+
+    <nav class="sidebar">
+        <div class="logo"><i class="fas fa-brain"></i> StudyHall</div>
+        
+        <button class="nav-btn active" onclick="showSection('dashboard', this)"><i class="fas fa-columns"></i> Dashboard</button>
+        <button class="nav-btn" onclick="toggleNotebookMenu(this)">
+            <i class="fas fa-sticky-note"></i> Notebook <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i>
+        </button>
+        <div id="notebook-submenu" class="submenu"></div>
+        <button class="nav-btn" onclick="showSection('radio-room', this)"><i class="fas fa-music"></i> Radio Room</button>
+        <button class="nav-btn" onclick="showSection('todos', this)"><i class="fas fa-check-circle"></i> Tasks</button>
+        <button class="nav-btn" onclick="showSection('calculator', this)"><i class="fas fa-calculator"></i> Calculator</button>
+
+        <div style="flex-grow: 1;"></div>
+        <button class="nav-btn" onclick="showSection('settings', this)"><i class="fas fa-cog"></i> Settings</button>
+        <button class="nav-btn" onclick="toggleZenMode()"><i class="fas fa-expand-arrows-alt"></i> Zen Mode</button>
+    </nav>
+
+    <main class="main">
+        <div class="header">
+            <div>
+                <h2 id="page-title" style="margin:0;">Dashboard</h2>
+                <div id="status-bar" class="cloud-status" style="margin-top:5px; display:inline-flex;">
+                    <i class="fas fa-cloud"></i> <span id="cloud-text">Ready</span>
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <h3 id="clock" style="margin:0; font-family:monospace; color:var(--accent);">00:00</h3>
+                <div id="now-playing-pill" style="font-size: 0.8rem; color: var(--accent); opacity: 0; transition: opacity 0.3s; margin-top: 5px;">
+                    <i class="fas fa-volume-up"></i> Audio Active
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboard" class="section active">
+            <div class="dashboard-grid">
+                <div class="card" style="text-align:center;">
+                    <h3 style="margin-top:0;"><i class="fas fa-stopwatch"></i> Focus Timer</h3>
+                    <div style="font-size: 3.5rem; font-weight: 700; margin: 10px 0; font-family: monospace;" id="timer-display">25:00</div>
+                    <div style="display:flex; justify-content:center; gap:10px;">
+                        <button class="btn btn-primary" onclick="toggleTimer()" id="timer-btn">Start</button>
+                        <button class="btn" style="background:var(--bg-color); border:1px solid var(--border);" onclick="resetTimer()">Reset</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-top:0;"><i class="fas fa-tasks"></i> Top Tasks</h3>
+                    <ul id="dashboard-todo-list" style="padding-left: 20px; color: var(--text-secondary);"><li>No tasks yet.</li></ul>
+                </div>
+                <div class="card">
+                    <h3 style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Schedule</h3>
+                    <div id="schedule-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="radio-room" class="section">
+            <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+                <h3><i class="fas fa-broadcast-tower"></i> Radio Room</h3>
+                <p style="color:var(--text-secondary); margin-bottom: 30px;">Unblockable Streams (GitHub) & Audio Generators.</p>
+                
+                <div class="radio-container">
+                    <div class="record-player" id="record-player">
+                        <div class="record-grooves"></div>
+                        <div class="record-label"><i class="fas fa-music"></i></div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; margin-bottom: 20px;">
+                    <button id="main-play-btn" class="btn btn-primary" style="width: 150px; border-radius: 30px; padding: 12px;" onclick="toggleAudio()">
+                        <i class="fas fa-play"></i> Start
+                    </button>
+                    <div style="margin-top: 15px;">
+                         <input type="range" min="0" max="1" step="0.05" value="0.4" oninput="setVolume(this.value)" style="width: 200px; accent-color: var(--accent);">
+                    </div>
+                </div>
+
+                <div class="station-grid">
+                    <div class="station-btn active" id="st-lofi" onclick="changeStation('lofi')">
+                        <i class="fas fa-coffee"></i> Lofi Girl
+                    </div>
+                    <div class="station-btn" id="st-piano" onclick="changeStation('piano')">
+                        <i class="fas fa-book-open"></i> Piano Focus
+                    </div>
+                    <div class="station-btn" id="st-rain" onclick="changeStation('rain')">
+                        <i class="fas fa-cloud-rain"></i> Rain Storm
+                    </div>
+                    <div class="station-btn" id="st-noise" onclick="changeStation('noise')">
+                        <i class="fas fa-wind"></i> Brown Noise
+                    </div>
+                </div>
+                <p id="stream-status" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px;"></p>
+            </div>
+        </div>
+
+        <div id="notebook-view" class="section">
+            <textarea id="current-note" oninput="handleNoteInput()" placeholder="Start typing your notes here..."></textarea>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">* Notes are automatically synced to Firebase.</p>
+        </div>
+
+        <div id="todos" class="section">
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <input type="text" id="newTodo" placeholder="Add assignment..." 
+                           style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-color); color:var(--text-primary);">
+                    <button class="btn btn-primary" onclick="addTodo()">Add</button>
+                </div>
+                <div id="todoList"></div>
+            </div>
+        </div>
+
+        <div id="calculator" class="section">
+            <div class="card" style="max-width:350px; margin:0 auto;">
+                <input type="text" id="calcDisplay" readonly>
+                <div class="calc-grid">
+                    <button class="calc-btn" onclick="calc('7')">7</button>
+                    <button class="calc-btn" onclick="calc('8')">8</button>
+                    <button class="calc-btn" onclick="calc('9')">9</button>
+                    <button class="calc-btn accent" onclick="calc('/')">÷</button>
+                    <button class="calc-btn" onclick="calc('4')">4</button>
+                    <button class="calc-btn" onclick="calc('5')">5</button>
+                    <button class="calc-btn" onclick="calc('6')">6</button>
+                    <button class="calc-btn accent" onclick="calc('*')">×</button>
+                    <button class="calc-btn" onclick="calc('1')">1</button>
+                    <button class="calc-btn" onclick="calc('2')">2</button>
+                    <button class="calc-btn" onclick="calc('3')">3</button>
+                    <button class="calc-btn accent" onclick="calc('-')">-</button>
+                    <button class="calc-btn" onclick="calc('C')">C</button>
+                    <button class="calc-btn" onclick="calc('0')">0</button>
+                    <button class="calc-btn" onclick="calc('=')">=</button>
+                    <button class="calc-btn accent" onclick="calc('+')">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings" class="section">
+            <div class="card" style="max-width: 500px; margin: 0 auto;">
+                <h3><i class="fas fa-sliders-h"></i> Preferences</h3>
+                <div class="setting-row">
+                    <span>Base Theme</span>
+                    <button class="btn" style="background:var(--bg-color); border:1px solid var(--border);" onclick="toggleTheme()">Toggle Light/Dark</button>
+                </div>
+                <div style="margin-top: 20px;">
+                    <span style="font-weight: 500;">Ambience & Mood</span>
+                    <div class="mood-grid">
+                        <div class="mood-btn" onclick="setMood('mood-sunset')">🌅 Sunset</div>
+                        <div class="mood-btn" onclick="setMood('mood-forest')">🌲 Forest</div>
+                        <div class="mood-btn" onclick="setMood('mood-midnight')">🌌 Deep</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <span style="font-weight: 500;">Your Cloud ID</span>
+                    <p style="font-size:0.8rem; color:var(--text-secondary);">Use this ID to access notes on other devices.</p>
+                    <input type="text" id="user-id-display" readonly style="width:100%; padding:10px; background:var(--bg-color); border:1px solid var(--border); border-radius:6px; color:var(--text-primary);">
+                </div>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                    <span style="font-weight: 500;">Data</span>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Clear all notes and schedule data?</p>
+                    <button class="btn btn-danger" onclick="clearData()">Reset App Data</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <audio id="audio-engine" loop preload="none" crossorigin="anonymous"></audio>
+
+    <script>
+        // --- 1. FIREBASE CONFIGURATION ---
+        // TODO: PASTE YOUR FIREBASE CONFIG HERE
+        const firebaseConfig = {
+            apiKey: "PASTE_API_KEY_HERE",
+            authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
+            databaseURL: "PASTE_DATABASE_URL_HERE",
+            projectId: "PASTE_PROJECT_ID",
+            storageBucket: "PASTE_BUCKET_HERE",
+            messagingSenderId: "PASTE_SENDER_ID",
+            appId: "PASTE_APP_ID"
+        };
+
+        // Initialize Firebase safely
+        let db;
+        let userId;
+        try {
+            if(firebaseConfig && firebaseConfig.apiKey !== "PASTE_API_KEY_HERE" && typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+            }
+        } catch(e) { console.log("Local Mode Only"); }
+
+        // --- 2. STATE & INIT ---
+        const appState = {
+            theme: localStorage.getItem('theme') || 'light',
+            mood: localStorage.getItem('mood') || '',
+            isPlaying: false,
+            currentStation: 'lofi',
+            activeNoteId: null
+        };
+
+        // --- 3. UNBLOCKABLE AUDIO SOURCES ---
+        const stations = {
+            lofi: "https://raw.githubusercontent.com/sasi-k/lofi-player/master/public/music/1.mp3",
+            piano: "https://raw.githubusercontent.com/josephernest/BigSound/master/examples/mp3/02.mp3",
+            rain: "generate:rain",
+            noise: "generate:brown"
+        };
+
+        let audioCtx, jsNode, audioNode, saveTimeout;
+
+        function init() {
+            if(appState.theme === 'dark') document.body.setAttribute('data-theme', 'dark');
+            if(appState.mood) document.body.className = appState.mood;
+            
+            // User ID Logic
+            userId = localStorage.getItem('study_user_id');
+            if(!userId) {
+                userId = 'student_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('study_user_id', userId);
+            }
+            const userDisplay = document.getElementById('user-id-display');
+            if(userDisplay) userDisplay.value = userId;
+
+            updateClock();
+            setInterval(updateClock, 1000);
+            loadSchedule();
+            loadTodos();
+            renderNotebookMenu();
+            
+            // Audio Error Listener
+            const audioEl = document.getElementById('audio-engine');
+            if(audioEl) {
+                audioEl.onerror = function() {
+                    const status = document.getElementById('stream-status');
+                    status.innerText = "❌ Blocked by School Filter. Switching to Generator...";
+                    status.style.color = "var(--danger)";
+                    setTimeout(() => changeStation('noise'), 2000);
+                };
+            }
+        }
+
+        // --- 4. AUDIO ENGINE ---
         const audioEl = document.getElementById('audio-engine');
-        if(audioEl) {
-            audioEl.onerror = function() {
-                const status = document.getElementById('stream-status');
-                status.innerText = "❌ Blocked by School Filter. Switching to Generator...";
-                status.style.color = "var(--danger)";
-                // Fallback to brown noise if file fails
-                setTimeout(() => changeStation('noise'), 2000);
-            };
+
+        function changeStation(id) {
+            document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById('st-' + id);
+            if(btn) btn.classList.add('active');
+            appState.currentStation = id;
+            if(appState.isPlaying) playAudioSource();
         }
-    }
 
-    // --- 4. AUDIO ENGINE ---
-    const audioEl = document.getElementById('audio-engine');
-
-    function changeStation(id) {
-        document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('active'));
-        const btn = document.getElementById('st-' + id);
-        if(btn) btn.classList.add('active');
-        
-        appState.currentStation = id;
-        if(appState.isPlaying) {
-            playAudioSource();
+        function toggleAudio() {
+            const btn = document.getElementById('main-play-btn');
+            const pill = document.getElementById('now-playing-pill');
+            const record = document.getElementById('record-player');
+            
+            if(appState.isPlaying) {
+                audioEl.pause();
+                stopProceduralAudio();
+                appState.isPlaying = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> Start';
+                if(record) record.classList.remove('playing');
+                if(pill) pill.style.opacity = '0';
+                document.getElementById('stream-status').innerText = "";
+            } else {
+                playAudioSource();
+                appState.isPlaying = true;
+                btn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                if(record) record.classList.add('playing');
+                if(pill) pill.style.opacity = '1';
+            }
         }
-    }
 
-    function toggleAudio() {
-        const btn = document.getElementById('main-play-btn');
-        const pill = document.getElementById('now-playing-pill');
-        const record = document.getElementById('record-player');
-        
-        if(appState.isPlaying) {
-            // STOP
+        function playAudioSource() {
+            const status = document.getElementById('stream-status');
             audioEl.pause();
             stopProceduralAudio();
-            appState.isPlaying = false;
+            let source = stations[appState.currentStation];
             
-            btn.innerHTML = '<i class="fas fa-play"></i> Start';
-            if(record) record.classList.remove('playing');
-            if(pill) pill.style.opacity = '0';
-            document.getElementById('stream-status').innerText = "";
-        } else {
-            // PLAY
-            playAudioSource();
-            appState.isPlaying = true;
-            
-            btn.innerHTML = '<i class="fas fa-pause"></i> Pause';
-            if(record) record.classList.add('playing');
-            if(pill) pill.style.opacity = '1';
-        }
-    }
-
-    function playAudioSource() {
-        const status = document.getElementById('stream-status');
-        audioEl.pause();
-        stopProceduralAudio();
-
-        let source = stations[appState.currentStation];
-        
-        // Fix for Piano key mapping
-        if(appState.currentStation === 'piano') source = stations.piano_full;
-
-        if (source.startsWith("generate:")) {
-            // CODE GENERATED (UNBLOCKABLE)
-            const type = source.split(':')[1];
-            startProceduralAudio(type);
-            status.innerText = "⚡ Generating " + type + " (Local)";
-            status.style.color = "var(--accent)";
-        } else {
-            // GITHUB FILE STREAM
-            status.innerText = "⌛ Buffering from GitHub...";
-            status.style.color = "var(--text-secondary)";
-            
-            audioEl.src = source;
-            audioEl.volume = document.querySelector('input[type=range]').value;
-            
-            // Attempt play
-            const playPromise = audioEl.play();
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
+            if (source.startsWith("generate:")) {
+                const type = source.split(':')[1];
+                startProceduralAudio(type);
+                status.innerText = "⚡ Generating " + type + " (Local)";
+                status.style.color = "var(--accent)";
+            } else {
+                status.innerText = "⌛ Buffering from GitHub...";
+                status.style.color = "var(--text-secondary)";
+                audioEl.src = source;
+                audioEl.volume = document.querySelector('input[type=range]').value;
+                audioEl.play().then(_ => {
                     status.innerText = "✅ Playing (GitHub Source)";
-                    status.style.color = "var(--success)"; // Green
-                })
-                .catch(error => {
-                    console.error("Play Error:", error);
+                    status.style.color = "var(--success)";
+                }).catch(error => {
                     status.innerText = "⚠️ Network Blocked. Try 'Brown Noise'.";
                 });
             }
         }
-    }
 
-    function setVolume(val) {
-        if(audioEl) audioEl.volume = val;
-        if(jsNode) jsNode.gain.value = val * 0.15;
-    }
-
-    // --- 5. PROCEDURAL AUDIO (The Math Stuff) ---
-    function startProceduralAudio(type) {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        const bufferSize = 2 * audioCtx.sampleRate;
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const data = buffer.getChannelData(0);
-
-        for (let i = 0; i < bufferSize; i++) {
-            const white = Math.random() * 2 - 1;
-            
-            if(type === 'brown') {
-                // Brown Noise Algorithm
-                let lastOut = 0;
-                data[i] = (lastOut + (0.02 * white)) / 1.02;
-                lastOut = data[i];
-                data[i] *= 3.5; 
-            } 
-            else if (type === 'rain') {
-                // Pink Noise Algorithm (Sounds like rain)
-                let b0, b1, b2, b3, b4, b5, b6;
-                b0=b1=b2=b3=b4=b5=b6=0.0;
-                b0 = 0.99886 * b0 + white * 0.0555179;
-                b1 = 0.99332 * b1 + white * 0.0750759;
-                b2 = 0.96900 * b2 + white * 0.1538520;
-                b3 = 0.86650 * b3 + white * 0.3104856;
-                b4 = 0.55000 * b4 + white * 0.5329522;
-                b5 = -0.7616 * b5 - white * 0.0168980;
-                data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-                data[i] *= 0.11; 
-            }
+        function setVolume(val) {
+            if(audioEl) audioEl.volume = val;
+            if(jsNode) jsNode.gain.value = val * 0.15;
         }
 
-        audioNode = audioCtx.createBufferSource();
-        audioNode.buffer = buffer;
-        audioNode.loop = true;
-        jsNode = audioCtx.createGain();
-        jsNode.gain.value = (audioEl ? audioEl.volume : 0.5) * 0.15;
-        
-        audioNode.connect(jsNode);
-        jsNode.connect(audioCtx.destination);
-        audioNode.start();
-    }
+        // --- 5. PROCEDURAL AUDIO ---
+        function startProceduralAudio(type) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
 
-    function stopProceduralAudio() {
-        if(audioNode) {
-            audioNode.stop();
-            audioNode = null;
-        }
-    }
-
-    // --- 6. STANDARD APP LOGIC ---
-    function handleNoteInput() {
-        const status = document.getElementById('cloud-text');
-        const icon = document.querySelector('.cloud-status');
-        const val = document.getElementById('current-note').value;
-        localStorage.setItem('note_' + appState.activeNoteId, val);
-        
-        if(status) {
-            status.innerText = "Saving...";
-            if(icon) {
-                icon.classList.add('saving');
-                icon.classList.remove('synced');
-            }
-        }
-
-        clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(() => {
-            saveToCloud(val);
-        }, 1000);
-    }
-
-    function saveToCloud(content) {
-        if(db && userId) {
-            db.ref('users/' + userId + '/notes/' + appState.activeNoteId).set(content)
-                .then(() => {
-                    const status = document.getElementById('cloud-text');
-                    const icon = document.querySelector('.cloud-status');
-                    if(status) status.innerText = "Synced";
-                    if(icon) {
-                        icon.classList.remove('saving');
-                        icon.classList.add('synced');
-                    }
-                })
-                .catch(e => console.log("Cloud save failed"));
-        } else {
-            const status = document.getElementById('cloud-text');
-            if(status) status.innerText = "Local Mode";
-        }
-    }
-
-    function fetchFromCloud(noteId) {
-        if(db && userId) {
-            const status = document.getElementById('cloud-text');
-            if(status) status.innerText = "Syncing...";
-            
-            db.ref('users/' + userId + '/notes/' + noteId).once('value', (snap) => {
-                const cloudContent = snap.val();
-                if(cloudContent) {
-                    document.getElementById('current-note').value = cloudContent;
-                    localStorage.setItem('note_' + noteId, cloudContent);
-                } else {
-                    document.getElementById('current-note').value = localStorage.getItem('note_' + noteId) || "";
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                if(type === 'brown') {
+                    let lastOut = 0;
+                    data[i] = (lastOut + (0.02 * white)) / 1.02;
+                    lastOut = data[i];
+                    data[i] *= 3.5; 
+                } else if (type === 'rain') {
+                    let b0, b1, b2, b3, b4, b5, b6;
+                    b0=b1=b2=b3=b4=b5=b6=0.0;
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                    data[i] *= 0.11; 
                 }
-                if(status) status.innerText = "Synced";
-            });
-        } else {
-            document.getElementById('current-note').value = localStorage.getItem('note_' + noteId) || "";
-        }
-    }
-
-    // UI Helpers
-    function setMood(moodClass) {
-        document.body.className = ''; document.body.removeAttribute('data-theme');
-        if(moodClass) document.body.classList.add(moodClass);
-        if(moodClass === 'mood-midnight') document.body.setAttribute('data-theme', 'dark');
-        localStorage.setItem('mood', moodClass);
-    }
-    
-    function toggleTheme() {
-        const next = document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-        document.body.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-        localStorage.setItem('mood', '');
-        document.body.className = '';
-    }
-
-    function showSection(id, btn) {
-        document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(btn) {
-            document.querySelectorAll('.nav-btn, .sub-btn').forEach(el => el.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('page-title').innerText = btn.innerText.trim();
-        }
-    }
-
-    function toggleZenMode() { document.body.classList.toggle('zen-mode'); }
-    function updateClock() { 
-        const el = document.getElementById('clock');
-        if(el) el.innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); 
-    }
-
-    // Data Loaders
-    const defaultSchedule = [ { id: 'p1', class: "Mathematics" }, { id: 'p2', class: "History" }, { id: 'p3', class: "Science" }, { id: 'p4', class: "English" }, { id: 'p5', class: "Elective" } ];
-    
-    function loadSchedule() {
-        const saved = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
-        const container = document.getElementById('schedule-list');
-        if(!container) return;
-        container.innerHTML = '';
-        saved.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = 'schedule-item';
-            div.innerHTML = `<div style="width:20%; font-weight:600; color:var(--accent);">Period ${index+1}</div><div style="width:80%;"><input type="text" value="${item.class}" onchange="updateClass(${index}, this.value)"></div>`;
-            container.appendChild(div);
-        });
-    }
-
-    function updateClass(index, newName) {
-        let schedule = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
-        schedule[index].class = newName;
-        localStorage.setItem('study_schedule', JSON.stringify(schedule));
-        renderNotebookMenu();
-    }
-
-    function renderNotebookMenu() {
-        const schedule = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
-        const submenu = document.getElementById('notebook-submenu');
-        if(!submenu) return;
-        submenu.innerHTML = '';
-        schedule.forEach(item => {
-            const btn = document.createElement('button');
-            btn.className = 'sub-btn';
-            btn.innerHTML = `<i class="fas fa-circle" style="font-size:0.5rem; margin-right:8px;"></i> ${item.class}`;
-            btn.onclick = () => openNote(item.id, item.class, btn);
-            submenu.appendChild(btn);
-        });
-        const miscBtn = document.createElement('button');
-        miscBtn.className = 'sub-btn';
-        miscBtn.innerHTML = `<i class="fas fa-circle" style="font-size:0.5rem; margin-right:8px;"></i> Brainstorming`;
-        miscBtn.onclick = () => openNote('misc', 'Brainstorming', miscBtn);
-        submenu.appendChild(miscBtn);
-    }
-
-    function toggleNotebookMenu(btn) {
-        const menu = document.getElementById('notebook-submenu');
-        if(menu) {
-            menu.classList.toggle('open');
-            const arrow = btn.querySelector('.fa-chevron-down');
-            if(arrow) arrow.style.transform = menu.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
-        }
-    }
-
-    function openNote(noteId, noteTitle, btnElement) {
-        document.querySelectorAll('.nav-btn, .sub-btn').forEach(el => el.classList.remove('active'));
-        if(btnElement) btnElement.classList.add('active');
-        showSection('notebook-view');
-        
-        const titleEl = document.getElementById('page-title');
-        if(titleEl) titleEl.innerText = noteTitle;
-        
-        appState.activeNoteId = noteId;
-        fetchFromCloud(noteId);
-    }
-
-    function addTodo() {
-        const input = document.getElementById('newTodo');
-        const val = input.value.trim();
-        if(!val) return;
-        const tasks = JSON.parse(localStorage.getItem('study_todos') || '[]');
-        tasks.push(val);
-        localStorage.setItem('study_todos', JSON.stringify(tasks));
-        input.value = '';
-        loadTodos();
-    }
-
-    function loadTodos() {
-        const tasks = JSON.parse(localStorage.getItem('study_todos') || '[]');
-        const list = document.getElementById('todoList');
-        const dashList = document.getElementById('dashboard-todo-list');
-        if(list) list.innerHTML = ''; 
-        if(dashList) dashList.innerHTML = '';
-        
-        if(dashList && tasks.length === 0) dashList.innerHTML = '<li>No tasks yet.</li>';
-        
-        tasks.forEach((t, i) => {
-            if(list) {
-                const item = document.createElement('div');
-                item.style.cssText = "padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;";
-                item.innerHTML = `<span>${t}</span> <button class="btn btn-danger" onclick="removeTodo(${i})" style="font-size:0.8rem; padding:5px;">Done</button>`;
-                list.appendChild(item);
             }
-            if(dashList && i < 3) dashList.innerHTML += `<li>${t}</li>`;
-        });
-    }
+            audioNode = audioCtx.createBufferSource();
+            audioNode.buffer = buffer;
+            audioNode.loop = true;
+            jsNode = audioCtx.createGain();
+            jsNode.gain.value = (audioEl ? audioEl.volume : 0.5) * 0.15;
+            audioNode.connect(jsNode);
+            jsNode.connect(audioCtx.destination);
+            audioNode.start();
+        }
+        function stopProceduralAudio() { if(audioNode) { audioNode.stop(); audioNode = null; } }
 
-    function removeTodo(i) {
-        const tasks = JSON.parse(localStorage.getItem('study_todos') || '[]');
-        tasks.splice(i, 1);
-        localStorage.setItem('study_todos', JSON.stringify(tasks));
-        loadTodos();
-    }
+        // --- 6. DATA & SYNC ---
+        function handleNoteInput() {
+            const status = document.getElementById('cloud-text');
+            const icon = document.querySelector('.cloud-status');
+            const val = document.getElementById('current-note').value;
+            localStorage.setItem('note_' + appState.activeNoteId, val);
+            
+            if(status) {
+                status.innerText = "Saving...";
+                if(icon) { icon.classList.add('saving'); icon.classList.remove('synced'); }
+            }
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => { saveToCloud(val); }, 1000);
+        }
 
-    function calc(val) {
-        const d = document.getElementById('calcDisplay');
-        if(!d) return;
-        if(val==='C') d.value = '';
-        else if(val==='=') { try { d.value = eval(d.value); } catch { d.value = 'Error'; } }
-        else d.value += val;
-    }
+        function saveToCloud(content) {
+            if(db && userId) {
+                db.ref('users/' + userId + '/notes/' + appState.activeNoteId).set(content)
+                    .then(() => {
+                        const status = document.getElementById('cloud-text');
+                        const icon = document.querySelector('.cloud-status');
+                        if(status) status.innerText = "Synced";
+                        if(icon) { icon.classList.remove('saving'); icon.classList.add('synced'); }
+                    });
+            } else {
+                const status = document.getElementById('cloud-text');
+                if(status) status.innerText = "Local Mode";
+            }
+        }
 
-    let tmr;
-    function toggleTimer() {
-        const btn = document.getElementById('timer-btn');
-        if(tmr) { 
-            clearInterval(tmr); tmr = null; 
-            if(btn) btn.innerText = "Start"; 
+        function fetchFromCloud(noteId) {
+            if(db && userId) {
+                const status = document.getElementById('cloud-text');
+                if(status) status.innerText = "Syncing...";
+                db.ref('users/' + userId + '/notes/' + noteId).once('value', (snap) => {
+                    const cloudContent = snap.val();
+                    if(cloudContent) {
+                        document.getElementById('current-note').value = cloudContent;
+                        localStorage.setItem('note_' + noteId, cloudContent);
+                    } else {
+                        document.getElementById('current-note').value = localStorage.getItem('note_' + noteId) || "";
+                    }
+                    if(status) status.innerText = "Synced";
+                });
+            } else {
+                document.getElementById('current-note').value = localStorage.getItem('note_' + noteId) || "";
+            }
+        }
+
+        // --- 7. UI LOGIC ---
+        function setMood(moodClass) {
+            document.body.className = ''; document.body.removeAttribute('data-theme');
+            if(moodClass) document.body.classList.add(moodClass);
+            if(moodClass === 'mood-midnight') document.body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('mood', moodClass);
+        }
+        function toggleTheme() {
+            const next = document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            localStorage.setItem('mood', '');
+            document.body.className = '';
+        }
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(btn) {
+                document.querySelectorAll('.nav-btn, .sub-btn').forEach(el => el.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('page-title').innerText = btn.innerText.trim();
+            }
+        }
+        function toggleZenMode() { document.body.classList.toggle('zen-mode'); }
+        function updateClock() { const el = document.getElementById('clock'); if(el) el.innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }
+        
+        // Data Loaders
+        const defaultSchedule = [ { id: 'p1', class: "Mathematics" }, { id: 'p2', class: "History" }, { id: 'p3', class: "Science" }, { id: 'p4', class: "English" }, { id: 'p5', class: "Elective" } ];
+        function loadSchedule() {
+            const saved = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
+            const container = document.getElementById('schedule-list');
+            if(!container) return;
+            container.innerHTML = '';
+            saved.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'schedule-item';
+                div.innerHTML = `<div style="width:20%; font-weight:600; color:var(--accent);">Period ${index+1}</div><div style="width:80%;"><input type="text" value="${item.class}" onchange="updateClass(${index}, this.value)"></div>`;
+                container.appendChild(div);
+            });
+        }
+        function updateClass(index, newName) {
+            let schedule = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
+            schedule[index].class = newName;
+            localStorage.setItem('study_schedule', JSON.stringify(schedule));
+            renderNotebookMenu();
+        }
+        function renderNotebookMenu() {
+            const schedule = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
+            const submenu = document.getElementById('notebook-submenu');
+            if(!submenu) return;
+            submenu.innerHTML = '';
+            schedule.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'sub-btn';
+                btn.innerHTML = `<i class="fas fa-circle" style="font-size:0.5rem; margin-right:8px;"></i> ${item.class}`;
+                btn.onclick = () => openNote(item.id, item.class, btn);
+                submenu.appendChild(btn);
+            });
+            const miscBtn = document.createElement('button');
+            miscBtn.className = 'sub-btn';
+            miscBtn.innerHTML = `<i class="fas fa-circle" style="font-size:0.5rem; margin-right:8px;"></i> Brainstorming`;
+            miscBtn.onclick = () => openNote('misc', 'Brainstorming', miscBtn);
+            submenu.appendChild(miscBtn);
+        }
+        function toggleNotebookMenu(btn) {
+            const menu = document.getElementById('notebook-submenu');
+            if(menu) {
+                menu.classList.toggle('open');
+                const arrow = btn.querySelector('.fa-chevron-down');
+                if(arrow) arrow.style.transform = menu.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        }
+        function openNote(noteId, noteTitle, btnElement) {
+            document.querySelectorAll('.nav-btn, .sub-btn').forEach(el => el.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+            showSection('notebook-view');
+            const titleEl = document.getElementById('page-title');
+            if(titleEl) titleEl.innerText = noteTitle;
+            appState.activeNoteId = noteId;
+            fetchFromCloud(noteId);
+        }
+        function addTodo() {
+            const input = document.getElementById('newTodo');
+            const val = input.value.trim();
+            if(!val) return;
+            const tasks = JSON.parse(localStorage.getItem('study_todos') || '[]');
+            tasks.push(val);
+            localStorage.setItem('study_todos', JSON.stringify(tasks));
+            input.value = '';
+            loadTodos();
+        }
+        function loadTodos() {
+            const tasks = JSON.parse(localStorage.getItem('study_todos') || '[]');
+            const list = document.getElementById('todoList');
+            const dashList = document.getElementById('dashboard-todo-list');
+            if(list) list.innerHTML = ''; 
+            if(dashList) dashList.innerHTML = '';
+            if(dashList && tasks.length === 0) dashList.innerHTML = '<li>No tasks yet.</li>';
+            tasks.forEach((t, i) => {
+                if(list) {
+                    const item = document.createElement('div');
+                    item.style.cssText = "padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;";
+                    item.innerHTML = `<span>${t}</span> <button class="btn btn-danger" onclick="removeTodo(${i})" style="font-size:0.8rem; padding:5px;">Done</button>`;
+                    list.appendChild(item);
+                }
+                if(dashList && i < 3) dashList.innerHTML += `<li>${t}</li>`;
+            });
+        }
+        function removeTodo(i) {
+            const tasks = JSON.parse(localStorage.getItem('study_todos') || '[]');
+            tasks.splice(i, 1);
+            localStorage.setItem('study_todos', JSON.stringify(tasks));
+            loadTodos();
+        }
+        function calc(val) {
+            const d = document.getElementById('calcDisplay');
+            if(!d) return;
+            if(val==='C') d.value = '';
+            else if(val==='=') { try { d.value = eval(d.value); } catch { d.value = 'Error'; } }
+            else d.value += val;
+        }
+        let tmr;
+        function toggleTimer() {
+            const btn = document.getElementById('timer-btn');
+            if(tmr) { 
+                clearInterval(tmr); tmr = null; 
+                if(btn) btn.innerText = "Start"; 
+                if(btn) btn.classList.remove('btn-danger'); 
+            } else {
+                if(btn) btn.innerText = "Pause"; 
+                if(btn) btn.classList.add('btn-danger');
+                tmr = setInterval(() => {
+                    const el = document.getElementById('timer-display');
+                    if(!el) return;
+                    let [m, s] = el.innerText.split(':').map(Number);
+                    if(s===0) { if(m===0) { clearInterval(tmr); return; } m--; s=59; } else s--;
+                    el.innerText = `${m}:${s<10?'0'+s:s}`;
+                }, 1000);
+            }
+        }
+        function resetTimer() { 
+            clearInterval(tmr); tmr=null; 
+            const el = document.getElementById('timer-display');
+            const btn = document.getElementById('timer-btn');
+            if(el) el.innerText="25:00"; 
+            if(btn) btn.innerText="Start"; 
             if(btn) btn.classList.remove('btn-danger'); 
-        } else {
-            if(btn) btn.innerText = "Pause"; 
-            if(btn) btn.classList.add('btn-danger');
-            tmr = setInterval(() => {
-                const el = document.getElementById('timer-display');
-                if(!el) return;
-                let [m, s] = el.innerText.split(':').map(Number);
-                if(s===0) { if(m===0) { clearInterval(tmr); return; } m--; s=59; } else s--;
-                el.innerText = `${m}:${s<10?'0'+s:s}`;
-            }, 1000);
         }
-    }
+        function clearData() { if(confirm("Delete all notes and todos?")) { localStorage.clear(); location.reload(); } }
 
-    function resetTimer() { 
-        clearInterval(tmr); tmr=null; 
-        const el = document.getElementById('timer-display');
-        const btn = document.getElementById('timer-btn');
-        if(el) el.innerText="25:00"; 
-        if(btn) btn.innerText="Start"; 
-        if(btn) btn.classList.remove('btn-danger'); 
-    }
-
-    function clearData() {
-        if(confirm("Delete all notes and todos?")) {
-            localStorage.clear();
-            location.reload();
-        }
-    }
-
-    window.onload = init;
-</script>
+        window.onload = init;
+    </script>
+</body>
+</html>
