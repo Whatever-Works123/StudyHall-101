@@ -3,29 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall 101</title>
+    <title>StudyHall Focus</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-
     <style>
         /* --- CSS VARIABLES --- */
         :root {
-            --bg-color: #f1f5f9;
+            --bg-color: #f8fafc;
             --sidebar-bg: #ffffff;
             --card-bg: #ffffff;
-            --text-primary: #0f172a;
+            --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --danger: #ef4444;
-            --success: #22c55e;
+            --accent: #6366f1; /* Indigo for focus */
+            --accent-hover: #4f46e5;
             --border: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
         [data-theme="dark"] {
@@ -34,142 +28,149 @@
             --card-bg: #1e293b;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            --accent: #3b82f6;
+            --accent: #818cf8;
             --border: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
-        * { box-sizing: border-box; transition: background 0.3s, color 0.3s; }
+        * { box-sizing: border-box; transition: background 0.3s, color 0.3s; outline: none; }
         body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; }
 
-        /* --- LOGIN OVERLAY --- */
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(5px);
-            z-index: 9999; display: flex; justify-content: center; align-items: center;
-        }
-        .login-box {
-            background: var(--card-bg); padding: 2rem; border-radius: 12px;
-            width: 350px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
-        }
-        .login-box input {
-            width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border);
-            border-radius: 6px; background: var(--bg-color); color: var(--text-primary);
-        }
-
-        /* --- SIDEBAR --- */
+        /* --- LAYOUT --- */
         .sidebar {
-            width: 250px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 1rem;
+            width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 1.5rem 1rem;
+            transition: transform 0.3s ease, width 0.3s ease;
+            z-index: 100;
         }
-        .logo { font-weight: 700; font-size: 1.25rem; margin-bottom: 2rem; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        
+        /* Zen Mode: Hides sidebar */
+        body.zen-mode .sidebar { margin-left: -240px; }
+        body.zen-mode .zen-toggle i { transform: rotate(180deg); }
+
+        .logo { font-weight: 700; font-size: 1.2rem; margin-bottom: 2rem; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        
         .nav-btn {
             background: none; border: none; width: 100%; text-align: left; padding: 12px;
             margin-bottom: 5px; color: var(--text-secondary); border-radius: 8px;
-            cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;
+            cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 12px;
+            transition: all 0.2s;
         }
-        .nav-btn:hover, .nav-btn.active { background: var(--bg-color); color: var(--accent); }
-        .spacer { flex-grow: 1; }
-
-        /* --- MAIN CONTENT --- */
-        .main { flex: 1; padding: 2rem; overflow-y: auto; position: relative; }
+        .nav-btn:hover { background: var(--bg-color); color: var(--accent); }
+        .nav-btn.active { background: var(--bg-color); color: var(--accent); font-weight: 600; }
+        
+        .main { flex: 1; padding: 2rem; overflow-y: auto; position: relative; scroll-behavior: smooth; }
+        
+        /* --- COMPONENTS --- */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         
-        /* SECTIONS */
+        .card { 
+            background: var(--card-bg); padding: 1.5rem; border-radius: 16px; 
+            border: 1px solid var(--border); box-shadow: var(--shadow); 
+        }
+
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+
+        /* --- EDITABLE SCHEDULE --- */
+        .schedule-item { 
+            padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; 
+        }
+        .schedule-item input { 
+            border: none; background: transparent; color: var(--text-primary); font-family: inherit; font-size: 0.95rem; width: 100%;
+        }
+        .schedule-item input:focus { border-bottom: 1px solid var(--accent); }
+
+        /* --- NOTES --- */
+        textarea { 
+            width: 100%; height: 200px; background: var(--bg-color); color: var(--text-primary); 
+            border: 1px solid var(--border); padding: 1rem; border-radius: 12px; resize: none; line-height: 1.6;
+        }
+
+        /* --- CALCULATOR --- */
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
+        .calc-btn { 
+            padding: 15px; border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer; 
+            background: var(--bg-color); color: var(--text-primary); box-shadow: 0 2px 0 var(--border);
+        }
+        .calc-btn:active { transform: translateY(2px); box-shadow: none; }
+        .calc-btn.accent { background: var(--accent); color: white; border: none; }
+        #calcDisplay { 
+            width: 100%; padding: 15px; font-size: 1.8rem; text-align: right; 
+            background: var(--bg-color); border: 1px solid var(--border); 
+            color: var(--text-primary); border-radius: 10px; font-family: monospace; 
+        }
+
+        /* --- UTILS --- */
         .section { display: none; animation: fadeIn 0.3s ease; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* GRID LAYOUTS */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-        .card { background: var(--card-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); }
-
-        /* CALCULATOR */
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
-        .calc-btn { padding: 15px; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer; background: var(--bg-color); color: var(--text-primary); }
-        .calc-btn.accent { background: var(--accent); color: white; }
-        #calcDisplay { width: 100%; padding: 10px; font-size: 1.5rem; text-align: right; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-primary); border-radius: 8px; }
-
-        /* GAME FRAME */
-        iframe { width: 100%; height: 100%; border: none; border-radius: 12px; }
-        .game-container { height: 80vh; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
-
-        /* UTILS */
-        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
         .btn-primary { background: var(--accent); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        textarea { width: 100%; height: 150px; background: var(--bg-color); color: var(--text-primary); border: 1px solid var(--border); padding: 1rem; border-radius: 8px; resize: none; }
+        .btn-danger { background: #ef4444; color: white; }
         
-        /* STEALTH MODE TOGGLES */
-        body.mode-school .fun-only { display: none !important; }
-        body.mode-fun .school-only { display: none !important; }
+        /* Music Player Frame */
+        .music-container { 
+            position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; 
+            border-radius: 12px; border: 1px solid var(--border);
+        }
+        .music-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
     </style>
 </head>
-<body class="mode-school" data-theme="light">
-
-    <div id="login-overlay">
-        <div class="login-box">
-            <h2><i class="fas fa-graduation-cap"></i> StudyHall</h2>
-            <p style="color:var(--text-secondary)">Enter credentials to access</p>
-            <input type="email" id="email" placeholder="Email" value="student@school.edu">
-            <input type="password" id="password" placeholder="Password" value="password">
-            <p id="login-error" style="color:var(--danger); font-size: 0.9rem;"></p>
-            <button class="btn btn-primary" style="width:100%" onclick="loginUser()">Access Dashboard</button>
-        </div>
-    </div>
+<body data-theme="light">
 
     <nav class="sidebar">
-        <div class="logo"><i class="fas fa-shapes"></i> StudyHall 101</div>
+        <div class="logo"><i class="fas fa-brain"></i> StudyHall Focus</div>
         
-        <button class="nav-btn school-only active" onclick="showSection('school-home', this)"><i class="fas fa-home"></i> Dashboard</button>
-        <button class="nav-btn school-only" onclick="showSection('notes', this)"><i class="fas fa-book"></i> Class Notes</button>
-        <button class="nav-btn school-only" onclick="showSection('calculator', this)"><i class="fas fa-calculator"></i> Calculator</button>
-        <button class="nav-btn school-only" onclick="showSection('todos', this)"><i class="fas fa-check-square"></i> Tasks</button>
+        <button class="nav-btn active" onclick="showSection('dashboard', this)"><i class="fas fa-columns"></i> Dashboard</button>
+        <button class="nav-btn" onclick="showSection('notes', this)"><i class="fas fa-sticky-note"></i> Notebook</button>
+        <button class="nav-btn" onclick="showSection('todos', this)"><i class="fas fa-check-circle"></i> Tasks</button>
+        <button class="nav-btn" onclick="showSection('calculator', this)"><i class="fas fa-calculator"></i> Calculator</button>
+        <button class="nav-btn" onclick="showSection('music', this)"><i class="fas fa-headphones"></i> Lo-Fi Music</button>
 
-        <button class="nav-btn fun-only" onclick="showSection('fun-home', this)"><i class="fas fa-gamepad"></i> Game Center</button>
-        <button class="nav-btn fun-only" onclick="showSection('chat', this)"><i class="fas fa-comments"></i> Chatterbox</button>
-
-        <div class="spacer"></div>
+        <div style="flex-grow: 1;"></div>
         
-        <button class="nav-btn" onclick="toggleMode()"><i class="fas fa-user-secret"></i> Toggle Mode (ESC)</button>
+        <button class="nav-btn" onclick="toggleZenMode()"><i class="fas fa-expand-arrows-alt"></i> Zen Mode</button>
         <button class="nav-btn" onclick="toggleTheme()"><i class="fas fa-moon"></i> Theme</button>
-        <button class="nav-btn" onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </nav>
 
     <main class="main">
         <div class="header">
-            <h2 id="page-title">Dashboard</h2>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span id="user-display" style="font-weight:600; color:var(--accent);">Student</span>
-                <div style="background:var(--card-bg); padding:5px 15px; border-radius:20px; border:1px solid var(--border); font-size:0.9rem;">
-                    <i class="far fa-clock"></i> <span id="clock">12:00 PM</span>
-                </div>
+            <div>
+                <h2 id="page-title" style="margin:0;">Dashboard</h2>
+                <p style="margin:5px 0 0; color:var(--text-secondary);">Welcome back to your workspace.</p>
+            </div>
+            <div style="text-align:right;">
+                <h3 id="clock" style="margin:0; font-family:monospace; color:var(--accent);">00:00</h3>
+                <span id="date" style="font-size:0.8rem; color:var(--text-secondary);">Loading...</span>
             </div>
         </div>
 
-        <div id="school-home" class="section active">
+        <div id="dashboard" class="section active">
             <div class="dashboard-grid">
-                <div class="card">
-                    <h3><i class="fas fa-calendar-day"></i> Today's Schedule</h3>
-                    <ul style="padding-left:20px; line-height:1.8; color:var(--text-secondary);">
-                        <li><strong>1st:</strong> Mathematics (Rm 101)</li>
-                        <li><strong>2nd:</strong> History (Rm 204)</li>
-                        <li><strong>3rd:</strong> Lunch</li>
-                        <li><strong>4th:</strong> Science (Lab 3)</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3><i class="fas fa-clipboard-list"></i> Quick Tasks</h3>
-                    <ul id="mini-todo-list" style="padding-left:20px; color:var(--text-secondary);">
-                        <li>No tasks pending.</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3><i class="fas fa-hourglass-half"></i> Focus Timer</h3>
-                    <div style="text-align:center; margin-top:10px;">
-                        <h1 id="timer-display" style="font-size:3rem; margin:0;">25:00</h1>
-                        <button class="btn btn-primary" onclick="toggleTimer()">Start/Stop</button>
-                        <button class="btn" onclick="resetTimer()">Reset</button>
+                
+                <div class="card" style="text-align:center;">
+                    <h3 style="margin-top:0;"><i class="fas fa-stopwatch"></i> Pomodoro Timer</h3>
+                    <div style="font-size: 3.5rem; font-weight: 700; margin: 10px 0; font-family: monospace;" id="timer-display">25:00</div>
+                    <div style="display:flex; justify-content:center; gap:10px;">
+                        <button class="btn btn-primary" onclick="toggleTimer()" id="timer-btn">Start</button>
+                        <button class="btn" style="background:var(--bg-color); border:1px solid var(--border);" onclick="resetTimer()">Reset</button>
                     </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Class Schedule</h3>
+                    <div id="schedule-list">
+                        </div>
+                    <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">* Click text to edit. Changes save automatically.</p>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-top:0;"><i class="fas fa-tasks"></i> Top Priorities</h3>
+                    <ul id="mini-todo-list" style="padding-left: 20px; color: var(--text-secondary);">
+                        <li>No tasks yet.</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -177,34 +178,45 @@
         <div id="notes" class="section">
             <div class="dashboard-grid">
                 <div class="card">
-                    <h3>Math Notes</h3>
-                    <textarea id="note-math" oninput="saveData('math')" placeholder="Type formulas here..."></textarea>
+                    <h3><i class="fas fa-square-root-alt"></i> Math / Science</h3>
+                    <textarea id="note-math" oninput="saveNote('math')" placeholder="Formulas, equations, definitions..."></textarea>
                 </div>
                 <div class="card">
-                    <h3>Science Notes</h3>
-                    <textarea id="note-science" oninput="saveData('science')" placeholder="Biology notes..."></textarea>
+                    <h3><i class="fas fa-book-open"></i> Humanities</h3>
+                    <textarea id="note-english" oninput="saveNote('english')" placeholder="History dates, essay ideas, reading notes..."></textarea>
                 </div>
                 <div class="card">
-                    <h3>History Notes</h3>
-                    <textarea id="note-history" oninput="saveData('history')" placeholder="Dates and events..."></textarea>
+                    <h3><i class="fas fa-lightbulb"></i> Brainstorming</h3>
+                    <textarea id="note-misc" oninput="saveNote('misc')" placeholder="Project ideas and random thoughts..."></textarea>
                 </div>
             </div>
-            <p id="save-toast" style="text-align:right; color:var(--success); opacity:0; transition:opacity 0.5s;">Saved!</p>
+        </div>
+
+        <div id="todos" class="section">
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <input type="text" id="newTodo" placeholder="What needs to be done?" 
+                           style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-color); color:var(--text-primary);">
+                    <button class="btn btn-primary" onclick="addTodo()">Add Task</button>
+                </div>
+                <div id="todoList">
+                    </div>
+            </div>
         </div>
 
         <div id="calculator" class="section">
-            <div class="card" style="max-width:400px; margin:0 auto;">
+            <div class="card" style="max-width:350px; margin:0 auto;">
                 <input type="text" id="calcDisplay" readonly>
                 <div class="calc-grid">
                     <button class="calc-btn" onclick="calc('7')">7</button>
                     <button class="calc-btn" onclick="calc('8')">8</button>
                     <button class="calc-btn" onclick="calc('9')">9</button>
-                    <button class="calc-btn accent" onclick="calc('/')">/</button>
+                    <button class="calc-btn accent" onclick="calc('/')">÷</button>
                     
                     <button class="calc-btn" onclick="calc('4')">4</button>
                     <button class="calc-btn" onclick="calc('5')">5</button>
                     <button class="calc-btn" onclick="calc('6')">6</button>
-                    <button class="calc-btn accent" onclick="calc('*')">x</button>
+                    <button class="calc-btn accent" onclick="calc('*')">×</button>
                     
                     <button class="calc-btn" onclick="calc('1')">1</button>
                     <button class="calc-btn" onclick="calc('2')">2</button>
@@ -219,151 +231,96 @@
             </div>
         </div>
 
-        <div id="todos" class="section">
-            <div class="card">
-                <div style="display:flex; gap:10px; margin-bottom:20px;">
-                    <input type="text" id="newTodo" placeholder="Add a new homework assignment..." style="flex:1; padding:10px; border-radius:6px; border:1px solid var(--border);">
-                    <button class="btn btn-primary" onclick="addTodo()">Add</button>
+        <div id="music" class="section">
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
+                <h3><i class="fas fa-headphones-alt"></i> Focus Zone</h3>
+                <p style="color:var(--text-secondary); margin-bottom: 20px;">Lofi Girl Radio - Beats to relax/study to.</p>
+                <div class="music-container">
+                    <iframe src="https://www.youtube.com/embed/jfKfPfyJRdk" title="Lofi Girl Radio" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
-                <div id="todoList">
-                    </div>
-            </div>
-        </div>
-
-        <div id="fun-home" class="section">
-            <div class="dashboard-grid">
-                <div class="card" onclick="loadGame('https://scratch.mit.edu/projects/105500895/embed')" style="cursor:pointer; transition:transform 0.2s;">
-                    <h3><i class="fas fa-cube"></i> Geometry Dash</h3>
-                    <p>Click to play</p>
-                </div>
-                <div class="card" onclick="loadGame('https://scratch.mit.edu/projects/396658092/embed')" style="cursor:pointer; transition:transform 0.2s;">
-                    <h3><i class="fas fa-car"></i> Drive Mad</h3>
-                    <p>Click to play</p>
-                </div>
-            </div>
-            <div id="game-area" style="margin-top:20px; display:none;">
-                <button class="btn btn-danger" onclick="closeGame()" style="margin-bottom:10px;">Close Game</button>
-                <div class="game-container">
-                    <iframe id="game-frame" src=""></iframe>
-                </div>
-            </div>
-        </div>
-
-        <div id="chat" class="section">
-            <div class="card" style="height:70vh; display:flex; justify-content:center; align-items:center;">
-                <p>Chatterbox is connecting... (Feature coming soon)</p>
             </div>
         </div>
 
     </main>
 
     <script>
-        // --- AUTHENTICATION ---
-        function loginUser() {
-            const email = document.getElementById('email').value;
-            if(email) {
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('user-display').innerText = email.split('@')[0];
-                loadData(); // Load saved data
-            }
+        // --- 1. SETUP & THEME ---
+        const appState = {
+            theme: localStorage.getItem('theme') || 'light'
+        };
+
+        function init() {
+            // Apply theme
+            if(appState.theme === 'dark') document.body.setAttribute('data-theme', 'dark');
+            
+            // Start Clock
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // Load Data
+            loadNotes();
+            loadTodos();
+            loadSchedule();
         }
 
-        function logoutUser() {
-            document.getElementById('login-overlay').style.display = 'flex';
+        function toggleTheme() {
+            const current = document.body.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
         }
 
-        // --- NAVIGATION ---
+        function toggleZenMode() {
+            document.body.classList.toggle('zen-mode');
+        }
+
         function showSection(id, btn) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            // Show target
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             
-            // Update buttons
             if(btn) {
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
                 btn.classList.add('active');
-                
-                // Update Title
                 document.getElementById('page-title').innerText = btn.innerText;
             }
         }
 
-        // --- MODES (SCHOOL VS FUN) ---
-        function toggleMode() {
-            const body = document.body;
-            if (body.classList.contains('mode-school')) {
-                body.classList.remove('mode-school');
-                body.classList.add('mode-fun');
-                showSection('fun-home');
-                document.getElementById('page-title').innerText = "Game Center";
-            } else {
-                body.classList.remove('mode-fun');
-                body.classList.add('mode-school');
-                showSection('school-home');
-                closeGame(); // Safety: close game immediately
-                document.getElementById('page-title').innerText = "Dashboard";
-            }
-        }
-
-        // Stealth Key (ESC)
-        document.addEventListener('keydown', (e) => {
-            if (e.key === "Escape") {
-                // Only if not typing in a box
-                if(document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
-                    if (document.body.classList.contains('mode-fun')) {
-                        toggleMode();
-                    }
-                }
-            }
-        });
-
-        // --- THEME ---
-        function toggleTheme() {
-            const body = document.body;
-            const current = body.getAttribute('data-theme');
-            const next = current === 'light' ? 'dark' : 'light';
-            body.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-        }
-
-        // --- CLOCK ---
-        setInterval(() => {
+        function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        }, 1000);
-
-        // --- CALCULATOR ---
-        function calc(val) {
-            const display = document.getElementById('calcDisplay');
-            if(val === 'C') display.value = '';
-            else if(val === '=') {
-                try { display.value = eval(display.value); } 
-                catch { display.value = 'Error'; }
-            } else {
-                display.value += val;
-            }
+            document.getElementById('date').innerText = now.toLocaleDateString([], {weekday: 'long', month: 'short', day: 'numeric'});
         }
 
-        // --- TODOS (WITH SAVE) ---
+        // --- 2. NOTES SYSTEM ---
+        function saveNote(id) {
+            const val = document.getElementById('note-' + id).value;
+            localStorage.setItem('study_note_' + id, val);
+        }
+
+        function loadNotes() {
+            ['math', 'english', 'misc'].forEach(id => {
+                const saved = localStorage.getItem('study_note_' + id);
+                if(saved) document.getElementById('note-' + id).value = saved;
+            });
+        }
+
+        // --- 3. TODO SYSTEM ---
         function addTodo(text = null) {
             const input = document.getElementById('newTodo');
-            const value = text || input.value;
-            if(!value) return;
+            const val = text || input.value.trim();
+            if(!val) return;
 
             const list = document.getElementById('todoList');
-            const div = document.createElement('div');
-            div.style.padding = "10px";
-            div.style.borderBottom = "1px solid var(--border)";
-            div.style.display = "flex";
-            div.style.justifyContent = "space-between";
-            div.innerHTML = `
-                <span>${value}</span>
-                <button class="btn btn-danger" style="padding:2px 8px; font-size:0.8rem;" onclick="removeTodo(this)">Done</button>
+            const item = document.createElement('div');
+            item.style.cssText = "padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;";
+            item.innerHTML = `
+                <span style="font-weight:500;">${val}</span>
+                <button class="btn btn-danger" onclick="removeTodo(this)" style="padding:5px 10px; font-size:0.8rem;">Done</button>
             `;
-            list.appendChild(div);
+            list.appendChild(item);
             input.value = '';
-            if(!text) saveTodos(); // Only save if adding new
+            
+            if(!text) saveTodos();
         }
 
         function removeTodo(btn) {
@@ -372,75 +329,93 @@
         }
 
         function saveTodos() {
-            const todos = [];
-            document.querySelectorAll('#todoList span').forEach(s => todos.push(s.innerText));
-            localStorage.setItem('todos', JSON.stringify(todos));
+            const tasks = [];
+            document.querySelectorAll('#todoList span').forEach(span => tasks.push(span.innerText));
+            localStorage.setItem('study_todos', JSON.stringify(tasks));
             
-            // Update mini list
+            // Update Mini List
             const mini = document.getElementById('mini-todo-list');
-            mini.innerHTML = todos.length ? todos.slice(0,3).map(t => `<li>${t}</li>`).join('') : '<li>No tasks pending.</li>';
+            if(tasks.length === 0) mini.innerHTML = '<li>No tasks yet.</li>';
+            else mini.innerHTML = tasks.slice(0,3).map(t => `<li>${t}</li>`).join('');
         }
 
-        // --- NOTES & STORAGE ---
-        function saveData(subject) {
-            const val = document.getElementById('note-'+subject).value;
-            localStorage.setItem('note-'+subject, val);
-            
-            const toast = document.getElementById('save-toast');
-            toast.style.opacity = '1';
-            setTimeout(() => toast.style.opacity = '0', 2000);
-        }
-
-        function loadData() {
-            // Theme
-            if(localStorage.getItem('theme') === 'dark') toggleTheme();
-            
-            // Notes
-            ['math','science','history'].forEach(sub => {
-                const val = localStorage.getItem('note-'+sub);
-                if(val) document.getElementById('note-'+sub).value = val;
-            });
-
-            // Todos
-            const savedTodos = JSON.parse(localStorage.getItem('todos') || '[]');
-            savedTodos.forEach(t => addTodo(t));
+        function loadTodos() {
+            const tasks = JSON.parse(localStorage.getItem('study_todos') || '[]');
+            tasks.forEach(t => addTodo(t));
             saveTodos(); // Refresh mini list
         }
 
-        // --- GAMES ---
-        function loadGame(url) {
-            document.getElementById('game-area').style.display = 'block';
-            document.getElementById('game-frame').src = url;
-        }
-        function closeGame() {
-            document.getElementById('game-area').style.display = 'none';
-            document.getElementById('game-frame').src = '';
+        // --- 4. SCHEDULE SYSTEM (Editable) ---
+        const defaultSchedule = [
+            { period: "1st Period", class: "Mathematics" },
+            { period: "2nd Period", class: "History" },
+            { period: "3rd Period", class: "Science" },
+            { period: "4th Period", class: "English" }
+        ];
+
+        function loadSchedule() {
+            const saved = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
+            const container = document.getElementById('schedule-list');
+            container.innerHTML = '';
+            
+            saved.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'schedule-item';
+                div.innerHTML = `
+                    <div style="width:30%; font-weight:600; color:var(--accent);">${item.period}</div>
+                    <div style="width:70%;">
+                        <input type="text" value="${item.class}" oninput="saveSchedule(${index}, this.value)">
+                    </div>
+                `;
+                container.appendChild(div);
+            });
         }
 
-        // --- TIMER ---
-        let timerInterval;
+        function saveSchedule(index, newVal) {
+            let current = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
+            current[index].class = newVal;
+            localStorage.setItem('study_schedule', JSON.stringify(current));
+        }
+
+        // --- 5. CALCULATOR & TIMER ---
+        function calc(val) {
+            const display = document.getElementById('calcDisplay');
+            if(val === 'C') display.value = '';
+            else if(val === '=') {
+                try { display.value = eval(display.value); } catch { display.value = 'Error'; }
+            } else display.value += val;
+        }
+
+        let tmr;
         function toggleTimer() {
-            const display = document.getElementById('timer-display');
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
+            const btn = document.getElementById('timer-btn');
+            if(tmr) {
+                clearInterval(tmr); tmr = null;
+                btn.innerText = "Start";
+                btn.classList.remove('btn-danger');
             } else {
-                timerInterval = setInterval(() => {
-                    let [m, s] = display.innerText.split(':').map(Number);
-                    if (s > 0) s--;
-                    else {
-                        if (m === 0) { clearInterval(timerInterval); return; }
+                btn.innerText = "Pause";
+                btn.classList.add('btn-danger');
+                tmr = setInterval(() => {
+                    const el = document.getElementById('timer-display');
+                    let [m, s] = el.innerText.split(':').map(Number);
+                    if(s === 0) {
+                        if(m === 0) { clearInterval(tmr); return; }
                         m--; s = 59;
-                    }
-                    display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                    } else s--;
+                    el.innerText = `${m}:${s<10?'0'+s:s}`;
                 }, 1000);
             }
         }
         function resetTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
+            clearInterval(tmr); tmr = null;
             document.getElementById('timer-display').innerText = "25:00";
+            document.getElementById('timer-btn').innerText = "Start";
+            document.getElementById('timer-btn').classList.remove('btn-danger');
         }
+
+        // Initialize App
+        window.onload = init;
     </script>
 </body>
 </html>
