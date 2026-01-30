@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall v23</title>
+    <title>StudyHall v24</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -112,8 +112,18 @@
         .input-group { margin-bottom: 20px; }
         .input-label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
 
-        /* Notes */
-        #notepad { width: 100%; height: 65vh; background: transparent; color: var(--text-main); padding: 0; border: none; font-family: 'Nunito', sans-serif; line-height: 1.6; font-size: 1.1rem; resize: none; }
+        /* Classes Grid */
+        .class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .class-card { background: var(--bg-input); border-radius: 16px; padding: 25px; display: flex; flex-direction: column; justify-content: space-between; min-height: 140px; position: relative; cursor: pointer; border: 2px solid transparent; }
+        .class-card:hover { border-color: var(--accent); background: var(--bg-card); box-shadow: var(--shadow); }
+        .class-name { font-weight: 800; font-size: 1.2rem; margin-bottom: 5px; }
+        .class-meta { font-size: 0.8rem; color: var(--text-muted); }
+        .class-del { position: absolute; top: 15px; right: 15px; color: var(--text-muted); cursor: pointer; }
+        .class-del:hover { color: var(--danger); }
+
+        /* Notes Dropdown */
+        .note-select { background: var(--bg-input); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; color: var(--text-main); font-family: var(--font); cursor: pointer; max-width: 250px; }
+        #notepad { width: 100%; height: 60vh; background: transparent; color: var(--text-main); padding: 0; border: none; font-family: 'Nunito', sans-serif; line-height: 1.6; font-size: 1.1rem; resize: none; margin-top: 20px; }
         
         /* Shop */
         .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
@@ -154,6 +164,7 @@
         <nav class="sidebar">
             <div class="app-title"><i class="fas fa-shapes"></i> StudyHall</div>
             <button class="nav-link active" id="nav-home" onclick="showPage('home', this)"><i class="fas fa-home"></i> Dashboard</button>
+            <button class="nav-link" onclick="showPage('classes', this)"><i class="fas fa-book"></i> Classes</button>
             <button class="nav-link" onclick="showPage('notes', this)"><i class="fas fa-pencil-alt"></i> Notes</button>
             <button class="nav-link" onclick="showPage('focus', this)"><i class="fas fa-clock"></i> Timer</button>
             <button class="nav-link" onclick="showPage('shop', this)"><i class="fas fa-store"></i> Market</button>
@@ -208,13 +219,30 @@
                 </div>
             </div>
 
+            <div id="classes" class="page hidden">
+                <div class="card">
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <input type="text" id="class-input" class="todo-input" style="margin:0;" placeholder="Add Class Name (e.g. History)">
+                        <button class="btn btn-primary" onclick="addClass()">Add</button>
+                    </div>
+                    <div id="class-list" class="class-grid"></div>
+                </div>
+            </div>
+
             <div id="notes" class="page hidden">
                 <div class="card" style="height:100%;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                        <span style="color:var(--text-muted); font-size:0.9rem;">Changes save automatically.</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:var(--border); padding-bottom:15px; margin-bottom:10px;">
+                        
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <i class="fas fa-book" style="color:var(--accent);"></i>
+                            <select id="note-selector" class="note-select" onchange="changeNotebook()">
+                                <option value="general">General Notes</option>
+                                </select>
+                        </div>
+
                         <button class="btn" style="padding:5px 15px; font-size:0.8rem;" onclick="exportNotes()">Download</button>
                     </div>
-                    <textarea id="notepad" placeholder="Start typing..." oninput="handleNoteInput()"></textarea>
+                    <textarea id="notepad" placeholder="Select a notebook and start typing..." oninput="handleNoteInput()"></textarea>
                 </div>
             </div>
 
@@ -302,17 +330,27 @@
                     if (data) {
                         window.state = { ...window.state, ...data };
                         
-                        // Defaults
+                        // Defaults & Migrations
                         if(!window.state.inventory) window.state.inventory = ['pet_dog'];
                         if(!window.state.todos) window.state.todos = [];
                         if(!window.state.username) window.state.username = "Student";
-                        
+                        if(!window.state.classes) window.state.classes = [];
+                        // Migrate old single note to General Notes if undefined
+                        if(window.state.generalNotes === undefined && window.state.notes) {
+                            window.state.generalNotes = window.state.notes;
+                        }
+                        if(!window.state.generalNotes) window.state.generalNotes = "";
+
                         // Render
                         window.renderShop();
                         window.renderTodos();
-                        window.updateUI();
+                        window.renderClasses();
+                        window.updateUI(); // Updates UI and Avatar
+                        
                         document.body.setAttribute('data-theme', window.state.theme || 'light');
-                        document.getElementById('notepad').value = window.state.notes || '';
+                        
+                        // Init Notepad to current selection
+                        window.changeNotebook(); 
                     }
                 });
                 window.init();
@@ -339,7 +377,7 @@
                     username: name,
                     xp: 0, lvl: 1, coins: 0, streak: 1, lastLogin: new Date().toDateString(),
                     inventory: ['pet_dog'], equippedPet: 'pet_dog', 
-                    theme: 'light', todos: [], notes: ''
+                    theme: 'light', todos: [], classes: [], generalNotes: ''
                 };
                 await set(ref(db, 'users/' + cred.user.uid), newUserState);
             } catch (e) { document.getElementById('auth-error').innerText = e.message; }
@@ -365,8 +403,11 @@
             username: 'Student',
             xp: 0, lvl: 1, coins: 0, streak: 1, lastLogin: '',
             inventory: ['pet_dog'], equippedPet: 'pet_dog', 
-            theme: 'light', todos: [], notes: ''
+            theme: 'light', todos: [], classes: [], generalNotes: ''
         };
+
+        // UI State
+        let currentNoteId = 'general'; // 'general' or class index
 
         const quotes = ["Make it happen.", "Focus on the Good.", "Dream Big.", "Stay Curious."];
         const shopItems = [
@@ -394,8 +435,7 @@
         }
 
         function updateAvatarDisplay() {
-             // Set Avatar
-             const bg = window.state.theme === 'light' ? 'E5E7EB' : '374151';
+            const bg = window.state.theme === 'light' ? 'E5E7EB' : '374151';
             const nameParam = window.state.username || 'St';
             if(!window.state.avatar) document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${nameParam}&background=${bg}&color=9CA3AF`;
             else document.getElementById('user-avatar').src = window.state.avatar;
@@ -419,26 +459,17 @@
             
             // Handle active class
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            if(btn) {
-                btn.classList.add('active');
-            } else if(id === 'settings') {
-                document.getElementById('nav-settings').classList.add('active');
-            }
+            if(btn) btn.classList.add('active');
+            else if(id === 'settings') document.getElementById('nav-settings').classList.add('active');
 
             // Titles
-            const t = {'home':`Hello, ${window.state.username}`,'notes':'Notes','focus':'Focus Timer','shop':'Market','settings':'Settings'};
+            const t = {'home':`Hello, ${window.state.username}`,'classes':'My Classes','notes':'Notebooks','focus':'Focus Timer','shop':'Market','settings':'Settings'};
             document.getElementById('page-title').innerText = t[id] || t['home'];
 
-            // Pre-fill settings input
-            if(id === 'settings') {
-                document.getElementById('settings-username').value = window.state.username;
-            }
+            if(id === 'settings') document.getElementById('settings-username').value = window.state.username;
         }
 
-        // NAVIGATION HELPER
-        window.openSettingsFromProfile = function() {
-            showPage('settings', null);
-        }
+        window.openSettingsFromProfile = function() { showPage('settings', null); }
 
         window.updateUI = function() {
             document.getElementById('sidebar-name').innerText = window.state.username;
@@ -459,18 +490,110 @@
             updateAvatarDisplay();
         }
 
-        // UPDATE NAME
         window.updateUsername = function() {
             const newName = document.getElementById('settings-username').value;
             if(newName && newName.trim() !== "") {
                 window.state.username = newName.trim();
-                window.saveData();
-                window.updateUI();
-                alert("Username updated!");
+                window.saveData(); window.updateUI(); alert("Username updated!");
             }
         }
 
-        // TODO
+        // --- CLASSES LOGIC ---
+        window.addClass = function() {
+            const name = document.getElementById('class-input').value;
+            if(!name.trim()) return;
+            if(!window.state.classes) window.state.classes = [];
+            window.state.classes.push({ name: name, notes: '' });
+            document.getElementById('class-input').value = '';
+            window.saveData(); window.renderClasses();
+        }
+
+        window.deleteClass = function(index) {
+            if(confirm('Delete this class and its notes?')) {
+                window.state.classes.splice(index, 1);
+                // Reset note selection if we deleted the active class
+                if(currentNoteId == index) { currentNoteId = 'general'; document.getElementById('note-selector').value = 'general'; changeNotebook(); }
+                window.saveData(); window.renderClasses();
+            }
+        }
+
+        window.renderClasses = function() {
+            const list = document.getElementById('class-list');
+            const select = document.getElementById('note-selector');
+            
+            // Render Grid
+            list.innerHTML = '';
+            if(window.state.classes) {
+                window.state.classes.forEach((c, i) => {
+                    list.innerHTML += `
+                    <div class="class-card" onclick="openClassNote(${i})">
+                        <div>
+                            <div class="class-name">${c.name}</div>
+                            <div class="class-meta">Click to open notes</div>
+                        </div>
+                        <i class="fas fa-trash class-del" onclick="event.stopPropagation(); deleteClass(${i})"></i>
+                    </div>`;
+                });
+            }
+
+            // Render Note Dropdown
+            // Save current selection
+            const currentVal = select.value;
+            select.innerHTML = '<option value="general">General Notes</option>';
+            if(window.state.classes) {
+                window.state.classes.forEach((c, i) => {
+                    select.innerHTML += `<option value="${i}">${c.name}</option>`;
+                });
+            }
+            // Restore selection if possible, else default to general
+            if(currentVal === 'general' || (window.state.classes && window.state.classes[currentVal])) {
+                select.value = currentVal;
+            } else {
+                select.value = 'general';
+            }
+        }
+
+        // --- NOTEBOOK LOGIC ---
+        window.openClassNote = function(index) {
+            showPage('notes', document.querySelector('button[onclick*="notes"]'));
+            const sel = document.getElementById('note-selector');
+            sel.value = index;
+            window.changeNotebook();
+        }
+
+        window.changeNotebook = function() {
+            const sel = document.getElementById('note-selector');
+            currentNoteId = sel.value;
+            const pad = document.getElementById('notepad');
+            
+            if(currentNoteId === 'general') {
+                pad.value = window.state.generalNotes || '';
+            } else {
+                pad.value = window.state.classes[currentNoteId].notes || '';
+            }
+        }
+
+        window.handleNoteInput = function() {
+            const val = document.getElementById('notepad').value;
+            if(currentNoteId === 'general') {
+                window.state.generalNotes = val;
+            } else {
+                window.state.classes[currentNoteId].notes = val;
+            }
+            
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(window.saveData, 1000);
+        }
+
+        window.exportNotes = function() {
+            const val = document.getElementById('notepad').value;
+            const name = currentNoteId === 'general' ? 'General_Notes' : window.state.classes[currentNoteId].name + '_Notes';
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([val], {type:'text/plain'}));
+            a.download = name + '.txt'; a.click();
+        }
+
+        // --- TASKS ---
         window.addTask = function() {
             const val = document.getElementById('todo-input').value;
             if(!val.trim()) return;
@@ -483,9 +606,7 @@
         window.toggleTask = function(i) {
             window.state.todos[i].done = !window.state.todos[i].done;
             if(window.state.todos[i].done) {
-                window.state.coins += 20;
-                window.state.xp += 10;
-                checkLvl();
+                window.state.coins += 20; window.state.xp += 10; checkLvl();
             }
             window.saveData(); window.renderTodos(); window.updateUI();
         }
@@ -509,7 +630,7 @@
             });
         }
 
-        // TIMER
+        // TIMER & SHOP (Standard)
         window.adjustTime = (v) => { if(!running) { timerDuration = Math.max(5, timerDuration + v); document.getElementById('timer-display').innerText = timerDuration + ":00"; }};
         window.toggleTimer = () => {
             const btn = document.getElementById('btn-toggle');
@@ -521,15 +642,12 @@
             if(m===0 && s===0) {
                 toggleTimer(); alert("Session Complete!");
                 window.state.coins += 100; window.state.xp += 50; checkLvl();
-                window.saveData(); window.updateUI();
-                return;
+                window.saveData(); window.updateUI(); return;
             }
             if(s===0) { m--; s=59; } else s--;
             document.getElementById('timer-display').innerText = `${m}:${s<10?'0'+s:s}`;
         }
         function checkLvl() { if(window.state.xp >= window.state.lvl * 500) { window.state.lvl++; window.state.xp = 0; alert("Level Up!"); } }
-
-        // SHOP
         window.renderShop = () => {
             const c = document.getElementById('shop-container'); c.innerHTML='';
             shopItems.forEach(i => {
@@ -548,23 +666,10 @@
             else if(window.state.coins >= cost) { window.state.coins -= cost; window.state.inventory.push(id); window.state.equippedPet = id; }
             window.saveData(); window.renderShop(); window.updateUI();
         }
-
-        // SYSTEM
-        window.handleNoteInput = () => {
-            window.state.notes = document.getElementById('notepad').value;
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(window.saveData, 1000);
-        }
-        window.exportNotes = () => {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([document.getElementById('notepad').value], {type:'text/plain'}));
-            a.download = 'notes.txt'; a.click();
-        }
         window.toggleTheme = () => {
             window.state.theme = window.state.theme === 'light' ? 'dark' : 'light';
             document.body.setAttribute('data-theme', window.state.theme);
-            window.updateUI(); // Updates avatar for dark mode bg
-            window.saveData();
+            window.updateUI(); window.saveData();
         }
         window.uploadAvatar = (inp) => {
             const r = new FileReader();
