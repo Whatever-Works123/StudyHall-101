@@ -349,10 +349,36 @@
 
         <div id="chatterbox" class="section">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h2>ChatterBox</h2>
+                <h2>💬 ChatterBox Native</h2>
                 <button class="btn" onclick="toggleFullscreenEl('chatterbox')">⛶ Fullscreen</button>
             </div>
-            <iframe src="https://whatever-works123.github.io/Chatter-Box/" style="height:500px;"></iframe>
+        
+            <div class="chat-layout">
+                <div class="chat-sidebar">
+                    <div class="card" style="padding:15px; height:100%; display:flex; flex-direction:column;">
+                        <label style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:5px;">Current Room</label>
+                        <input type="text" id="room-name" value="Global" style="margin-bottom:10px; font-weight:bold;">
+                        <button class="btn btn-primary" onclick="switchRoom()">Join Room</button>
+                        
+                        <hr style="margin: 15px 0; border:0; border-top:1px solid var(--border);">
+                        
+                        <div style="font-size:0.8rem; color:var(--text-secondary);">
+                            <strong>Users Online:</strong>
+                            <div id="chat-users-list" style="margin-top:5px;">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="chat-main">
+                    <div id="chat-window">
+                        <p style="text-align:center; color:var(--text-secondary); margin-top:20px;">Joined room: Global</p>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="msg-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendChatMsg()">
+                        <button class="btn btn-primary" onclick="sendChatMsg()">Send</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="settings" class="section">
@@ -452,21 +478,115 @@
             location.reload();
         }
 
-        // --- 3. SCHEDULE LOGIC (NEW) ---
-        function checkScheduleSetup() {
-            db.ref('users/' + currentUser.uid + '/schedule').once('value', s => {
-                if (!s.exists()) {
-                    // No schedule found? Show popup!
-                    document.getElementById('schedule-overlay').style.display = 'flex';
-                } else {
-                    // Schedule exists, load it
-                    userSchedule = s.val();
-                    populateSettingsInputs(userSchedule);
-                    renderSchedule('red'); // Default view
+                // --- 3. SCHEDULE LOGIC (NEW) ---
+                function checkScheduleSetup() {
+                    db.ref('users/' + currentUser.uid + '/schedule').once('value', s => {
+                        if (!s.exists()) {
+                            // No schedule found? Show popup!
+                            document.getElementById('schedule-overlay').style.display = 'flex';
+                        } else {
+                            // Schedule exists, load it
+                            userSchedule = s.val();
+                            populateSettingsInputs(userSchedule);
+                            renderSchedule('red'); // Default view
+                        }
+                    });
+                }
+        
+                // --- CHATTERBOX INTEGRATION ---
+        let currentRoom = "Global";
+        let chatRef = null;
+        
+        function initChatSystem() {
+            // 1. Set User Presence
+            if (!currentUser) return;
+            const username = currentUser.email.split('@')[0];
+            
+            // Simple presence system
+            const presenceRef = db.ref("ChatterBox/Presence/" + currentUser.uid);
+            presenceRef.set({ name: username, online: true });
+            presenceRef.onDisconnect().remove();
+        
+            // 2. Load Users List
+            db.ref("ChatterBox/Presence").on("value", snapshot => {
+                const list = document.getElementById("chat-users-list");
+                if(list) {
+                    list.innerHTML = "";
+                    snapshot.forEach(child => {
+                        const u = child.val();
+                        const div = document.createElement("div");
+                        div.textContent = "🟢 " + u.name;
+                        div.style.marginBottom = "4px";
+                        list.appendChild(div);
+                    });
                 }
             });
+        
+            // 3. Load Initial Room
+            switchRoom();
         }
-
+        
+        function switchRoom() {
+            // Clear old listener if exists
+            if(chatRef) chatRef.off();
+            
+            // Get new room name
+            const roomInput = document.getElementById("room-name");
+            currentRoom = roomInput.value.trim() || "Global";
+            
+            // Update UI
+            const win = document.getElementById("chat-window");
+            win.innerHTML = `<p style="text-align:center; color:var(--text-secondary); margin-top:20px; opacity:0.6;">— Joined Room: ${currentRoom} —</p>`;
+            
+            // Connect to new room
+            chatRef = db.ref("ChatterBox/" + currentRoom);
+            
+            // Load last 50 messages
+            chatRef.limitToLast(50).on("child_added", snapshot => {
+                const data = snapshot.val();
+                renderMessage(data);
+            });
+        }
+        
+        function sendChatMsg() {
+            const input = document.getElementById("msg-input");
+            const text = input.value.trim();
+            if (!text || !currentUser) return;
+        
+            const username = currentUser.email.split('@')[0];
+            
+            // Push message to Firebase
+            db.ref("ChatterBox/" + currentRoom).push({
+                name: username,
+                msg: text,
+                uid: currentUser.uid, // Store UID to identify "me" vs "them"
+                timestamp: Date.now()
+            });
+        
+            input.value = "";
+            input.focus();
+        }
+        
+        function renderMessage(data) {
+            const win = document.getElementById("chat-window");
+            const isMe = data.uid === currentUser.uid;
+            
+            const div = document.createElement("div");
+            div.className = `msg-bubble ${isMe ? 'mine' : 'theirs'}`;
+            
+            // Format Time
+            const date = new Date(data.timestamp);
+            const time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
+            
+            div.innerHTML = `
+                <div class="msg-meta">${isMe ? 'You' : data.name} • ${time}</div>
+                <div>${data.msg}</div>
+            `;
+            
+            win.appendChild(div);
+            // Auto-scroll to bottom
+            win.scrollTop = win.scrollHeight;
+        }
         function saveInitialSchedule() {
             const sched = {
                 c1: document.getElementById('setup-c1').value || "Free Period",
@@ -565,6 +685,7 @@
                 });
             });
             initTodoListener();
+            initChatSystem(); // <--- ADD THIS LINE
         }
 
         // --- 5. CALCULATOR ---
