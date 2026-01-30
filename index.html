@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyHall Focus</title>
+    <title>StudyHall Focus v5</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -38,7 +38,7 @@
         body.mood-forest { --bg-color: #f0fdf4; --accent: #16a34a; }
         body.mood-midnight { --bg-color: #020617; --sidebar-bg: #0f172a; --card-bg: #0f172a; --text-primary: #f8fafc; --text-secondary: #94a3b8; --border: #1e293b; }
 
-        * { box-sizing: border-box; transition: background 0.5s, color 0.3s; outline: none; }
+        * { box-sizing: border-box; transition: background 0.4s, color 0.3s; outline: none; }
         body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; }
 
         /* --- SIDEBAR --- */
@@ -87,59 +87,52 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- CHILL ZONE COMPONENTS --- */
+        /* --- RADIO STATION UI (CSS ONLY - NO IMAGES) --- */
+        .radio-container {
+            display: flex; flex-direction: column; align-items: center;
+        }
         
-        /* 1. Lofi Player */
-        .lofi-container {
-            position: relative; width: 100%; height: 200px; border-radius: 12px; overflow: hidden;
-            background-color: #000; display: flex; align-items: center; justify-content: center;
+        /* The Vinyl Record */
+        .record-player {
+            width: 200px; height: 200px; background: #1e1e1e; border-radius: 50%;
+            position: relative; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.3); border: 5px solid #2d2d2d;
+            transition: transform 0.5s;
         }
-        .lofi-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6;
-            transition: opacity 0.5s;
+        .record-grooves {
+            width: 180px; height: 180px; border-radius: 50%;
+            border: 2px dashed #333; opacity: 0.5; position: absolute;
         }
-        .lofi-controls {
-            position: relative; z-index: 2; text-align: center; color: white;
+        .record-label {
+            width: 80px; height: 80px; background: var(--accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; z-index: 2;
         }
-        .play-circle {
-            width: 60px; height: 60px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; cursor: pointer; border: 2px solid rgba(255,255,255,0.5);
-            transition: transform 0.2s, background 0.2s;
-        }
-        .play-circle:hover { transform: scale(1.1); background: rgba(255,255,255,0.4); }
+        .record-label i { color: white; font-size: 1.5rem; }
+        
+        /* Animation State */
+        .record-player.playing { animation: spin 4s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* 2. Breathing Circle */
-        .breathe-container {
-            height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            position: relative; overflow: hidden;
+        /* Station Cards */
+        .station-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 20px; width: 100%; }
+        .station-btn {
+            background: var(--bg-color); border: 1px solid var(--border); padding: 15px;
+            border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.2s;
         }
-        .circle {
-            width: 100px; height: 100px; background: var(--accent); border-radius: 50%; opacity: 0.2;
-            transform: scale(1);
-        }
-        .circle.animating {
-            animation: breathe 8s infinite ease-in-out;
-        }
-        .breathe-text {
-            position: absolute; font-weight: 600; color: var(--accent); font-size: 1.1rem;
-        }
-        @keyframes breathe {
-            0% { transform: scale(1); opacity: 0.2; }
-            40% { transform: scale(2.5); opacity: 0.5; } /* Inhale */
-            60% { transform: scale(2.5); opacity: 0.5; } /* Hold */
-            100% { transform: scale(1); opacity: 0.2; } /* Exhale */
-        }
+        .station-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .station-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .station-btn i { font-size: 1.5rem; margin-bottom: 8px; display: block; }
 
-        /* 3. Mood Buttons */
-        .mood-grid { display: flex; gap: 10px; margin-top: 15px; }
+        /* --- SETTINGS UI --- */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        .mood-grid { display: flex; gap: 10px; margin-top: 10px; }
         .mood-btn {
             flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer;
             text-align: center; font-size: 0.9rem; font-weight: 500; background: var(--card-bg); color: var(--text-primary);
         }
-        .mood-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .mood-btn:hover, .mood-btn.active { border-color: var(--accent); color: var(--accent); }
 
-        /* Other Components */
+        /* --- STANDARD UI --- */
         .schedule-item { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
         .schedule-item input { border: none; background: transparent; color: var(--text-primary); font-family: inherit; font-size: 0.95rem; width: 100%; }
         .schedule-item input:focus { border-bottom: 1px solid var(--accent); }
@@ -166,23 +159,27 @@
         </button>
         <div id="notebook-submenu" class="submenu"></div>
 
-        <button class="nav-btn" onclick="showSection('chill-zone', this)"><i class="fas fa-headphones-alt"></i> Chill Zone</button>
+        <button class="nav-btn" onclick="showSection('radio-room', this)"><i class="fas fa-music"></i> Radio Room</button>
         <button class="nav-btn" onclick="showSection('todos', this)"><i class="fas fa-check-circle"></i> Tasks</button>
         <button class="nav-btn" onclick="showSection('calculator', this)"><i class="fas fa-calculator"></i> Calculator</button>
 
         <div style="flex-grow: 1;"></div>
+        
+        <button class="nav-btn" onclick="showSection('settings', this)"><i class="fas fa-cog"></i> Settings</button>
         <button class="nav-btn" onclick="toggleZenMode()"><i class="fas fa-expand-arrows-alt"></i> Zen Mode</button>
-        <button class="nav-btn" onclick="toggleTheme()"><i class="fas fa-moon"></i> Theme</button>
     </nav>
 
     <main class="main">
         <div class="header">
             <div>
                 <h2 id="page-title" style="margin:0;">Dashboard</h2>
-                <p id="page-subtitle" style="margin:5px 0 0; color:var(--text-secondary);">Welcome back.</p>
+                <p id="page-subtitle" style="margin:5px 0 0; color:var(--text-secondary);">Ready to focus?</p>
             </div>
             <div style="text-align:right;">
                 <h3 id="clock" style="margin:0; font-family:monospace; color:var(--accent);">00:00</h3>
+                <div id="now-playing-pill" style="font-size: 0.8rem; color: var(--accent); opacity: 0; transition: opacity 0.3s; margin-top: 5px;">
+                    <i class="fas fa-volume-up"></i> Playing Audio
+                </div>
             </div>
         </div>
 
@@ -199,63 +196,57 @@
                 </div>
 
                 <div class="card">
-                    <h3 style="margin-top:0;"><i class="fas fa-tasks"></i> Priorities</h3>
+                    <h3 style="margin-top:0;"><i class="fas fa-tasks"></i> Top Tasks</h3>
                     <ul id="dashboard-todo-list" style="padding-left: 20px; color: var(--text-secondary);">
                         <li>No tasks yet.</li>
                     </ul>
                 </div>
 
                 <div class="card">
-                    <h3 style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Class Schedule</h3>
+                    <h3 style="margin-top:0;"><i class="fas fa-calendar-alt"></i> Schedule</h3>
                     <div id="schedule-list"></div>
-                    <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">* Renaming classes updates your notebook.</p>
                 </div>
             </div>
         </div>
 
-        <div id="chill-zone" class="section">
-            <div class="dashboard-grid">
+        <div id="radio-room" class="section">
+            <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+                <h3><i class="fas fa-broadcast-tower"></i> Study Frequencies</h3>
+                <p style="color:var(--text-secondary); margin-bottom: 30px;">High-fidelity streams. Select a station.</p>
                 
-                <div class="card" style="grid-column: span 2;">
-                    <h3><i class="fas fa-broadcast-tower"></i> Lofi Radio 24/7</h3>
-                    <div class="lofi-container">
-                        <img src="https://media.giphy.com/media/5wFHWyW0xFtrXM6fmz/giphy.gif" class="lofi-bg" id="lofi-visual" alt="Lofi Study Girl">
-                        <div class="lofi-controls">
-                            <div class="play-circle" onclick="toggleMusic()">
-                                <i class="fas fa-play" id="play-icon"></i>
-                            </div>
-                            <div style="margin-top: 10px; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Beats to Relax/Study to</div>
+                <div class="radio-container">
+                    <div class="record-player" id="record-player">
+                        <div class="record-grooves"></div>
+                        <div class="record-label">
+                            <i class="fas fa-music"></i>
                         </div>
                     </div>
-                    <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Audio Stream: Lofi Hip Hop</span>
-                        <input type="range" min="0" max="1" step="0.1" value="0.5" oninput="document.getElementById('audio-stream').volume = this.value" style="width: 100px; accent-color: var(--accent);">
+                </div>
+
+                <div style="margin-top: 30px; margin-bottom: 20px;">
+                    <button id="main-play-btn" class="btn btn-primary" style="width: 150px; border-radius: 30px; padding: 12px;" onclick="toggleAudio()">
+                        <i class="fas fa-play"></i> Start Radio
+                    </button>
+                    <div style="margin-top: 15px;">
+                         <input type="range" min="0" max="1" step="0.1" value="0.5" oninput="setVolume(this.value)" style="width: 200px; accent-color: var(--accent);">
                     </div>
                 </div>
 
-                <div class="card">
-                    <h3><i class="fas fa-wind"></i> Breathe</h3>
-                    <div class="breathe-container">
-                        <div class="circle" id="breathe-circle"></div>
-                        <div class="breathe-text" id="breathe-text">Ready</div>
+                <div class="station-grid">
+                    <div class="station-btn active" id="st-lofi" onclick="changeStation('lofi')">
+                        <i class="fas fa-coffee"></i> Lofi Girl
                     </div>
-                    <button class="btn" style="width:100%; margin-top:10px; background:var(--bg-color); border:1px solid var(--border);" onclick="toggleBreathing()" id="breathe-btn">Start Exercise</button>
-                </div>
-
-                <div class="card">
-                    <h3><i class="fas fa-palette"></i> Ambience</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary);">Change the app vibe.</p>
-                    <div class="mood-grid">
-                        <div class="mood-btn" onclick="setMood('light')">☀️ Day</div>
-                        <div class="mood-btn" onclick="setMood('dark')">🌙 Night</div>
+                    <div class="station-btn" id="st-piano" onclick="changeStation('piano')">
+                        <i class="fas fa-book-open"></i> Piano
                     </div>
-                    <div class="mood-grid">
-                        <div class="mood-btn" onclick="setMood('mood-sunset')">🌅 Sunset</div>
-                        <div class="mood-btn" onclick="setMood('mood-forest')">🌲 Forest</div>
-                        <div class="mood-btn" onclick="setMood('mood-midnight')">🌌 Deep</div>
+                    <div class="station-btn" id="st-synth" onclick="changeStation('synth')">
+                        <i class="fas fa-robot"></i> Synthwave
+                    </div>
+                    <div class="station-btn" id="st-noise" onclick="changeStation('noise')">
+                        <i class="fas fa-wind"></i> Brown Noise
                     </div>
                 </div>
-
+                <p id="stream-status" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px;"></p>
             </div>
         </div>
 
@@ -299,34 +290,61 @@
             </div>
         </div>
 
+        <div id="settings" class="section">
+            <div class="card" style="max-width: 500px; margin: 0 auto;">
+                <h3><i class="fas fa-sliders-h"></i> Preferences</h3>
+                
+                <div class="setting-row">
+                    <span>Base Theme</span>
+                    <button class="btn" style="background:var(--bg-color); border:1px solid var(--border);" onclick="toggleTheme()">Toggle Light/Dark</button>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <span style="font-weight: 500;">Ambience & Mood</span>
+                    <div class="mood-grid">
+                        <div class="mood-btn" onclick="setMood('mood-sunset')">🌅 Sunset</div>
+                        <div class="mood-btn" onclick="setMood('mood-forest')">🌲 Forest</div>
+                        <div class="mood-btn" onclick="setMood('mood-midnight')">🌌 Deep</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                    <span style="font-weight: 500;">Data</span>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Clear all notes and schedule data?</p>
+                    <button class="btn btn-danger" onclick="clearData()">Reset App Data</button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <audio id="audio-stream" preload="none">
-        <source src="https://streams.ilovemusic.de/iloveradio17.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="audio-engine" preload="none" crossorigin="anonymous"></audio>
 
     <script>
         // --- STATE & INIT ---
         const appState = {
             theme: localStorage.getItem('theme') || 'light',
             mood: localStorage.getItem('mood') || '',
-            activeNoteId: null, 
-            isPlaying: false
+            isPlaying: false,
+            currentStation: 'lofi',
+            activeNoteId: null
         };
 
-        const defaultSchedule = [
-            { id: 'p1', class: "Mathematics" },
-            { id: 'p2', class: "History" },
-            { id: 'p3', class: "Science" },
-            { id: 'p4', class: "English" },
-            { id: 'p5', class: "Elective" }
-        ];
+        // RELIABLE STREAM SOURCES
+        const stations = {
+            lofi: "https://stream.zeno.fm/0r0xa75zkvvtv", // Lofi Girl Mirror
+            piano: "https://stream.zeno.fm/r5eqz568g2zuv", // Classical Piano
+            synth: "https://stream.zeno.fm/te5tr7885v8uv", // Retrowave/Synth
+            // Using a brown noise file loop for stability vs math gen
+            noise: "https://media.githubusercontent.com/media/anars/blank-audio/master/10-minutes-of-silence.mp3" 
+        };
+
+        // Note: Brown noise is actually generated via JS below if selected to avoid bandwidth
+        let audioCtx, noiseSource, noiseGain;
 
         function init() {
-            // Restore Theme/Mood
             if(appState.theme === 'dark') document.body.setAttribute('data-theme', 'dark');
             if(appState.mood) document.body.className = appState.mood;
-
             updateClock();
             setInterval(updateClock, 1000);
             loadSchedule();
@@ -334,78 +352,138 @@
             renderNotebookMenu();
         }
 
-        // --- CHILL ZONE LOGIC ---
+        // --- AUDIO ENGINE ---
+        const audio = document.getElementById('audio-engine');
         
-        // 1. Music Player
-        function toggleMusic() {
-            const audio = document.getElementById('audio-stream');
-            const icon = document.getElementById('play-icon');
-            const visual = document.getElementById('lofi-visual');
+        function changeStation(id) {
+            // UI Update
+            document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('st-' + id).classList.add('active');
+            appState.currentStation = id;
             
+            // If playing, switch immediately
             if(appState.isPlaying) {
+                playAudioSource();
+            }
+        }
+
+        function toggleAudio() {
+            if(appState.isPlaying) {
+                // STOP
                 audio.pause();
+                stopNoise(); // If noise is running
                 appState.isPlaying = false;
-                icon.className = "fas fa-play";
-                visual.style.opacity = "0.6"; // Dim when paused
+                document.getElementById('main-play-btn').innerHTML = '<i class="fas fa-play"></i> Start Radio';
+                document.getElementById('record-player').classList.remove('playing');
+                document.getElementById('now-playing-pill').style.opacity = '0';
             } else {
-                audio.volume = 0.5;
-                audio.play().catch(e => alert("Audio blocked. Try clicking elsewhere first."));
+                // PLAY
+                playAudioSource();
                 appState.isPlaying = true;
-                icon.className = "fas fa-pause";
-                visual.style.opacity = "1"; // Bright when playing
+                document.getElementById('main-play-btn').innerHTML = '<i class="fas fa-pause"></i> Pause Radio';
+                document.getElementById('record-player').classList.add('playing');
+                document.getElementById('now-playing-pill').style.opacity = '1';
             }
         }
 
-        // 2. Breathing Exercise
-        let breatheInterval;
-        function toggleBreathing() {
-            const circle = document.getElementById('breathe-circle');
-            const txt = document.getElementById('breathe-text');
-            const btn = document.getElementById('breathe-btn');
+        function playAudioSource() {
+            const status = document.getElementById('stream-status');
+            status.innerText = "Buffering stream...";
 
-            if(circle.classList.contains('animating')) {
-                // Stop
-                circle.classList.remove('animating');
-                txt.innerText = "Ready";
-                btn.innerText = "Start Exercise";
-                clearInterval(breatheInterval);
+            if(appState.currentStation === 'noise') {
+                audio.pause(); // Stop standard audio
+                startNoiseGen(); // Start JS noise
+                status.innerText = "Generating Neural Static...";
             } else {
-                // Start
-                circle.classList.add('animating');
-                btn.innerText = "Stop";
-                
-                // Helper text logic (4-7-8)
-                let step = 0; // 0=Inhale, 1=Hold, 2=Exhale
-                const cycle = () => {
-                    // This creates a rough visual guide text
-                    // The CSS animation handles the smooth movement
-                    setTimeout(() => txt.innerText = "Inhale...", 0);
-                    setTimeout(() => txt.innerText = "Hold...", 3200);
-                    setTimeout(() => txt.innerText = "Exhale...", 4800);
-                };
-                cycle();
-                breatheInterval = setInterval(cycle, 8000);
+                stopNoise(); // Stop JS noise
+                audio.src = stations[appState.currentStation];
+                audio.play()
+                    .then(() => status.innerText = "Live Stream Active")
+                    .catch(e => status.innerText = "Stream Blocked. Try another station.");
             }
         }
 
-        // 3. Mood Setter
-        function setMood(moodClass) {
-            document.body.className = ''; // Reset
-            document.body.removeAttribute('data-theme');
+        function setVolume(val) {
+            audio.volume = val;
+            if(noiseGain) noiseGain.gain.value = val * 0.2; // Noise is loud, lower it
+        }
+
+        // JS Noise Generator (Re-added as fallback/feature because it's so stable)
+        function startNoiseGen() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
             
-            if(moodClass === 'dark' || moodClass === 'light') {
-                document.body.setAttribute('data-theme', moodClass);
-                localStorage.setItem('theme', moodClass);
-                localStorage.setItem('mood', '');
-            } else {
-                document.body.classList.add(moodClass);
-                // Force dark mode vars for dark moods
-                if(moodClass === 'mood-midnight') document.body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('mood', moodClass);
+            // Brown Noise Math
+            let lastOut = 0;
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                data[i] = (lastOut + (0.02 * white)) / 1.02;
+                lastOut = data[i];
+                data[i] *= 3.5; 
             }
+
+            noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer;
+            noiseSource.loop = true;
+            noiseGain = audioCtx.createGain();
+            noiseGain.gain.value = audio.volume * 0.2;
+            noiseSource.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+            noiseSource.start();
+        }
+
+        function stopNoise() {
+            if(noiseSource) { noiseSource.stop(); noiseSource = null; }
         }
 
         // --- CORE FEATURES ---
+        function setMood(moodClass) {
+            document.body.className = ''; 
+            document.body.removeAttribute('data-theme');
+            if(moodClass) document.body.classList.add(moodClass);
+            if(moodClass === 'mood-midnight') document.body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('mood', moodClass);
+        }
+
+        function toggleTheme() {
+            const current = document.body.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            localStorage.setItem('mood', '');
+            document.body.className = '';
+        }
+
+        function clearData() {
+            if(confirm("Delete all notes and todos?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // --- NAVIGATION & UTILS (Standard) ---
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(btn) {
+                document.querySelectorAll('.nav-btn, .sub-btn').forEach(el => el.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('page-title').innerText = btn.innerText.trim();
+            }
+        }
+        function toggleZenMode() { document.body.classList.toggle('zen-mode'); }
+        function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }
+
+        // --- SCHEDULE, NOTES, TODOS ---
+        const defaultSchedule = [
+            { id: 'p1', class: "Mathematics" },
+            { id: 'p2', class: "History" },
+            { id: 'p3', class: "Science" },
+            { id: 'p4', class: "English" },
+            { id: 'p5', class: "Elective" }
+        ];
         function loadSchedule() {
             const saved = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
             const container = document.getElementById('schedule-list');
@@ -415,21 +493,17 @@
                 div.className = 'schedule-item';
                 div.innerHTML = `
                     <div style="width:20%; font-weight:600; color:var(--accent);">Period ${index+1}</div>
-                    <div style="width:80%;">
-                        <input type="text" value="${item.class}" onchange="updateClass(${index}, this.value)">
-                    </div>
+                    <div style="width:80%;"><input type="text" value="${item.class}" onchange="updateClass(${index}, this.value)"></div>
                 `;
                 container.appendChild(div);
             });
         }
-
         function updateClass(index, newName) {
             let schedule = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
             schedule[index].class = newName;
             localStorage.setItem('study_schedule', JSON.stringify(schedule));
             renderNotebookMenu();
         }
-
         function renderNotebookMenu() {
             const schedule = JSON.parse(localStorage.getItem('study_schedule')) || defaultSchedule;
             const submenu = document.getElementById('notebook-submenu');
@@ -447,46 +521,25 @@
             miscBtn.onclick = () => openNote('misc', 'Brainstorming', miscBtn);
             submenu.appendChild(miscBtn);
         }
-
         function toggleNotebookMenu(btn) {
             const menu = document.getElementById('notebook-submenu');
             menu.classList.toggle('open');
             const arrow = btn.querySelector('.fa-chevron-down');
             arrow.style.transform = menu.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
         }
-
         function openNote(noteId, noteTitle, btnElement) {
             document.querySelectorAll('.nav-btn, .sub-btn').forEach(el => el.classList.remove('active'));
             if(btnElement) btnElement.classList.add('active');
             showSection('notebook-view');
             document.getElementById('page-title').innerText = noteTitle;
-            document.getElementById('page-subtitle').innerText = "Auto-saving...";
             appState.activeNoteId = noteId;
             document.getElementById('current-note').value = localStorage.getItem('note_' + noteId) || '';
         }
-
         function saveCurrentNote() {
             if(!appState.activeNoteId) return;
             localStorage.setItem('note_' + appState.activeNoteId, document.getElementById('current-note').value);
             document.getElementById('save-status').innerText = "Saved at " + new Date().toLocaleTimeString();
         }
-
-        function showSection(id, btn) {
-            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if(btn) {
-                document.querySelectorAll('.nav-btn, .sub-btn').forEach(el => el.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById('page-title').innerText = btn.innerText.trim();
-                document.getElementById('page-subtitle').innerText = "StudyHall Focus";
-            }
-        }
-
-        function toggleZenMode() { document.body.classList.toggle('zen-mode'); }
-        function toggleTheme() { setMood(appState.theme === 'light' ? 'dark' : 'light'); }
-        function updateClock() { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }
-
-        // --- TODO SYSTEM ---
         function addTodo() {
             const input = document.getElementById('newTodo');
             const val = input.value.trim();
@@ -497,22 +550,17 @@
             input.value = '';
             loadTodos();
         }
-
         function loadTodos() {
             const tasks = JSON.parse(localStorage.getItem('study_todos') || '[]');
             const list = document.getElementById('todoList');
             const dashList = document.getElementById('dashboard-todo-list');
             list.innerHTML = ''; dashList.innerHTML = '';
-            
             if(tasks.length === 0) dashList.innerHTML = '<li>No tasks yet.</li>';
-
             tasks.forEach((t, i) => {
-                // Main List
                 const item = document.createElement('div');
                 item.style.cssText = "padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;";
                 item.innerHTML = `<span>${t}</span> <button class="btn btn-danger" onclick="removeTodo(${i})" style="font-size:0.8rem; padding:5px;">Done</button>`;
                 list.appendChild(item);
-                // Dash List
                 if(i < 3) dashList.innerHTML += `<li>${t}</li>`;
             });
         }
@@ -522,15 +570,12 @@
             localStorage.setItem('study_todos', JSON.stringify(tasks));
             loadTodos();
         }
-
-        // --- TIMER & CALC ---
         function calc(val) {
             const d = document.getElementById('calcDisplay');
             if(val==='C') d.value = '';
             else if(val==='=') { try { d.value = eval(d.value); } catch { d.value = 'Error'; } }
             else d.value += val;
         }
-
         let tmr;
         function toggleTimer() {
             const btn = document.getElementById('timer-btn');
